@@ -29,8 +29,8 @@ class Particle{
     PVector vel2D = new PVector(vel.x, vel.y);
     
     float heading = vel2D.heading2D();
-    //println(heading);
-    rotate(heading);
+
+    rotate(heading - PI/2);
     triangle(0, 1, -.5, -1, .5, -1);
     //box(5, 5, 1);
     popMatrix();

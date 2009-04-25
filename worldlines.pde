@@ -19,7 +19,7 @@ PVector prevTarget;
 //float time = 0;
 float timeDelta = 0.1;
 
-int n_particles = 500;
+int n_particles = 200;
 
 float zoomVelocity = 0;
 
@@ -35,6 +35,8 @@ void setup() {
   myInfobox = new Infobox(FONT, 32);
 
   origin = new Particle(new PVector(0,0,0), new PVector(0,0,0));
+  origin.fillColor = color(#48F01B);//#F01B5E);//
+  
   particles = new Particle[n_particles];
 
   for(int i=0; i<n_particles; i++){
@@ -43,6 +45,7 @@ void setup() {
     vel.normalize();
 
     particles[i] = new Particle(pos, vel);
+    particles[i].fillColor = color(#1B83F0);
   }
   
   targetParticle = origin;
@@ -50,16 +53,31 @@ void setup() {
   kamera = new Kamera();
   kamera.target = targetParticle.pos.get();
 
+  //strokeWeight(1);
 }
 
 void draw(){
-  //  pgl = (PGraphicsOpenGL)g;
-  //  gl = pgl.beginGL();
+  pgl = (PGraphicsOpenGL)g;
+  gl = pgl.beginGL();
+  
+  gl.glEnable(GL.GL_BLEND);
+  gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
+//  gl.glDisable(GL.GL_DEPTH_TEST);
+//  gl.glDepthMask(false);
+  
+  pgl.endGL();
+  
   lights();
   background(15, 15, 15);
+  
+  directionalLight(3, 115, 140, // Color 
+    10, 10, -1); // The x-, y-, z-axis direction' 
+  directionalLight(2, 83, 115, // Color 
+    1, 10, -1); // The x-, y-, z-axis direction' 
 
   kamera.target = targetParticle.pos.get();
   kamera.update(timeDelta);
+//  pointLight(220, 220, 220, kamera.pos[0], kamera.pos[1], kamera.pos[2]);
 
   fill(0,0,200);
   stroke(0,200,200);
@@ -77,7 +95,7 @@ void draw(){
   myInfobox.print( 
   (int) frameRate + " fps\n"
   + (int) millis() / 1000 + " seconds\n"
-  + "CameraZ: " + nf(kamera.position()[2], 3, 2)
+  + "CameraZ: " + nf(kamera.pos.x, 3, 2)
   );
 }
 /*
@@ -92,6 +110,9 @@ class Kamera {
     azimuth = PI;
     zenith = PI/6;
     target = new PVector(0,0,0);
+    
+    pos = new PVector();
+    updatePosition();
     
     radiusVel = azimuthVel = zenithVel = 0;
     velDecay = 0.9;
@@ -114,12 +135,10 @@ class Kamera {
     radiusVel += mouseWheel;
   }
   
-  float[] position() {
-    float x = target.x + radius * sin(zenith) * cos(azimuth);
-    float y = target.y + radius * sin(zenith) * sin(azimuth);
-    float z = target.z + radius * cos(zenith);
-    
-    return new float[] {x, y, z};
+  void updatePosition() {
+    pos.x = target.x + radius * sin(zenith) * cos(azimuth);
+    pos.y = target.y + radius * sin(zenith) * sin(azimuth);
+    pos.z = target.z + radius * cos(zenith);
   }
   
   void update(float dt) {
@@ -140,9 +159,9 @@ class Kamera {
     zenith = constrain(zenith + zenithVel / 60, EPSILON, PI - EPSILON);
     zenithVel *= velDecay;
     
-    float[] eye = position();
+    updatePosition();
     
-    camera(eye[0], eye[1], eye[2],
+    camera(pos.x, pos.y, pos.z,
     target.x, target.y, target.z,
     0, 0, -1
     );
@@ -159,5 +178,7 @@ class Kamera {
   float radius;
   float azimuth;
   float zenith;
+  
+  PVector pos;
   PVector target;
 }

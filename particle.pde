@@ -51,11 +51,12 @@ class Particle{
   void drawPath(){
     float[] from, to;
     
+    int alpha = abs((3*frameCount + (this.hashCode() >> 19)) % 510 - 255);
 //    beginShape();
     for(int i=0; i<pathCount-1; i++){
       from = path[i];
       to = path[i+1];
-      stroke(pathColor, 255*i/pathCount);
+      stroke(pathColor, 255*i/pathCount - alpha);
 //      vertex(path[i+1][0], path[i+1][1], path[i+1][2]);
 /*    
       pushMatrix();

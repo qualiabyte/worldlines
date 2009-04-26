@@ -30,12 +30,12 @@ Infobox myInfobox;
 
 void setup() {
 
-  size(1200, 800, OPENGL);
+  size(900, 540, OPENGL);
 
-  myInfobox = new Infobox(FONT, 32);
+  myInfobox = new Infobox(FONT, (int)(0.03 * height));
 
   origin = new Particle(new PVector(0,0,0), new PVector(0,0,0));
-  origin.fillColor = color(#48F01B);//#F01B5E);//
+  origin.fillColor = color(#F01B5E);//#48F01B);//
   
   particles = new Particle[n_particles];
 
@@ -62,8 +62,8 @@ void draw(){
   
   gl.glEnable(GL.GL_BLEND);
   gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
-//  gl.glDisable(GL.GL_DEPTH_TEST);
-//  gl.glDepthMask(false);
+  gl.glDisable(GL.GL_DEPTH_TEST);
+  gl.glDepthMask(false);
   
   pgl.endGL();
   
@@ -77,7 +77,7 @@ void draw(){
 
   kamera.target = targetParticle.pos.get();
   kamera.update(timeDelta);
-//  pointLight(220, 220, 220, kamera.pos[0], kamera.pos[1], kamera.pos[2]);
+  pointLight(220, 220, 220, kamera.pos.x, kamera.pos.y, kamera.pos.z);
 
   fill(0,0,200);
   stroke(0,200,200);
@@ -142,10 +142,10 @@ class Kamera {
   }
   
   void update(float dt) {
-    if (mousePressed && mouseButton == RIGHT){
+//    if (mousePressed && mouseButton == RIGHT){
       zenithVel -= (float)(mouseY - pmouseY)/10;
       azimuthVel += (float)(mouseX - pmouseX)/10;
-    }
+//    }
     
     radiusVel += mouseWheel;
     mouseWheel *= 0.1;
@@ -156,15 +156,14 @@ class Kamera {
     azimuth = (azimuth + azimuthVel / 60) % (TWO_PI);
     azimuthVel *= velDecay;
     
-    zenith = constrain(zenith + zenithVel / 60, EPSILON, PI - EPSILON);
+    zenith = constrain(zenith + zenithVel / 60, 0.00001, PI - 0.00001);
     zenithVel *= velDecay;
     
     updatePosition();
     
-    camera(pos.x, pos.y, pos.z,
-    target.x, target.y, target.z,
-    0, 0, -1
-    );
+    camera(pos.x,     pos.y,     pos.z,
+           target.x,  target.y,  target.z,
+           0,         0,         -1 );
   }
   
   float mouseWheel;

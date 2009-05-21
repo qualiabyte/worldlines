@@ -16,23 +16,19 @@ Particle targetParticle;
 PVector target;
 PVector prevTarget;
 
-//float time = 0;
-float timeDelta = 0.1;
+float timeDelta = 0.2;
 
-int n_particles = 200;
+int n_particles = 300;
 
-float zoomVelocity = 0;
-
-String FONT = "BitstreamVeraSansMono-Roman-48.vlw";
+String bundledFont = "VeraMono.ttf";
 
 Infobox myInfobox;
-//Infoline fpsLine;
 
 void setup() {
+  size(1200, 900, OPENGL);
 
-  size(900, 540, OPENGL);
-
-  myInfobox = new Infobox(FONT, (int)(0.03 * height));
+  File fontFile = new File(dataPath(bundledFont));
+  myInfobox = new Infobox(fontFile, (int)(0.025 * height));
 
   origin = new Particle(new PVector(0,0,0), new PVector(0,0,0));
   origin.fillColor = color(#F01B5E);//#48F01B);//
@@ -40,13 +36,29 @@ void setup() {
   particles = new Particle[n_particles];
 
   for(int i=0; i<n_particles; i++){
-    PVector pos = new PVector(random(-100, 100), random(-100, 100), 0);
-    PVector vel = new PVector(random(-1,1), random(-1,1));
-    vel.normalize();
 
+    PVector pos = new PVector(0,0);
+    //PVector pos = new PVector(random(-100, 100), random(-100, 100), 0);
+
+    float heading = random(TWO_PI);
+    
+    // Exponentially weight distribution of velocities towards lightspeed
+    float vel_mag = 1-pow(random(1, 2), -15.0);
+    
+    PVector vel = new PVector(vel_mag*cos(heading), vel_mag*sin(heading));
+    
     particles[i] = new Particle(pos, vel);
     particles[i].fillColor = color(#1B83F0);
+    /*
+    colorMode(HSB, 1.0);
+    color c = color(random(1), 0.8, 1.0);
+
+    particles[i].setPathColor(c);
+    
+    colorMode(RGB, 255);
+    */
   }
+  //colorMode(RGB);
   
   targetParticle = origin;
   
@@ -68,7 +80,7 @@ void draw(){
   pgl.endGL();
   
   lights();
-  background(15, 15, 15);
+  background(30);
   
   directionalLight(3, 115, 140, // Color 
     10, 10, -1); // The x-, y-, z-axis direction' 
@@ -77,25 +89,24 @@ void draw(){
 
   kamera.target = targetParticle.pos.get();
   kamera.update(timeDelta);
-  pointLight(220, 220, 220, kamera.pos.x, kamera.pos.y, kamera.pos.z);
+  pointLight(220, 0, 0, kamera.pos.x, kamera.pos.y, kamera.pos.z);
 
-  fill(0,0,200);
-  stroke(0,200,200);
+  kamera.azimuthVel += PI * 0.002;
 
   for (int i=0; i<n_particles; i++){
-    particles[i].drawHead();
-    particles[i].drawPath();
+    particles[i].draw();
     particles[i].update(timeDelta);
   }
   
-  fill(200,0,0);
   origin.draw();
   origin.update(timeDelta);
   
   myInfobox.print( 
-  (int) frameRate + " fps\n"
+  (int) frameRate + " fps / " + (int)(frameCount / (millis() / 1000)) + "avg\n"
   + (int) millis() / 1000 + " seconds\n"
-  + "CameraZ: " + nf(kamera.pos.x, 3, 2)
+  + "targetParticle.pos.z:      " + nf(targetParticle.pos.z, 3, 2) + "c\n"
+  + "targetParticle.properTime: " + nf(targetParticle.properTime, 3, 2) + "c\n"
+  + "CameraZ: " + nf(kamera.pos.z, 3, 2)
   );
 }
 /*

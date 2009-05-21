@@ -12,7 +12,15 @@ class VTextRenderer
     _textRender.setColor( 1.0f, 1.0, 1.0, 1.0 );
     //_textRender.setUseVertexArrays( true );
   }
-
+  
+  VTextRenderer( Font font, int size )
+  {
+    _fontName = font.getFontName();
+    _fontSize = size;
+    _textRender = new TextRenderer( font, true, true, null, true );
+    _textRender.setColor( 1.0f, 1.0, 1.0, 1.0 );
+  }  
+  
   VTextRenderer( String fontName, int size, boolean antialiased, boolean mipmap )
   {
     _fontName = fontName;
@@ -68,14 +76,15 @@ class VTextRenderer
     _textRender.setSmoothing( flag );
   }
 
-/// ____________________________________________________
-/// Members
-int _w, _h;
+  /// ____________________________________________________
+  /// Members
+  int _w, _h;
 
-String _fontName;
-int _fontSize;
-TextRenderer _textRender;
-Font font;
+  String _fontName;
+  int _fontSize;
+  TextRenderer _textRender;
+  Font font;
 }
+
 
 

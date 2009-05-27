@@ -52,7 +52,7 @@ class Infobox {
     String[] lines = split(text, "\n");
         
     for (int i=0; i < lines.length; i++) {
-      textRenderer.print( lines[i], xOffset, yOffset + (int)(0.5 + i) * fontSize);
+      textRenderer.print( lines[i], xOffset, yOffset + (int)(lines.length - i - 0.5) * fontSize);
     }
   }
   

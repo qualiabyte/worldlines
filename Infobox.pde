@@ -5,11 +5,17 @@ class Infobox {
     init( fontSize );
     textRenderer = new VTextRenderer(fontName, fontSize);
   }
-
+/*
   Infobox( File fontFile, int fontSize ){
 
     init( fontSize );
     textRenderer = new VTextRenderer( loadFont(fontFile), fontSize );
+  }
+*/
+  Infobox( byte[] fontBytes, int fontSize ){
+
+    init( fontSize );
+    textRenderer = new VTextRenderer( loadFont(fontBytes), fontSize );
   }
     
   private void init( int fontSize ){
@@ -19,12 +25,12 @@ class Infobox {
     infolines = new Infoline[maxlines];
   }
   
-  private Font loadFont( File fontFile ){
+  private Font loadFont( byte[] fontBytes ){
 
     Font font = null;
     
     try {
-      FileInputStream fontStream = new FileInputStream(fontFile);
+      ByteArrayInputStream fontStream = new ByteArrayInputStream(fontBytes);
       font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
       font = font.deriveFont((float)fontSize );
     }
@@ -73,4 +79,29 @@ class Infobox {
   int numlines = 0;
   int maxlines = 10;
 }
+
+/*
+  private Font loadFont( File fontFile ){
+
+    Font font = null;
+    
+    try {
+      FileInputStream fontStream = new FileInputStream(fontFile);
+      font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+      font = font.deriveFont((float)fontSize );
+    }
+    catch (FontFormatException e) {
+      println(e.getMessage());
+    }
+    catch (IOException e) {
+      println(e.getMessage());
+    }
+    finally {
+      if (font==null) {
+        font = new Font("Sans-Serif", Font.PLAIN, fontSize);
+      }
+    }
+    return font;
+  }
+*/
 

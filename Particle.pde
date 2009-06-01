@@ -188,7 +188,7 @@ class Particle{
     velNormX = vel.x / velMag;
     velNormY = vel.y / velMag;
     
-    this.gamma = Relativity.gamma(velMag);    
+    gamma = Relativity.gamma(velMag);    
   }
   
   void setPathColor(color c) {

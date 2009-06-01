@@ -13,8 +13,8 @@ Kamera kamera;
 Particle[] particles;
 Particle targetParticle;
 
-PVector target;
-PVector prevTarget;
+//PVector target;
+//PVector prevTarget;
 
 float C = 1.0;
 float timeDelta = 0.2;
@@ -31,7 +31,7 @@ public float MAX_START_VEL_DISPERSION = 20;
 public float START_VEL_DISPERSION = 5.4; //4.2; //1.8;
 
 public float MAX_START_VEL_ECCENTRICITY = 15;
-public float START_VEL_ECCENTRICITY = 1.95; //0;
+public float START_VEL_ECCENTRICITY = 1.95;
 
 public float HARMONIC_FRINGES = 3.4;
 public float HARMONIC_FRINGES_MAX = 16;
@@ -40,11 +40,12 @@ public float HARMONIC_CONTRIBUTION = -0.5;
 public float HARMONIC_CONTRIBUTION_MIN = -1;
 public float HARMONIC_CONTRIBUTION_MAX = 0;
 
-public boolean TOGGLE_TIMESTEP_SCALING;
-public boolean TOGGLE_SPATIAL_TRANSFORM;
+public boolean TOGGLE_TIMESTEP_SCALING = true;
+public boolean TOGGLE_SPATIAL_TRANSFORM = true;
 
 public float LIGHTING = 0.75;
-public float STROKE_WIDTH = 0.8;
+public float STROKE_WIDTH = 1.1;
+public float STROKE_WIDTH_MAX = 8.0;
 
 public float MAX_INPUT_RESPONSIVENESS = 1.0;
 public float INPUT_RESPONSIVENESS = 0.8;
@@ -67,11 +68,14 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(1200, 900, OPENGL);
+  size(900, 540, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
-  int nControls = 0;
+  String tabLabel;
+  int numGlobalControls = 0;
+  int numTabControls = 0;
+  
   int bWidth = 20;
   int bHeight = 20;
   int bSpacingY = bHeight + 15;
@@ -79,20 +83,39 @@ void setup() {
   
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
-  controlP5.addButton("setup", 0, 10, ++nControls*bSpacingY, 2*bWidth, bHeight).setLabel("RESTART");
-  controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("START_POS_DISPERSION_X", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_X, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("START_POS_DISPERSION_Y", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_Y, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("START_VEL_DISPERSION", 0, MAX_START_VEL_DISPERSION, START_VEL_DISPERSION, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("START_VEL_ECCENTRICITY", 0, MAX_START_VEL_ECCENTRICITY, START_VEL_ECCENTRICITY, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addToggle("TOGGLE_TIMESTEP_SCALING",false,10,++nControls*bSpacingY,bWidth,bHeight);
-  controlP5.addToggle("TOGGLE_SPATIAL_TRANSFORM", false, 10, ++nControls*bSpacingY,bWidth,bHeight);
-  controlP5.addSlider("HARMONIC_FRINGES", 0, HARMONIC_FRINGES_MAX, HARMONIC_FRINGES, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("HARMONIC_CONTRIBUTION", HARMONIC_CONTRIBUTION_MIN, HARMONIC_CONTRIBUTION_MAX, HARMONIC_CONTRIBUTION, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("INPUT_RESPONSIVENESS", 0f, MAX_INPUT_RESPONSIVENESS, INPUT_RESPONSIVENESS, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-//  controlP5.addSlider("LIGHTING", 0f, 1.0f, 1.0f, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("STROKE_WIDTH", 0f, 5f, 0.8f, 10, ++nControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.setColorForeground(#093967); //173A7E);
   
+  // Global Controls (All Tabs)
+  controlP5.addButton("setup", 0, 10, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).setLabel("RESTART");
+  controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++numGlobalControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addToggle("TOGGLE_TIMESTEP_SCALING",TOGGLE_TIMESTEP_SCALING,10,++numGlobalControls*bSpacingY,bWidth,bHeight);
+  controlP5.addToggle("TOGGLE_SPATIAL_TRANSFORM", TOGGLE_SPATIAL_TRANSFORM, 10, ++numGlobalControls*bSpacingY,bWidth,bHeight);
+  
+  String[] globalLabels = new String[] {"setup", "PARTICLES", "TOGGLE_TIMESTEP_SCALING", "TOGGLE_SPATIAL_TRANSFORM"};
+  
+  for (int i=0; i<globalLabels.length; i++) {
+    controlP5.controller(globalLabels[i]).moveTo("global");
+  }
+  
+  // Main Tab
+  tabLabel = "Main";
+  controlP5.tab("default").setLabel(tabLabel);
+  numTabControls = numGlobalControls;
+  controlP5.addSlider("HARMONIC_FRINGES", 0, HARMONIC_FRINGES_MAX, HARMONIC_FRINGES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addSlider("HARMONIC_CONTRIBUTION", HARMONIC_CONTRIBUTION_MIN, HARMONIC_CONTRIBUTION_MAX, HARMONIC_CONTRIBUTION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addSlider("INPUT_RESPONSIVENESS", 0f, MAX_INPUT_RESPONSIVENESS, INPUT_RESPONSIVENESS, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addSlider("LIGHTING", 0f, 1.0f, LIGHTING, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addSlider("STROKE_WIDTH", 0f, STROKE_WIDTH_MAX, STROKE_WIDTH, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  
+  // Setup Tab
+  tabLabel = "SETUP";
+  controlP5.addTab(tabLabel);
+  numTabControls = numGlobalControls;
+  controlP5.addSlider("START_POS_DISPERSION_X", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_X, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
+  controlP5.addSlider("START_POS_DISPERSION_Y", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_Y, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
+  controlP5.addSlider("START_VEL_DISPERSION", 0, MAX_START_VEL_DISPERSION, START_VEL_DISPERSION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
+  controlP5.addSlider("START_VEL_ECCENTRICITY", 0, MAX_START_VEL_ECCENTRICITY, START_VEL_ECCENTRICITY, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
+
   particles = new Particle[MAX_PARTICLES];
 
   for(int i=0; i<MAX_PARTICLES; i++){
@@ -117,7 +140,8 @@ void setup() {
 
   particles[0] = new Particle(new PVector(0,0,0), new PVector(0,0,0));
   targetParticle = particles[0];
-  targetParticle.fillColor = color(#48F01B); //color(#F01B5E); 
+  targetParticle.fillColor = color(#F01B5E);
+
     
   kamera = new Kamera();
   kamera.target = targetParticle.pos;
@@ -177,6 +201,7 @@ void draw() {
   + "targetParticle.pos.z:      " + nf(targetParticle.pos.z, 3, 2) + "c\n"
   + "targetParticle.properTime: " + nf(targetParticle.properTime, 3, 2) + "c\n"
   + "targetParticle.velMag:     " + nf(targetParticle.velMag, 1, 8) + "c\n"
+  + "\nControls: W,A,S,D to move; Right mouse button toggles camera rotation"
   );
 
   // ControlP5 needs some scene defaults to render GUI layer correctly
@@ -202,8 +227,8 @@ void processUserInput(Particle particle) {
     float direction = atan2(y, x);
     float offset = kamera.azimuth - PI/2.0;
     
-    println("Nudge: Direction: " + direction / PI);
-    println("Nudge: Offset:    " + offset / PI);
+    //println("Nudge: Direction: " + direction / PI);
+    //println("Nudge: Offset:    " + offset / PI);
     
     nudge(particle, direction + offset);
   }
@@ -224,9 +249,8 @@ void nudge(Particle particle, float theta) {
     float heading_initial = atan2(vy, vx);
     
     float angleDiff = heading_initial - theta;
-    println("angleDiff: " + angleDiff);
     
-    if ((v_mag > 0.99999) && abs(abs(angleDiff)-PI) < TWO_PI/4.0) {
+    if ((v_mag > 0.99999) && abs(abs(angleDiff)-PI) < TWO_PI/5.0) {
       theta = heading_initial + PI + angleDiff * (1.0 - v_mag);
       momentumScale = 0.5;
     }
@@ -236,7 +260,7 @@ void nudge(Particle particle, float theta) {
     float dp_x = dp * cos(theta);
     float dp_y = dp * sin(theta);
     
-    println("Nudging: dp: " + dp_x + "dy:" + dp_y);
+    //println("Nudging: dp: " + dp + "theta: " + theta / PI);
 
     targetParticle.addImpulse(dp_x, dp_y);
 }

@@ -1,3 +1,7 @@
+// VTextRenderer
+// by V* (Victor Martinis)
+// pixelnerve.com/v
+
 import java.text.*;
 import com.sun.opengl.util.*;
 import com.sun.opengl.util.j2d.*;

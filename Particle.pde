@@ -1,3 +1,6 @@
+// Particle
+// tflorez
+
 class Particle{
 
   Particle( PVector pos, PVector vel ){
@@ -74,11 +77,11 @@ class Particle{
 
     float vx = targetParticle.vel.x;
     float vy = targetParticle.vel.y;
-    float vx_norm = targetParticle.velNormX;
+/*  float vx_norm = targetParticle.velNormX;
     float vy_norm = targetParticle.velNormY;
     float v_mag = targetParticle.velMag;
     float gamma_v = targetParticle.gamma;
-    
+*/  
     float alphaFactor = 0.5 * pathColorA / ((float)histCount);
     
     float wavenumberFactor = TWO_PI * HARMONIC_FRINGES / pos.z;
@@ -87,57 +90,34 @@ class Particle{
     float draw_x, draw_y, draw_z;
     draw_x = draw_y = draw_z = 0;
     
+    float[] xyt = {0, 0, 0};
+    float[] xyt_prime = new float[3];
+    
+    Relativity.preloadVel(vx, vy);
+    
     for (int i=0; i <= histCount; i++) {
       
       float harmonic = HARMONIC_CONTRIBUTION * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
       
       r = (pathColorR+properTimeHist[i]%400)/400;
-      g = pathColorG + harmonic;
+      g = pathColorG - harmonic;
       b = pathColorB;
       a = alphaFactor * g * i * (1 + sin(TWO_PI * 0.01 * properTimeHist[i]%100));
       
-      if (TOGGLE_SPATIAL_TRANSFORM && (v_mag > 0.00001)) {
-        //Distance in 2D from target to point on path
-        float rx = posHistX[i] - targ_x;
-        float ry = posHistY[i] - targ_y;
-        
-        float r_dot_v = rx * vx + ry * vy;
-  
-        // Projection |r| Cos(angle) gives the component of r parallel to v
-        float r_cos_theta = r_dot_v / v_mag;
-        
-        // Get components of r parallel and perpendicular to v
-        float r_para_x = r_cos_theta * vx_norm;
-        float r_para_y = r_cos_theta * vy_norm;
-        
-        float r_perp_x = rx - r_cos_theta * vx;
-        float r_perp_y = ry - r_cos_theta * vy;
-        
-        // Apply inverse lorentz transform to parallel component
-        // this should give spatial scale as seen by the target
-        // Note the graphical result for now is combination of the X' and T axis,
-        // like the Brehme diagram, a mix of "my space and your time"
-        float r_para_x_final = r_para_x * gamma_v;
-        float r_para_y_final = r_para_y * gamma_v;
-  
-        float rx_final = r_perp_x + r_para_x_final;
-        float ry_final = r_perp_y + r_para_y_final;
-        
-        // Final positions for graphics display of transformed space-time position
-        draw_x = targ_x + rx_final;
-        draw_y = targ_y + ry_final;
-        draw_z = posHistZ[i];
-      }
-      else {
-         draw_x = posHistX[i];
-         draw_y = posHistY[i];
-         draw_z = posHistZ[i];
-      }
+      xyt[0] = posHistX[i];
+      xyt[1] = posHistY[i];
+      xyt[2] = posHistZ[i];
+      
+      Relativity.applyTransforms(xyt, xyt_prime);
+      
+      draw_x = xyt_prime[0];
+      draw_y = xyt_prime[1];
+      draw_z = xyt_prime[2];
+      
       gl.glColor4f(r, g, b, a);
       gl.glVertex3f(draw_x, draw_y, draw_z);
     }
     gl.glEnd();
-
     pgl.endGL();
     
     drawHead(draw_x, draw_y, draw_z);
@@ -173,7 +153,7 @@ class Particle{
     
     setVel( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
   }
-  
+    
   void setVel(PVector vel) {
     this.vel = vel;
     setVel(vel.x, vel.y);

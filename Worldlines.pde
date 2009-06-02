@@ -1,9 +1,10 @@
-//Worldlines
-//tflorez
+// Worldlines
+// tflorez
 
 import processing.opengl.*;
 import javax.media.opengl.GL;
 import controlP5.*;
+import Relativity.*;
 
 PGraphicsOpenGL pgl;
 GL gl;
@@ -12,9 +13,6 @@ Kamera kamera;
 
 Particle[] particles;
 Particle targetParticle;
-
-//PVector target;
-//PVector prevTarget;
 
 float C = 1.0;
 float timeDelta = 0.2;
@@ -36,15 +34,23 @@ public float START_VEL_ECCENTRICITY = 1.95;
 public float HARMONIC_FRINGES = 3.4;
 public float HARMONIC_FRINGES_MAX = 16;
 
-public float HARMONIC_CONTRIBUTION = -0.5;
-public float HARMONIC_CONTRIBUTION_MIN = -1;
-public float HARMONIC_CONTRIBUTION_MAX = 0;
+public float HARMONIC_CONTRIBUTION = 0.5;
+public float HARMONIC_CONTRIBUTION_MIN = 0;
+public float HARMONIC_CONTRIBUTION_MAX = 1;
 
 public boolean TOGGLE_TIMESTEP_SCALING = true;
 public boolean TOGGLE_SPATIAL_TRANSFORM = true;
+public boolean TOGGLE_TEMPORAL_TRANSFORM = true;
+
+public void toggleSpatialTransform () {
+  TOGGLE_SPATIAL_TRANSFORM = Relativity.TOGGLE_SPATIAL_TRANSFORM ^= true;
+}
+public void toggleTemporalTransform () {
+  TOGGLE_TEMPORAL_TRANSFORM = Relativity.TOGGLE_TEMPORAL_TRANSFORM ^= true;
+}
 
 public float LIGHTING = 0.75;
-public float STROKE_WIDTH = 1.1;
+public float STROKE_WIDTH = 2.0;
 public float STROKE_WIDTH_MAX = 8.0;
 
 public float MAX_INPUT_RESPONSIVENESS = 1.0;
@@ -68,7 +74,7 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(900, 540, OPENGL);
+  size(1280, 900, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -83,19 +89,12 @@ void setup() {
   
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
-  controlP5.setColorForeground(#093967); //173A7E);
+  controlP5.setColorForeground(#093967);
   
   // Global Controls (All Tabs)
-  controlP5.addButton("setup", 0, 10, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).setLabel("RESTART");
-  controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++numGlobalControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addToggle("TOGGLE_TIMESTEP_SCALING",TOGGLE_TIMESTEP_SCALING,10,++numGlobalControls*bSpacingY,bWidth,bHeight);
-  controlP5.addToggle("TOGGLE_SPATIAL_TRANSFORM", TOGGLE_SPATIAL_TRANSFORM, 10, ++numGlobalControls*bSpacingY,bWidth,bHeight);
-  
-  String[] globalLabels = new String[] {"setup", "PARTICLES", "TOGGLE_TIMESTEP_SCALING", "TOGGLE_SPATIAL_TRANSFORM"};
-  
-  for (int i=0; i<globalLabels.length; i++) {
-    controlP5.controller(globalLabels[i]).moveTo("global");
-  }
+  controlP5.addButton("setup", 0, 10, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
+  controlP5.controller("setup").setLabel("RESTART");
+  controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++numGlobalControls*bSpacingY, sliderWidth, bHeight).moveTo("global");
   
   // Main Tab
   tabLabel = "Main";
@@ -106,7 +105,13 @@ void setup() {
   controlP5.addSlider("INPUT_RESPONSIVENESS", 0f, MAX_INPUT_RESPONSIVENESS, INPUT_RESPONSIVENESS, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("LIGHTING", 0f, 1.0f, LIGHTING, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("STROKE_WIDTH", 0f, STROKE_WIDTH_MAX, STROKE_WIDTH, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addToggle("TOGGLE_TIMESTEP_SCALING",TOGGLE_TIMESTEP_SCALING,10,++numTabControls*bSpacingY,bWidth,bHeight);
+  controlP5.addToggle("toggleSpatialTransform", TOGGLE_SPATIAL_TRANSFORM, 10, ++numTabControls*bSpacingY,bWidth,bHeight);
+  controlP5.addToggle("toggleTemporalTransform", TOGGLE_TEMPORAL_TRANSFORM, 10, ++numTabControls*bSpacingY,bWidth,bHeight);
   
+  Relativity.TOGGLE_SPATIAL_TRANSFORM = TOGGLE_SPATIAL_TRANSFORM;
+  Relativity.TOGGLE_TEMPORAL_TRANSFORM = TOGGLE_TEMPORAL_TRANSFORM;
+
   // Setup Tab
   tabLabel = "SETUP";
   controlP5.addTab(tabLabel);
@@ -142,13 +147,16 @@ void setup() {
   targetParticle = particles[0];
   targetParticle.fillColor = color(#F01B5E);
 
-    
   kamera = new Kamera();
-  kamera.target = targetParticle.pos;
+  kamera.target = targetParticle.pos.get();
 
   frameRate(90);
   //hint(DISABLE_DEPTH_SORT);
 }
+
+float[] targ_xyt = new float[3];
+float[] targ_vel = new float[3];
+float[] targ_xyt_prime = new float[3];
 
 void draw() {
   
@@ -162,30 +170,37 @@ void draw() {
   gl.glDisable(GL.GL_DEPTH_TEST);
   gl.glDepthMask(false);
   
-  //gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
   pgl.endGL();
-  background(30); //noLights();
-  
+
+  background(30);
   directionalLight(LIGHTING, LIGHTING, LIGHTING, 0.5, 0.5, -1);
   directionalLight(LIGHTING, LIGHTING, LIGHTING, 0.5, -0.5, -1);
-    
   strokeWeight(STROKE_WIDTH);
 
   processUserInput(targetParticle);
 
-  float dilationFactor = TOGGLE_TIMESTEP_SCALING ? 
-                         targetParticle.gamma : 1.0;
-                         
-  for (int i=0; i<PARTICLES; i++) {
-    particles[i].update(timeDelta * dilationFactor);
-  }
+  float dilationFactor = TOGGLE_TIMESTEP_SCALING ? targetParticle.gamma : 1.0;
+  float dt = timeDelta * dilationFactor;
   
+  // UPDATE SCENE
+  for (int i=0; i<PARTICLES; i++) {
+    particles[i].update(dt);
+  }
+
+  // CAMERA PREP
+  targetParticle.pos.get(targ_xyt);
+  targetParticle.vel.get(targ_vel);
+  Relativity.applyTransforms(targ_xyt, targ_vel, targ_xyt_prime);
+  
+  kamera.updateTarget(targ_xyt_prime);
   kamera.update(timeDelta);
   
+  // RENDER
   for (int i=0; i<PARTICLES; i++) {
     particles[i].draw();
   }
   
+  // UPDATE FPS
   seconds = 0.001 * millis();
   deltaSeconds = seconds - prevSeconds;
   
@@ -195,16 +210,17 @@ void draw() {
     prevFrameCount = frameCount;
   }
   
+  // INFO LAYER
   myInfobox.print(
   + (int) seconds + " seconds\n"
   + (int) fpsRecent +  "fps (" + (int)(frameCount / seconds) + "avg)\n"
-  + "targetParticle.pos.z:      " + nf(targetParticle.pos.z, 3, 2) + "c\n"
-  + "targetParticle.properTime: " + nf(targetParticle.properTime, 3, 2) + "c\n"
-  + "targetParticle.velMag:     " + nf(targetParticle.velMag, 1, 8) + "c\n"
+  + "targetParticle.pos.t:      " + nf(targetParticle.pos.z, 3, 2) + " seconds\n"
+  + "targetParticle.properTime: " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
+  + "targetParticle.velMag:     " + nf(targetParticle.velMag, 1, 8) + " c\n"
   + "\nControls: W,A,S,D to move; Right mouse button toggles camera rotation"
   );
 
-  // ControlP5 needs some scene defaults to render GUI layer correctly
+  // GUI LAYER
   camera();
   noLights(); //lights();
   perspective(PI/3.0, float(width)/float(height), 0.1, 10E7);
@@ -237,7 +253,7 @@ void processUserInput(Particle particle) {
 void nudge(Particle particle, float theta) {
     
     float momentumScale = 0.05;
-    float momentumNudge = 0.001;
+    float momentumNudge = 0.0001;
     
     float v_mag = particle.velMag;
     
@@ -327,13 +343,7 @@ class Kamera {
     
     radiusVel += mouseWheel;
   }
-  
-  void updatePosition() {
-    pos.x = target.x + radius * sin(zenith) * cos(azimuth);
-    pos.y = target.y + radius * sin(zenith) * sin(azimuth);
-    pos.z = target.z + radius * cos(zenith);
-  }
-  
+
   void update(float dt) {
     
     if (MOUSELOOK) {
@@ -354,7 +364,32 @@ class Kamera {
     zenithVel *= velDecay;
     
     updatePosition();
+    updateUp();
+    commit();
+  }
+  
+  void updateTarget(float[] xyz) {
     
+    updateTarget(xyz[0], xyz[1], xyz[2]);    
+  }
+  
+  void updateTarget(float x, float y, float z) {
+    target.x = x;
+    target.y = y;
+    target.z = z;
+    
+    updatePosition();
+    updateUp();
+    commit();
+  }
+   
+  void updatePosition() {
+    pos.x = target.x + radius * sin(zenith) * cos(azimuth);
+    pos.y = target.y + radius * sin(zenith) * sin(azimuth);
+    pos.z = target.z + radius * cos(zenith);
+  }
+  
+  void updateUp() {
     upX = 0;
     upY = 0;
     upZ = -1;
@@ -371,7 +406,9 @@ class Kamera {
       upY = -sin(azimuth);
       upZ = 0;
     }
-    
+  }
+  
+  void commit() {
     camera(pos.x,     pos.y,     pos.z,
            target.x,  target.y,  target.z,
            upX,       upY,      upZ);

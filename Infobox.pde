@@ -1,3 +1,6 @@
+// Infobox
+// tflorez
+
 class Infobox {
   
   Infobox( String fontName, int fontSize ){

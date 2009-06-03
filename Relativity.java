@@ -6,7 +6,6 @@ package Relativity;
 public class Relativity {
   static float C = 1.0f;
 
-  // gamma(float v): get the time dilation factor (gamma) for given velocity (as fraction of c)
   public static float gamma(float v) {
     return 1.0f / (float)Math.sqrt (1 - v*v);
   }
@@ -50,26 +49,11 @@ public class Relativity {
   
   public static void applyTransforms(float[] xyt, float[] xyt_prime) {
     
-    if (TOGGLE_SPATIAL_TRANSFORM || TOGGLE_TEMPORAL_TRANSFORM) {
-      lorentzTransform(xyt, xyt_prime);
-
-      // Done alone, the graphical result combines the X' and T axis,
-      // like the Brehme diagram, a mix of "my space and your time"
-      if ( ! TOGGLE_SPATIAL_TRANSFORM ) {
-        xyt_prime[0] = xyt[0];
-        xyt_prime[1] = xyt[1];
-      }
-  
-      // Inverse lorentz transform of the time component
-      if ( ! TOGGLE_TEMPORAL_TRANSFORM ) {
-        xyt_prime[2] = xyt[2];
-      }
-    } 
-    else {
-      xyt_prime[0] = xyt[0];
-      xyt_prime[1] = xyt[1];
-      xyt_prime[2] = xyt[2];
-    }
+    lorentzTransform(xyt, xyt_prime);
+    
+    xyt_prime[0] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : xyt[0];
+    xyt_prime[1] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[1] : xyt[1];
+    xyt_prime[2] = TOGGLE_TEMPORAL_TRANSFORM ? xyt_prime[2] : xyt[2];
   }
   
   public static void loadVel(float vel_x, float vel_y) {
@@ -84,24 +68,13 @@ public class Relativity {
     gamma_v = gamma(v_mag);
   }
   
-  // OPTIONAL PRELOAD
-  public static void preloadVel(float vx, float vy) {
-    loadVel(vx, vy);
-    preloaded = true;
-  }
-  
-  public static void unload(){
-    preloaded = false;
-  }
-
   // PRELOAD VARS
   static float vx;
   static float vy;
   static float vx_norm;
   static float vy_norm;
   static float v_mag; 
-  static float gamma_v;  
-  static boolean preloaded;
+  static float gamma_v;
 
   // TRANSFORM MODE
   public static boolean TOGGLE_SPATIAL_TRANSFORM;

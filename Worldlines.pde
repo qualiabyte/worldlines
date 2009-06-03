@@ -21,7 +21,7 @@ float timeDelta = 0.2;
 public int MAX_PARTICLES = 1000;
 public int PARTICLES = MAX_PARTICLES/3;
 
-public float MAX_START_POS_DISPERSION = 6;
+public float MAX_START_POS_DISPERSION = 4.5;
 public float START_POS_DISPERSION_X = 0;
 public float START_POS_DISPERSION_Y = 0;
 
@@ -30,6 +30,14 @@ public float START_VEL_DISPERSION = 5.4; //4.2; //1.8;
 
 public float MAX_START_VEL_ECCENTRICITY = 15;
 public float START_VEL_ECCENTRICITY = 1.95;
+
+public void randomize() {
+  START_POS_DISPERSION_X = random(MAX_START_POS_DISPERSION);
+  START_POS_DISPERSION_Y = random(MAX_START_POS_DISPERSION);
+  START_VEL_DISPERSION = random(MAX_START_VEL_DISPERSION);
+  START_VEL_ECCENTRICITY = random(MAX_START_VEL_ECCENTRICITY);
+  setup();
+}
 
 public float HARMONIC_FRINGES = 3.4;
 public float HARMONIC_FRINGES_MAX = 16;
@@ -74,7 +82,7 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(1280, 900, OPENGL);
+  size(900, 540, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -94,6 +102,7 @@ void setup() {
   // Global Controls (All Tabs)
   controlP5.addButton("setup", 0, 10, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
   controlP5.controller("setup").setLabel("RESTART");
+  controlP5.addButton("randomize", 0, (int)3*bWidth, numGlobalControls*bSpacingY, (int)(2.6*bWidth), bHeight).moveTo("global");
   controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++numGlobalControls*bSpacingY, sliderWidth, bHeight).moveTo("global");
   
   // Main Tab
@@ -121,6 +130,7 @@ void setup() {
   controlP5.addSlider("START_VEL_DISPERSION", 0, MAX_START_VEL_DISPERSION, START_VEL_DISPERSION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
   controlP5.addSlider("START_VEL_ECCENTRICITY", 0, MAX_START_VEL_ECCENTRICITY, START_VEL_ECCENTRICITY, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
 
+  // SCENE OBJECTS
   particles = new Particle[MAX_PARTICLES];
 
   for(int i=0; i<MAX_PARTICLES; i++){
@@ -143,7 +153,7 @@ void setup() {
     particles[i].fillColor = color(#1B83F0);
   }
 
-  particles[0] = new Particle(new PVector(0,0,0), new PVector(0,0,0));
+  //particles[0] = new Particle(new PVector(0,0,0), new PVector(0,0,0));
   targetParticle = particles[0];
   targetParticle.fillColor = color(#F01B5E);
 
@@ -154,9 +164,9 @@ void setup() {
   //hint(DISABLE_DEPTH_SORT);
 }
 
-float[] targ_xyt = new float[3];
-float[] targ_vel = new float[3];
-float[] targ_xyt_prime = new float[3];
+float[] xyt = new float[3];
+float[] vel = new float[3];
+float[] xyt_prime = new float[3];
 
 void draw() {
   
@@ -170,34 +180,46 @@ void draw() {
   gl.glDisable(GL.GL_DEPTH_TEST);
   gl.glDepthMask(false);
   
+  gl.glLineWidth(STROKE_WIDTH);
   pgl.endGL();
-
+  
+  // SCENE PREP
   background(30);
   directionalLight(LIGHTING, LIGHTING, LIGHTING, 0.5, 0.5, -1);
   directionalLight(LIGHTING, LIGHTING, LIGHTING, 0.5, -0.5, -1);
-  strokeWeight(STROKE_WIDTH);
+  //strokeWeight(STROKE_WIDTH);
 
+  // UPDATE SCENE
   processUserInput(targetParticle);
 
   float dilationFactor = TOGGLE_TIMESTEP_SCALING ? targetParticle.gamma : 1.0;
   float dt = timeDelta * dilationFactor;
   
-  // UPDATE SCENE
   for (int i=0; i<PARTICLES; i++) {
     particles[i].update(dt);
   }
 
   // CAMERA PREP
-  targetParticle.pos.get(targ_xyt);
-  targetParticle.vel.get(targ_vel);
-  Relativity.applyTransforms(targ_xyt, targ_vel, targ_xyt_prime);
+  targetParticle.pos.get(xyt);
+  Relativity.loadVel(targetParticle.vel.x, targetParticle.vel.y);
+  Relativity.applyTransforms(xyt, xyt_prime);
   
-  kamera.updateTarget(targ_xyt_prime);
+  kamera.updateTarget(xyt_prime);
   kamera.update(timeDelta);
   
   // RENDER
+  pgl = (PGraphicsOpenGL)g;
+  gl = pgl.beginGL();
+  
   for (int i=0; i<PARTICLES; i++) {
     particles[i].draw();
+  }
+  pgl.endGL();
+  
+  for (int i=0; i<PARTICLES; i++) {
+    particles[i].pos.get(xyt);
+    Relativity.applyTransforms(xyt, xyt_prime);
+    particles[i].drawHead(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
   }
   
   // UPDATE FPS

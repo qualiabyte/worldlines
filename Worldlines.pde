@@ -13,6 +13,7 @@ Kamera kamera;
 
 Particle[] particles;
 Particle targetParticle;
+ArrayList targets;
 
 float C = 1.0;
 float timeDelta = 0.2;
@@ -156,6 +157,9 @@ void setup() {
   //particles[0] = new Particle(new PVector(0,0,0), new PVector(0,0,0));
   targetParticle = particles[0];
   targetParticle.fillColor = color(#F01B5E);
+  
+  targets = new ArrayList();
+  targets.add(particles[0]);
 
   kamera = new Kamera();
   kamera.target = targetParticle.pos.get();
@@ -190,7 +194,7 @@ void draw() {
   //strokeWeight(STROKE_WIDTH);
 
   // UPDATE SCENE
-  processUserInput(targetParticle);
+  processUserInput(targets);
 
   float dilationFactor = TOGGLE_TIMESTEP_SCALING ? targetParticle.gamma : 1.0;
   float dt = timeDelta * dilationFactor;
@@ -250,7 +254,7 @@ void draw() {
   controlP5.draw();
 }
 
-void processUserInput(Particle particle) {
+void processUserInput(ArrayList targets) {
   
   if (INPUT_UP || INPUT_DOWN || INPUT_LEFT || INPUT_RIGHT) {
     
@@ -268,7 +272,9 @@ void processUserInput(Particle particle) {
     //println("Nudge: Direction: " + direction / PI);
     //println("Nudge: Offset:    " + offset / PI);
     
-    nudge(particle, direction + offset);
+    for(int i=0; i < targets.size(); i++) {
+      nudge((Particle)targets.get(i), direction + offset);
+    }
   }
 }
 
@@ -300,10 +306,11 @@ void nudge(Particle particle, float theta) {
     
     //println("Nudging: dp: " + dp + "theta: " + theta / PI);
 
-    targetParticle.addImpulse(dp_x, dp_y);
+    particle.addImpulse(dp_x, dp_y);
 }
 
 void mousePressed() {
+  
   if (mouseButton == RIGHT) {
     MOUSELOOK = !MOUSELOOK;
     cursor(MOUSELOOK ? MOVE : ARROW);
@@ -321,7 +328,14 @@ void keyPressed() {
     case 'S' : INPUT_DOWN = true; break;
     case 'd' : INPUT_RIGHT = true; break;
     case 'D' : INPUT_RIGHT = true; break;
-   }
+  }
+     
+  if (key == ' ') {
+    int i = (int)random(PARTICLES);
+    targetParticle = particles[i];
+    targetParticle.fillColor = color(#F01B5E);
+    targets.add(particles[i]);
+  }
 }
 
 void keyReleased() {

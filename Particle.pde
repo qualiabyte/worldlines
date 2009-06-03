@@ -150,7 +150,13 @@ class Particle{
     pathColorB = blue(c);
     pathColorA = alpha(c);
   }
+  
+  PVector pos;
+  PVector vel;
 
+  float properTime;
+  float mass = 1.0;
+  
   int histCount;
   int histCountMax = 1000;
 
@@ -160,11 +166,6 @@ class Particle{
 
   //float[][] velHist = new float[histCountMax][3];
   float[] properTimeHist = new float[histCountMax];
-
-  float mass = 1.0;
-
-  PVector pos;
-  PVector vel = new PVector(0, 0, 0);
 
   // Convenience vars
   float velMag;
@@ -182,8 +183,6 @@ class Particle{
 
   float pathColorR, pathColorG, pathColorB, pathColorA;
   color pathColor;
-
-  float properTime=0;
 }
 
 /* Original drawPath(), replaced by drawPathGL()

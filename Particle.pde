@@ -7,8 +7,8 @@ class Particle{
     this.pos = pos;
     setVel(vel);
 
-    colorMode(RGB,255);
-    setPathColor(color(0,200,200,180));
+    colorMode(RGB,1.0);//255);
+    setPathColor(color(0,0.8,0.8,LIGHTING_WORLDLINES));//180));
 
     updateHist();
   }
@@ -68,7 +68,9 @@ class Particle{
 
     float r, g, b, a;
 
-    float alphaFactor = 0.5 * pathColorA / ((float)histCount);
+    //float alphaFactor = 0.5 * pathColorA / ((float)histCount);
+    float alphaFactor = 0.5 * LIGHTING_WORLDLINES / ((float)histCount);
+
 
     float wavenumberFactor = TWO_PI * HARMONIC_FRINGES / pos.z;
     //float redWavenumberFactor = TWO_PI / 800;

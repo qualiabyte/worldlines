@@ -4,7 +4,6 @@
 import processing.opengl.*;
 import javax.media.opengl.GL;
 import controlP5.*;
-import Relativity.*;
 
 PGraphicsOpenGL pgl;
 GL gl;
@@ -21,8 +20,11 @@ float timeDelta = 0.2;
 // GUI Control Vars
 public int MAX_PARTICLES = 1000;
 public int PARTICLES = MAX_PARTICLES/3;
+public int TARGETS = 1;
+public int TARGET_COLOR = #F01B5E;
+public int PARTICLE_COLOR = #1B83F0;
 
-public float MAX_START_POS_DISPERSION = 4.5;
+public float MAX_START_POS_DISPERSION = 3;
 public float START_POS_DISPERSION_X = 0;
 public float START_POS_DISPERSION_Y = 0;
 
@@ -37,6 +39,7 @@ public void randomize() {
   START_POS_DISPERSION_Y = random(MAX_START_POS_DISPERSION);
   START_VEL_DISPERSION = random(MAX_START_VEL_DISPERSION);
   START_VEL_ECCENTRICITY = random(MAX_START_VEL_ECCENTRICITY);
+  TARGETS = (int)random(PARTICLES) / 3;
   setup();
 }
 
@@ -58,7 +61,8 @@ public void toggleTemporalTransform () {
   TOGGLE_TEMPORAL_TRANSFORM = Relativity.TOGGLE_TEMPORAL_TRANSFORM ^= true;
 }
 
-public float LIGHTING = 0.75;
+public float LIGHTING_PARTICLES = 0.75;
+public float LIGHTING_WORLDLINES = 0.8;
 public float STROKE_WIDTH = 2.0;
 public float STROKE_WIDTH_MAX = 8.0;
 
@@ -83,7 +87,7 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(900, 540, OPENGL);
+  size(900, 600, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -113,7 +117,8 @@ void setup() {
   controlP5.addSlider("HARMONIC_FRINGES", 0, HARMONIC_FRINGES_MAX, HARMONIC_FRINGES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("HARMONIC_CONTRIBUTION", HARMONIC_CONTRIBUTION_MIN, HARMONIC_CONTRIBUTION_MAX, HARMONIC_CONTRIBUTION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("INPUT_RESPONSIVENESS", 0f, MAX_INPUT_RESPONSIVENESS, INPUT_RESPONSIVENESS, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("LIGHTING", 0f, 1.0f, LIGHTING, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addSlider("LIGHTING_PARTICLES", 0f, 1.0f, LIGHTING_PARTICLES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addSlider("LIGHTING_WORLDLINES", 0f, 1.0f, LIGHTING_WORLDLINES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("STROKE_WIDTH", 0f, STROKE_WIDTH_MAX, STROKE_WIDTH, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addToggle("TOGGLE_TIMESTEP_SCALING",TOGGLE_TIMESTEP_SCALING,10,++numTabControls*bSpacingY,bWidth,bHeight);
   controlP5.addToggle("toggleSpatialTransform", TOGGLE_SPATIAL_TRANSFORM, 10, ++numTabControls*bSpacingY,bWidth,bHeight);
@@ -159,13 +164,20 @@ void setup() {
   targetParticle.fillColor = color(#F01B5E);
   
   targets = new ArrayList();
-  targets.add(particles[0]);
-
+  for (int i=0; i<TARGETS; i++) {
+    addTarget(particles[i]);
+  }
+  
   kamera = new Kamera();
   kamera.target = targetParticle.pos.get();
 
-  frameRate(90);
+  frameRate(30);
   //hint(DISABLE_DEPTH_SORT);
+}
+
+void addTarget(Particle p){
+  targets.add(p);
+  p.fillColor = TARGET_COLOR;
 }
 
 float[] xyt = new float[3];
@@ -189,8 +201,8 @@ void draw() {
   
   // SCENE PREP
   background(30);
-  directionalLight(LIGHTING, LIGHTING, LIGHTING, 0.5, 0.5, -1);
-  directionalLight(LIGHTING, LIGHTING, LIGHTING, 0.5, -0.5, -1);
+  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -1);
+  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -1);
   //strokeWeight(STROKE_WIDTH);
 
   // UPDATE SCENE
@@ -205,6 +217,7 @@ void draw() {
 
   // CAMERA PREP
   targetParticle.pos.get(xyt);
+  Relativity.loadObserver(xyt);
   Relativity.loadVel(targetParticle.vel.x, targetParticle.vel.y);
   Relativity.applyTransforms(xyt, xyt_prime);
   

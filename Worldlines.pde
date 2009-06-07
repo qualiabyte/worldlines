@@ -14,6 +14,9 @@ Particle[] particles;
 Particle targetParticle;
 ArrayList targets;
 
+ParticlesLayer particlesLayer;
+InputDispatch inputDispatch;
+
 float C = 1.0;
 float timeDelta = 0.2;
 
@@ -76,6 +79,8 @@ public boolean INPUT_LEFT;
 public boolean INPUT_UP;
 public boolean INPUT_DOWN;
 
+// Data Files
+String PARTICLE_IMAGE = "particle.png";
 String bundledFont = "VeraMono.ttf";
 
 float fpsRecent, prevFrameCount;
@@ -87,7 +92,7 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(900, 600, OPENGL);
+  size(1280, 900, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -171,6 +176,9 @@ void setup() {
   kamera = new Kamera();
   kamera.target = targetParticle.pos.get();
 
+  particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera);
+  inputDispatch = new InputDispatch(targets);
+
   frameRate(30);
   //hint(DISABLE_DEPTH_SORT);
 }
@@ -185,7 +193,6 @@ float[] vel = new float[3];
 float[] xyt_prime = new float[3];
 
 void draw() {
-  
   pgl = (PGraphicsOpenGL)g;
   gl = pgl.beginGL();
   
@@ -201,12 +208,12 @@ void draw() {
   
   // SCENE PREP
   background(30);
-  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -1);
-  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -1);
+  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
+  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
   //strokeWeight(STROKE_WIDTH);
 
   // UPDATE SCENE
-  processUserInput(targets);
+  inputDispatch.update();
 
   float dilationFactor = TOGGLE_TIMESTEP_SCALING ? targetParticle.gamma : 1.0;
   float dt = timeDelta * dilationFactor;
@@ -225,20 +232,8 @@ void draw() {
   kamera.update(timeDelta);
   
   // RENDER
-  pgl = (PGraphicsOpenGL)g;
-  gl = pgl.beginGL();
-  
-  for (int i=0; i<PARTICLES; i++) {
-    particles[i].draw();
-  }
-  pgl.endGL();
-  
-  for (int i=0; i<PARTICLES; i++) {
-    particles[i].pos.get(xyt);
-    Relativity.applyTransforms(xyt, xyt_prime);
-    particles[i].drawHead(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
-  }
-  
+  particlesLayer.draw();
+
   // UPDATE FPS
   seconds = 0.001 * millis();
   deltaSeconds = seconds - prevSeconds;
@@ -253,13 +248,15 @@ void draw() {
   myInfobox.print(
   + (int) seconds + " seconds\n"
   + (int) fpsRecent +  "fps (" + (int)(frameCount / seconds) + "avg)\n"
-  + "targetParticle.pos.t:      " + nf(targetParticle.pos.z, 3, 2) + " seconds\n"
+  + "targetParticle.pos.z:      " + nf(targetParticle.pos.z, 3, 2) + " seconds\n"
+  + "kamera.target.pos.x:      " + nf(kamera.target.x, 3, 2) + " seconds\n"
   + "targetParticle.properTime: " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
   + "targetParticle.velMag:     " + nf(targetParticle.velMag, 1, 8) + " c\n"
-  + "\nControls: W,A,S,D to move; Right mouse button toggles camera rotation"
+  + "Controls: W,A,S,D to move; Right mouse button toggles camera rotation"
   );
 
   // GUI LAYER
+  imageMode(CORNERS);
   camera();
   noLights(); //lights();
   perspective(PI/3.0, float(width)/float(height), 0.1, 10E7);
@@ -267,59 +264,146 @@ void draw() {
   controlP5.draw();
 }
 
-void processUserInput(ArrayList targets) {
+class ParticlesLayer {
+  Particle[] particles;
+  PImage particleImage;
+  Kamera kamera;
   
-  if (INPUT_UP || INPUT_DOWN || INPUT_LEFT || INPUT_RIGHT) {
-    
-    float x = 0;
-    float y = 0;
-    
-    if      (INPUT_UP)   { y += -1.0; }
-    else if (INPUT_DOWN) { y += +1.0; }
-    else if (INPUT_LEFT) { x += -1.0; }
-    else if (INPUT_RIGHT){ x += 1.0; }
+  ParticlesLayer (Particle[] particles, String particleImagePath, Kamera kamera) {
+    this.particles = particles;
+    this.kamera = kamera;
+    this.particleImage = loadImage(particleImagePath);
+  }
+  
+  void draw() {
 
-    float direction = atan2(y, x);
-    float offset = kamera.azimuth - PI/2.0;
-    
-    //println("Nudge: Direction: " + direction / PI);
-    //println("Nudge: Offset:    " + offset / PI);
-    
-    for(int i=0; i < targets.size(); i++) {
-      nudge((Particle)targets.get(i), direction + offset);
+    // GL SECTION
+    pgl = (PGraphicsOpenGL)g;
+    gl = pgl.beginGL();
+  
+    for (int i=0; i<PARTICLES; i++) {
+      particles[i].drawGL(gl);
     }
+    gl.glBlendFunc(GL.GL_SRC_ALPHA , GL.GL_ALPHA);
+    pgl.endGL();
+
+    // PROCESSING SECTION
+    pushMatrix();
+    imageMode(CENTER);
+    for (int i=0; i<PARTICLES; i++) {
+      
+      particles[i].pos.get(xyt);
+      Relativity.applyTransforms(xyt, xyt_prime);
+      
+      float x = xyt_prime[0];
+      float y = xyt_prime[1];
+      float z = xyt_prime[2];
+      
+      particles[i].drawHead(x, y, z);
+      
+      // BILLBOARDING
+      pushMatrix();
+      
+      float dx = kamera.pos.x - x;
+      float dy = kamera.pos.y - y;
+      float dz = kamera.pos.z - z;
+      float dxy = sqrt(dx*dx + dy*dy);
+      float dxyz = sqrt(dz*dz + dxy*dxy);
+      
+      float theta_ct = atan2(dy, dx);
+      float phi_ct = atan2(dz, dxy);
+
+      translate(x, y, z);
+      rotateZ(theta_ct);
+      rotateY(-HALF_PI-phi_ct);
+      rotateZ(-HALF_PI);
+
+      float pulseFactor = 1 - 0.5*sin(particles[i].properTime);
+      float dim = LIGHTING_PARTICLES * constrain(dxyz * 0.005, 0, 1);
+      scale(0.1*pulseFactor*0.0015*dxyz);
+      
+      tint(lerpColor(#FFFFFF, particles[i].fillColor, 0.5*pulseFactor), pulseFactor);
+      image(particleImage, 0, 0);
+      
+      popMatrix();
+    }
+    noTint();
+    popMatrix();
   }
 }
 
-void nudge(Particle particle, float theta) {
+class InputDispatch {
+  ArrayList targets;
+  
+  float buttonPressure;
+  float buttonAccumulateFactor = 0.02;
+  float buttonDecayFactor = 0.95;
+  
+  InputDispatch(ArrayList targets) {
+     this.targets = targets;
+  }
+  
+  void update() {
     
-    float momentumScale = 0.05;
-    float momentumNudge = 0.0001;
-    
-    float v_mag = particle.velMag;
-    
-    float p = particle.mass * particle.gamma * v_mag;
-    
-    float vx = targetParticle.vel.x;
-    float vy = targetParticle.vel.y;
-    
-    float heading_initial = atan2(vy, vx);
-    
-    float angleDiff = heading_initial - theta;
-    
-    if ((v_mag > 0.99999) && abs(abs(angleDiff)-PI) < TWO_PI/5.0) {
-      theta = heading_initial + PI + angleDiff * (1.0 - v_mag);
-      momentumScale = 0.5;
+    if (INPUT_UP || INPUT_DOWN || INPUT_LEFT || INPUT_RIGHT) {
+      
+      float x = 0;
+      float y = 0;
+      
+      if      (INPUT_UP)   { y += -1.0; }
+      else if (INPUT_DOWN) { y += +1.0; }
+      else if (INPUT_LEFT) { x += -1.0; }
+      else if (INPUT_RIGHT){ x += 1.0; }
+  
+      float direction = atan2(y, x);
+      float offset = kamera.azimuth - PI/2.0;
+      
+      buttonPressure += (1 - buttonPressure) * buttonAccumulateFactor;
+      constrain(buttonPressure, 0, 1.0);      
+      
+      //println("Nudge: Direction: " + direction / PI);
+      //println("Nudge: Offset:    " + offset / PI);
+      
+      for (int i=0; i < targets.size(); i++) {
+        nudge((Particle)targets.get(i), direction + offset, buttonPressure);
+      }
     }
-
-    float dp = momentumScale * p + momentumNudge;
-
-    float dp_x = dp * cos(theta);
-    float dp_y = dp * sin(theta);
-    
-    //println("Nudging: dp: " + dp + "theta: " + theta / PI);
-
-    particle.addImpulse(dp_x, dp_y);
+    else {
+      buttonPressure *= buttonDecayFactor;
+    }
+  }
+  
+  void nudge(Particle particle, float theta, float amt) {
+      
+      float momentumScale = 0.05;
+      float momentumNudge = 0.0001 ;
+      
+      float v_mag = particle.velMag;
+      
+      float p = particle.mass * particle.gamma * v_mag;
+      
+      float vx = targetParticle.vel.x;
+      float vy = targetParticle.vel.y;
+      
+      float heading_initial = atan2(vy, vx);
+      
+      float angleDiff = heading_initial - theta;
+      
+      // Help user slow down at high speeds, quickly but smoothly
+      if ((v_mag > 0.99999) && abs(abs(angleDiff)-PI) < TWO_PI/5.0) {
+        theta = heading_initial + PI + angleDiff * (1.0 - v_mag);
+        momentumScale = 0.5;
+      }
+  
+      float dp = amt * (momentumScale * p + momentumNudge);
+  
+      float dp_x = dp * cos(theta);
+      float dp_y = dp * sin(theta);
+      
+      //println("Nudging: dp: " + dp + "theta: " + theta / PI);
+  
+      particle.addImpulse(dp_x, dp_y);
+  }
 }
 
 void mousePressed() {
@@ -365,118 +449,3 @@ void keyReleased() {
   }
 }
 
-class Kamera {
-  
-  Kamera() {
-    radius = 100;
-    azimuth = PI;
-    zenith = PI/6.0;
-    target = new PVector(0,0,0);
-    
-    pos = new PVector();
-    updatePosition();
-    
-    float fov = PI/3.0;
-    perspective(fov, width/height, 1, 15000000);
-    
-    addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
-      public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
-      mouseWheel(evt.getWheelRotation());
-      }
-    });
-  }
-  
-  void mouseWheel(int delta) {
-    mouseWheel -= delta;
-    println(mouseWheel);
-    
-    radiusVel += mouseWheel;
-  }
-
-  void update(float dt) {
-    
-    if (MOUSELOOK) {
-      zenithVel -= ((float)(mouseY - pmouseY))/10.0;
-      azimuthVel += ((float)(mouseX - pmouseX))/10.0;
-    }
-    
-    radiusVel += mouseWheel;
-    mouseWheel *= 0.1;
-    
-    radius = abs((float)(radius - radius * radiusVel / 60.0));
-    radiusVel *= velDecay;
-    
-    azimuth = (azimuth + azimuthVel / 60.0) % (TWO_PI);
-    azimuthVel *= velDecay;
-    
-    zenith = constrain(zenith + zenithVel / 60.0, 0.0001, PI - 0.0001);
-    zenithVel *= velDecay;
-    
-    updatePosition();
-    updateUp();
-    commit();
-  }
-  
-  void updateTarget(float[] xyz) {
-    
-    updateTarget(xyz[0], xyz[1], xyz[2]);    
-  }
-  
-  void updateTarget(float x, float y, float z) {
-    target.x = x;
-    target.y = y;
-    target.z = z;
-    
-    updatePosition();
-    updateUp();
-    commit();
-  }
-   
-  void updatePosition() {
-    pos.x = target.x + radius * sin(zenith) * cos(azimuth);
-    pos.y = target.y + radius * sin(zenith) * sin(azimuth);
-    pos.z = target.z + radius * cos(zenith);
-  }
-  
-  void updateUp() {
-    upX = 0;
-    upY = 0;
-    upZ = -1;
-    
-    // Keep rotation smooth at zenith extremes, when pos gets near limit for floats
-    // Done piecewise to work around oddities of the camera up vector in processing
-    if (zenith < PI / 10.0) {
-      upX = cos(azimuth);
-      upY = sin(azimuth);
-      upZ = 0;
-    }
-    else if((PI - zenith) < PI / 10.0) {
-      upX = -cos(azimuth);
-      upY = -sin(azimuth);
-      upZ = 0;
-    }
-  }
-  
-  void commit() {
-    camera(pos.x,     pos.y,     pos.z,
-           target.x,  target.y,  target.z,
-           upX,       upY,      upZ);
-  }
-  
-  float mouseWheel;
-  
-  float velDecay = 0.9;
-  
-  float radiusVel;
-  float azimuthVel;
-  float zenithVel;
-  
-  float radius;
-  float azimuth;
-  float zenith;
-  
-  float upX, upY, upZ;
-  
-  PVector pos;
-  PVector target;
-}

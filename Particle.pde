@@ -1,7 +1,7 @@
 // Particle
 // tflorez
 
-class Particle{
+class Particle {
 
   Particle( PVector pos, PVector vel ){
     this.pos = pos;
@@ -37,9 +37,13 @@ class Particle{
     properTimeHist[histCount] = properTime;
   }
 
-  void draw(){
+  void drawGL(GL gl){
     //drawHead();
-    drawPathGL();
+    drawPathGL(gl);
+  }
+  
+  void draw() {
+    drawHead();
   }
 
   void drawHead(){
@@ -62,7 +66,7 @@ class Particle{
 
   // A variation on drawPath using glBegin() and glVertex()
 
-  void drawPathGL(){
+  void drawPathGL(GL gl){
 
     gl.glBegin(GL.GL_LINE_STRIP);
 

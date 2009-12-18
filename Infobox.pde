@@ -20,7 +20,7 @@ class Infobox {
     init( fontSize );
     textRenderer = new VTextRenderer( loadFont(fontBytes), fontSize );
   }
-    
+  
   private void init( int fontSize ){
     
     this.fontSize = fontSize;    
@@ -35,7 +35,7 @@ class Infobox {
     try {
       ByteArrayInputStream fontStream = new ByteArrayInputStream(fontBytes);
       font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
-      font = font.deriveFont((float)fontSize );
+      font = font.deriveFont((float)fontSize);
     }
     catch (FontFormatException e) {
       println(e.getMessage());

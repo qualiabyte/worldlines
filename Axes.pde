@@ -1,17 +1,3 @@
-/*
-class Position extends PVector{
-  float t, x, y;
-  //float[] pos_xyt;
-  //float[] pos_xyt_prime;
-  
-  void getDisplayPos(float[] target_xyt){
-    target_xyt[0] = x;
-    target_xyt[1] = y;
-    target_xyt[2] = t;
-  }
-}
-*/
-
 static class Basis {
   static float scale = 15;
   static float[] x_hat = new float[] {scale,0,0};

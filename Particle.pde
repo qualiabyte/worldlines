@@ -177,11 +177,9 @@ class Particle implements Frame {
     //line.setPoint(xyt_hist[1]);
     //line.setDirection(velHistX[1], velHistY[1], 1);
     
-    
     //Velocity vel = this.headFrame.getVelocity();
     //line.setPoint(this.headFrame.getPosition());
     //line.setDirection(vel.vx, vel.vy, 1);
-    
     
     Vector3f intersection = new Vector3f();
     
@@ -225,20 +223,63 @@ class Particle implements Frame {
     //gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
     gl.glEnd();
   }
-
+  
+  void propelSelf(float momentumDeltaX, float momentumDeltaY) {
+    
+    addImpulse(momentumDeltaX, momentumDeltaY);
+    
+    emissionMomentumX += momentumDeltaX;
+    emissionMomentumY += momentumDeltaY;
+    emissionMomentumTotal = abs(emissionMomentumX) + abs(emissionMomentumY);
+  }
+  
   void addImpulse(float dp_x, float dp_y) {
     impulseX += dp_x;
     impulseY += dp_y;
   }
+  
+  void updateEmission() {
+    
+    /*
+    if (this == targetParticle) {
+      println("emissionMomentum Total: " + emissionMomentumTotal);
+      println("millisDiff: " + millisDiff);
+    }
+    */
+    if ( (emissionMomentumTotal > 1E-4) && //0.02 * this.mass * velocity.magnitude) &&
+         ((millis() - millisLastEmission) > 3000) ) {
+      
+      Particle emission = new Particle();
+      
+      emission.setPosition(this.position);
+      emission.mass = 0.001 * this.mass;
+      emission.addImpulse(-emissionMomentumX / emission.mass, -emissionMomentumY / emission.mass);
+      //println("emission.velocity.magnitude: " + emission.velocity.magnitude);
+      //TODO: more realistic emission velocity; also, photon emissions
+      emit(emission);
+    }
+  }
+  
+  void emit(Particle emission) {
+    
+    addEmission(emission);
+    emissionMomentumX = emissionMomentumY = emissionMomentumTotal = 0;
+    millisLastEmission = millis();
+    //println("emission: millis() = " + millis());
+    //TODO: more realistic emission energy & mass
+    this.mass -= emission.mass;
+  }
 
   void updateImpulse() {
-
+    
+    updateEmission();
+    
     float dp_x = impulseX * INPUT_RESPONSIVENESS;
     float dp_y = impulseY * INPUT_RESPONSIVENESS;
 
     impulseX -= dp_x;
     impulseY -= dp_y;
-
+    
     float p_x = mass * velocity.gamma * velocity.vx;
     float p_y = mass * velocity.gamma * velocity.vy;
 
@@ -291,6 +332,9 @@ class Particle implements Frame {
   int histCount = 0;
   int histCountMax = 1000;
   int frameCountLastHistUpdate = 0;
+  int millisLastEmission = 0;
+  
+  float emissionMomentumX, emissionMomentumY, emissionMomentumTotal;
 
   float[] velHistX = new float[histCountMax];
   float[] velHistY = new float[histCountMax];
@@ -305,8 +349,9 @@ class Particle implements Frame {
   float[][] xyt_prime_hist = new float[histCountMax][3];
 
   // Accumulated impulse (add to momentum smoothly)
-  float impulseX, impulseY;
-
+  float impulseX, impulseY, impulseTotal;
+  Particle impulseParticle;
+  
   color fillColor;
   float[] fillColor4fv;
 

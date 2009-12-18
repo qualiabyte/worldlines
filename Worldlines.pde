@@ -7,14 +7,21 @@ import controlP5.*;
 import javax.vecmath.*;
 import geometry.*;
 
+import com.sun.opengl.util.texture.*;
+import com.sun.opengl.util.BufferUtil;
+import java.nio.ByteBuffer;
+import java.nio.Buffer;
+
 PGraphicsOpenGL pgl;
 GL gl;
 
 Kamera kamera;
 
-Particle[] particles;
+//Particle[] particles;
+ArrayList particles;
 Particle targetParticle;
 ArrayList targets;
+ArrayList emissions;
 
 DefaultFrame restFrame;
 
@@ -103,7 +110,8 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(900, 540, OPENGL);//900, 540, 1280, 900, OPENGL);
+  size(900, 540, OPENGL);
+  //size(1280, 900, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -160,10 +168,10 @@ void setup() {
   targetParticle.setPosition(0, 0, 0);
   targetParticle.setFillColor(color(#F01B5E));
   
-  particles = new Particle[MAX_PARTICLES];
-  particles[0] = targetParticle;  
+  particles = new ArrayList(); //particles = new Particle[MAX_PARTICLES];
+  particles.add(targetParticle); //particles[0] = targetParticle;  
 
-  for(int i=1; i<MAX_PARTICLES; i++){
+  for(int i=1; i<PARTICLES; i++){
 
     float x = pow(10, START_POS_DISPERSION_X);
     float y = pow(10, START_POS_DISPERSION_Y);
@@ -179,8 +187,9 @@ void setup() {
     
     Vector3f vel = new Vector3f(vx, vy, 0);
     
-    particles[i] = new Particle(pos, vel);
-    particles[i].setFillColor(color(#1B83F0));
+    Particle p = new Particle(pos, vel);
+    p.setFillColor(color(#1B83F0));
+    particles.add(p); //particles[i] = p;
   }
   
   println("target pos: " + targetParticle.position.x + ", " + targetParticle.position.y );
@@ -190,21 +199,27 @@ void setup() {
   
   targets = new ArrayList();
   for (int i=0; i<TARGETS; i++) {
-    addTarget(particles[i]);
+    addTarget((Particle)particles.get(i));
   }
   
-  kamera = new Kamera();
+  emissions = new ArrayList();
   
-  particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera);
+  kamera = new Kamera();
+    
+  restFrame = new DefaultFrame();
+  restFrame.setVelocity(0,0);
+  
+  pgl = (PGraphicsOpenGL)g;
+  gl = pgl.beginGL();
+    particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera);
+  pgl.endGL();
+  
   inputDispatch = new InputDispatch(targets);
   
   particleGrid = new ParticleGrid(3*50, 5*1000);
   targetAxes = new Axes((Frame)targetParticle);
   
   Velocity restFrameVel = new Velocity(0, 0);
-  
-  restFrame = new DefaultFrame();
-  restFrame.setVelocity(0,0);
   
   // THREADING
   particleUpdater = new ParticleUpdater(targetParticle, particles);
@@ -217,7 +232,14 @@ void setup() {
 
 void addTarget(Particle p){
   targets.add(p);
-  p.fillColor = TARGET_COLOR;
+  p.velocity.set(targetParticle.velocity);
+  p.setFillColor(TARGET_COLOR);
+}
+
+void addEmission(Particle e){
+  emissions.add(e);
+  particles.add(e);
+  e.setFillColor(color(0, 1, 0));
 }
 
 float[] vel = new float[3];
@@ -230,6 +252,7 @@ void draw() {
   
   gl.glEnable(GL.GL_BLEND);
   gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
+  //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
   gl.glDisable(GL.GL_DEPTH_TEST);
   gl.glDepthMask(false);
   
@@ -238,6 +261,10 @@ void draw() {
   
   // SCENE PREP
   background(30);
+  //colorMode(HSB, 255);
+  //background((frameCount * 0.5)%255, 100, 75, 255);//  background(#3473F7);
+  //background((frameCount * 0.5)%255, 200, 24, 255);//  background(#3473F7);
+  //colorMode(RGB, 1.0f);
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
   //strokeWeight(STROKE_WIDTH);
@@ -257,8 +284,15 @@ void draw() {
   if (SIMPLE_UPDATES){
     
     for (int i=0; i<PARTICLES; i++) {
-      particles[i].update(dt);
-      particles[i].updateTransformedHist();
+      Particle p = (Particle)particles.get(i);//Particle p = particles[i];
+      p.update(dt);
+      p.updateTransformedHist();
+    }
+    
+    for (int i=0; i<emissions.size(); i++) {
+      Particle e = (Particle) emissions.get(i);
+      e.update(dt);
+      e.updateTransformedHist();
     }
   }
   else {
@@ -268,19 +302,20 @@ void draw() {
     
     // UPDATE NON-TARGETS
     for (int i=0; i<PARTICLES; i++) {
+      Particle p = (Particle)particles.get(i);
       
-      if ( particles[i] == targetParticle)
+      if (p == targetParticle)
       {
         continue;
       }
-      else if( particles[i].xyt_prime[2] > targetParticle.xyt_prime[2] )
+      else if( p.xyt_prime[2] > targetParticle.xyt_prime[2] )
       {
-        particles[i].updateTransformedHist();
+        p.updateTransformedHist();
         continue;
       } 
       else {
-        particles[i].update(dt);
-        particles[i].updateTransformedHist();
+        p.update(dt);
+        p.updateTransformedHist();
       }
     }
   }
@@ -328,103 +363,332 @@ void draw() {
 }
 
 class ParticlesLayer {
-  Particle[] particles;
+  ArrayList particles; //Particle[] particles;
   PImage particleImage;
   Kamera kamera;
   
-  ParticlesLayer (Particle[] particles, String particleImagePath, Kamera kamera) {
+  boolean useGL = true;
+  
+  Texture particleTexture;
+  int[] textures = new int[3];
+    
+  ParticlesLayer (ArrayList particles, String particleImagePath, Kamera kamera) {
     this.particles = particles;
     this.kamera = kamera;
     this.particleImage = loadImage(particleImagePath);
+    this.particleTexture = loadTexture(particleImagePath);
+    //this.particleTexture = loadTextureFromStream(openStream(particleImagePath));
+    //loadTextureGL(openStream(particleImagePath));
+  }
+  
+  void loadTextureGL(InputStream textureStream){
+    
+    TextureData textureData = null;
+    //dumpStreamBytes(textureStream, 32);
+    try {
+      textureData = TextureIO.newTextureData(textureStream, true, TextureIO.PNG);
+      //texture = TextureIO.newTexture(textureStream, false, TextureIO.PNG);
+    }
+    catch(Exception e) {
+      println("Error loading textureData: " + e);
+    }
+    
+    int imgWidth = textureData.getWidth();
+    int imgHeight = textureData.getHeight();
+    int bytesPerPixel = 4;
+    
+    Buffer textureBuffer = textureData.getBuffer();
+    //ByteBuffer textureByteBuffer = BufferUtil.newByteBuffer(imgWidth*imgHeight*bytesPerPixel);
+    
+    //ByteBuffer textureByteBuffer = textureData.getBuffer();
+    
+    //byte[] textureBytes = new byte[32];
+    //textureByteBuffer.get(textureBytes);
+    //dumpBytes(textureBytes, 32);
+    
+    gl.glGenTextures(1, textures, 0);
+    gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]);
+    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT);
+    gl.glTexImage2D(
+      GL.GL_TEXTURE_2D,
+      0,
+      GL.GL_RGBA,
+      imgWidth,
+      imgHeight,
+      0,
+      GL.GL_UNSIGNED_BYTE,//GL.GL_INT,//GL.GL_BYTE,//
+      GL.GL_RGBA,
+      textureBuffer
+      //textureByteBuffer
+    );
+    
+    if (textureBuffer != null) {
+      println("textureBuffer.toString(): " + textureBuffer.toString());
+    }
+    else {
+      println("textureBuffer was null");
+    }
+  }
+  
+  Texture loadTextureFromStream(InputStream textureStream){
+    
+    Texture texture = null;
+    
+    //dumpStreamBytes(textureStream, 32);
+    try {
+      //textureData = TextureIO.newTextureData(textureStream, true, TextureIO.PNG);
+      texture = TextureIO.newTexture(textureStream, false, TextureIO.PNG);
+      texture.setTexParameteri(GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
+      texture.setTexParameteri(GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
+    }
+    catch(Exception e) {
+      println("Error loading texture: " + e);
+    }
+    
+    return texture;
+    /*
+    if (textureData != null) {
+      texture = TextureIO.newTexture(textureData);
+      println("textureData.toString(): " + textureData.toString());
+    }
+    else {
+      println("textureData was null");
+    }
+    */
+  }
+  
+  Texture loadTexture(String pImagePath) {
+    Texture texture = null;
+    
+    try {
+      texture = TextureIO.newTexture(new File(dataPath(pImagePath)), true);
+    }
+    catch(Exception e) {
+      println("Error loading texture: " + e);
+    }
+      
+    return texture;
   }
   
   void draw() {
     
     restFrame.setPosition(targetParticle.getPosition());
-    restFrame.setVelocity(0, 0);
+    Frame[] displayFrames = new Frame[] {restFrame, targetParticle};
         
-    // GL SECTION
+    // GL SECTION BEGIN
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
     
-    Frame[] displayFrames = new Frame[] {
-      restFrame,
-      targetParticle
-    };
+    //targetParticle.drawHeadGL(gl);
     
-    targetParticle.drawHeadGL(gl);
+    Vector3f intersection = new Vector3f();
     Vector3f[] intersections = new Vector3f[MAX_PARTICLES*displayFrames.length];
     int intersectionCount = 0;
     
-    Vector3f intersection = new Vector3f();
-    
-    for (int i=0; i < PARTICLES; i++) {
+    for (int i=0; i < particles.size(); i++) {
+      Particle p = (Particle)particles.get(i);
       
-      particles[i].drawPathGL(gl);
-      targetAxes.drawGL(gl, (Frame)particles[i]);
+      p.drawPathGL(gl);
+      targetAxes.drawGL(gl, (Frame)p);
       
       for (int j=0; j < displayFrames.length; j++) {
         
-        intersection = particles[i].getIntersection(displayFrames[j]);
+        intersection = p.getIntersection(displayFrames[j]);
         
-        particles[i].drawHeadGL(gl, intersection);
         intersections[intersectionCount++] = intersection;
         
-        //particles[i].drawIntersectionGL(gl, displayFrames[j]);
-        //particles[i].drawIntersectionGL(gl, (Frame)targetParticle);
-        //particles[i].drawIntersectionGL(gl, (Frame)restFrame);
+        p.drawHeadGL(gl, intersection);
+        
+        //p.drawIntersectionGL(gl, displayFrames[j]);
+        //p.drawIntersectionGL(gl, (Frame)targetParticle);
+        //p.drawIntersectionGL(gl, (Frame)restFrame);
       }
     }
-    gl.glBlendFunc(GL.GL_SRC_ALPHA , GL.GL_ALPHA);
     pgl.endGL();
     
-    // PROCESSING SECTION
-    pushMatrix();
-    imageMode(CENTER);
-    
-    //for (int i=0; i<PARTICLES; i++) {
-    for (int i=0; i<intersectionCount; i++) {
+    if (useGL) {
       
-      //float[] xyt_prime = new float[3];
-      //intersections[i].get(xyt_prime);
+      pgl.beginGL();
       
-      //float[] xyt_prime = particles[i].getDisplayPosition();
+      particleTexture.enable(); //gl.glEnable(GL.GL_TEXTURE_2D); //gl.glEnable(particleTexture.getTarget());
+      particleTexture.bind(); //gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]); //gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
       
-      float x = intersections[i].x;
-      float y = intersections[i].y;
-      float z = intersections[i].z;
+      Vector3f toParticle = new Vector3f();
+            
+      for (int i=0; i<intersectionCount; i++) {
+        Particle p = (Particle)particles.get(i/2);
+        
+        float x = intersections[i].x;
+        float y = intersections[i].y;
+        float z = intersections[i].z;
+        
+        toParticle.set(intersections[i]);
+        toParticle.sub(kamera.pos);
+        
+        float distToParticle = toParticle.length();
+        float pulseFactor = 1.0 - 0.5*sin(p.properTime);
+                
+        float scale = distToParticle * 0.05* PARTICLE_SIZE * pulseFactor;
+        color c = lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor);
+        
+        //beginBillboardGL(kamera, x, y, z);
+        beginCylindricalBillboardGL(kamera, x, y, z);
+          
+          gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
+          gl.glScalef(scale, scale, scale);
+          simpleQuad(gl);
+          
+        endBillboardGL();
+      }
+      particleTexture.disable(); //particleTexture.dispose(); //gl.glDisable(GL.GL_TEXTURE_2D);
       
-      //noStroke();
+      pgl.endGL();
       
-      // BILLBOARDING
-      pushMatrix();
-      
-      float dx = kamera.pos.x - x;
-      float dy = kamera.pos.y - y;
-      float dz = kamera.pos.z - z;
-      float dxy = sqrt(dx*dx + dy*dy);
-      float dxyz = sqrt(dz*dz + dxy*dxy);
-      
-      float theta_ct = atan2(dy, dx);
-      float phi_ct = atan2(dz, dxy);
-  
-      translate(x, y, z);
-      rotateZ(theta_ct);
-      rotateY(-HALF_PI-phi_ct);
-      rotateZ(-HALF_PI);
-  
-      float pulseFactor = 1 - 0.5*sin(particles[i].properTime);
-      float dim = LIGHTING_PARTICLES * constrain(dxyz * 0.005, 0, 1);
-      scale(PARTICLE_SIZE * 0.1*pulseFactor*0.0015*dxyz);
-      
-      tint(lerpColor(#FFFFFF, particles[i].fillColor, 0.5*pulseFactor), pulseFactor);
-      image(particleImage, 0, 0);
-      
-      popMatrix();
     }
-    noTint();
-    popMatrix();
+    else {
+    
+      // PROCESSING SECTION
+      imageMode(CENTER);
+      
+      Vector3f toParticle = new Vector3f();
+      float distToParticle;
+      
+      for (int i=0; i<intersectionCount; i++) {
+        Particle p = (Particle)particles.get(i/2);
+        
+        float[] pos = new float[3];
+        intersections[i].get(pos);
+        
+        toParticle.set(intersections[i]);
+        toParticle.sub(kamera.pos);
+        
+        distToParticle = toParticle.length();
+        
+        float pulseFactor = 1 - 0.5*sin(p.properTime);
+        //float dim = LIGHTING_PARTICLES * constrain(distToParticle * 0.005, 0, 1);
+        
+        //scale *= PARTICLE_SIZE * 0.1 * pulseFactor*0.0015*log(distToParticle);
+        float scale = PARTICLE_SIZE * 0.1 * pulseFactor*0.0015*distToParticle;
+        
+        tint(lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor), pulseFactor);
+        
+        p.drawHead(pos[0], pos[1], pos[2]);
+        drawBillboard(particleImage, scale, kamera, pos[0], pos[1], pos[2]);
+        
+        noTint();
+      }
+    }
   }
+  
+  void simpleQuad(GL gl) {
+    gl.glBegin(GL.GL_QUADS);
+    gl.glTexCoord2f(1,1); gl.glVertex2f(1,1);
+    gl.glTexCoord2f(1,0); gl.glVertex2f(1,-1);
+    gl.glTexCoord2f(0,0); gl.glVertex2f(-1,-1);
+    gl.glTexCoord2f(0,1); gl.glVertex2f(-1,1);
+    gl.glEnd();
+  }
+}
+
+void dumpStreamBytes(InputStream inputStream, int numBytes) {
+  try {
+    byte[] b = new byte[numBytes];
+    inputStream.read(b, 0, numBytes);
+    
+    println("inputStream.toString(): " + inputStream.toString());
+    println("inputStream Bytes[0.."+numBytes+"]:");
+    
+    dumpBytes(b, numBytes);
+    
+  }
+  catch (Exception e){
+    println("Error reading inputStream: ");
+  }
+}
+
+void dumpBytes(byte[] b, int numBytes){
+  
+  for (int i=0; i<numBytes/8; i++){
+    for (int j=0; j<8; j++){
+      print(" " + b[i*8+j]);
+    }
+    println("\t");
+  }
+}
+/*
+void glTriangle(GL gl) {
+        gl.glBegin(GL.GL_TRIANGLES);
+        gl.glVertex2f(0, 1);
+        gl.glVertex2f(-0.5, -1);
+        gl.glVertex2f(+0.5, -1);
+        gl.glEnd();
+}
+*/
+
+void beginBillboardGL(Kamera k, float x, float y, float z){
+  gl.glPushMatrix();
+  
+  float dx = k.pos.x - x;
+  float dy = k.pos.y - y;
+  float dz = k.pos.z - z;
+  float dxy = sqrt(dx*dx + dy*dy);
+  float dxyz = sqrt(dz*dz + dxy*dxy);
+  
+  float theta_ct = degrees(atan2(dy, dx));
+  float phi_ct = atan2(dz, dxy);
+  
+  gl.glTranslatef(x, y, z);
+  
+  //gl.glRotatef(degrees(frameCount)/10, 0f, 0f, 1f);
+  
+  gl.glRotatef(theta_ct, 0f, 0f, 1f);
+  gl.glRotatef(degrees(-HALF_PI-phi_ct), 0f, 1f, 0f);
+  gl.glRotatef(degrees(-HALF_PI), 0f, 0f, 1f);  
+}
+
+void endBillboardGL(){
+  gl.glPopMatrix();
+}
+
+void beginCylindricalBillboardGL(Kamera k, float x, float y, float z){
+  gl.glPushMatrix();
+  
+  gl.glTranslatef(x, y, z);
+  
+  float[] modelview = new float[16];
+  
+  gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX, modelview, 0);
+  
+  for (int row=0; row<3; row++) {
+    for (int col=0; col<3; col++) {
+      modelview[row*4+col] = (row==col) ? 1 : 0;
+    }
+  }
+  gl.glLoadMatrixf(modelview, 0);
+}
+
+//BILLBOARDING (in processing)
+void drawBillboard(PImage img, float scale, Kamera kamera, float x, float y, float z){
+  pushMatrix();
+  
+  float dx = kamera.pos.x - x;
+  float dy = kamera.pos.y - y;
+  float dz = kamera.pos.z - z;
+  float dxy = sqrt(dx*dx + dy*dy);
+  float dxyz = sqrt(dz*dz + dxy*dxy);
+  
+  float theta_ct = atan2(dy, dx);
+  float phi_ct = atan2(dz, dxy);
+
+  translate(x, y, z);
+  rotateZ(theta_ct);
+  rotateY(-HALF_PI-phi_ct);
+  rotateZ(-HALF_PI);
+
+  scale(scale);
+  image(img, 0, 0);
+
+  popMatrix();
 }
 
 class InputDispatch {
@@ -460,7 +724,8 @@ class InputDispatch {
       //println("Nudge: Offset:    " + offset / PI);
       
       for (int i=0; i < targets.size(); i++) {
-        nudge((Particle)targets.get(i), direction + offset, buttonPressure);
+        
+        nudge((Particle)targets.get(i), direction + offset, buttonPressure); 
       }
     }
     else {
@@ -495,9 +760,8 @@ class InputDispatch {
       float dp_x = dp * cos(theta);
       float dp_y = dp * sin(theta);
       
-      //println("Nudging: dp: " + dp + "theta: " + theta / PI);
-  
-      particle.addImpulse(dp_x, dp_y);
+      //particle.addImpulse(dp_x, dp_y);
+      particle.propelSelf(dp_x, dp_y);
   }
 }
 
@@ -524,9 +788,13 @@ void keyPressed() {
      
   if (key == ' ') {
     int i = (int)random(PARTICLES);
-    targetParticle = particles[i];
+    targetParticle = (Particle) particles.get(i);
     targetParticle.setFillColor(color(#F01B5E));
-    targets.add(particles[i]);
+    targets.add(particles.get(i));
+  }
+  
+  if (key == 'g' || key == 'G') {
+    particlesLayer.useGL = !particlesLayer.useGL;
   }
 }
 
@@ -541,6 +809,12 @@ void keyReleased() {
     case 'S' : INPUT_DOWN = false; break;
     case 'd' : INPUT_RIGHT = false; break;
     case 'D' : INPUT_RIGHT = false; break;
+  }
+}
+
+static class Dbg {
+  static void dumphex(String name, int i) {
+    println("hex(" + name + "): " + hex(i));
   }
 }
 

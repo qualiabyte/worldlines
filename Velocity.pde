@@ -26,6 +26,10 @@ public class Velocity {
     this(0f, 0f);
   }
   
+  void set(Velocity sourceVel) {
+    setComponents(sourceVel.vx, sourceVel.vy);
+  }
+  
   void setComponents(float vx, float vy) {
     this.vx = vx;
     this.vy = vy;

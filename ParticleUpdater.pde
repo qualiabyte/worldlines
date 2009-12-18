@@ -2,10 +2,10 @@ class ParticleUpdater implements Runnable {
   Thread t;
   
   Particle targetParticle;
-  Particle[] particles;
+  ArrayList particles; //Particle[] particles;
   float dt;
 
-  public ParticleUpdater(Particle targetParticle, Particle[] particles) {
+  public ParticleUpdater(Particle targetParticle, ArrayList particles) {
     this.targetParticle = targetParticle;
     this.particles = particles;
     t = new Thread(this);
@@ -22,18 +22,19 @@ class ParticleUpdater implements Runnable {
       targetParticle.updateTransformedHist();
 
       for (int i=0; i<PARTICLES; i++) {
-        if (particles[i] == targetParticle)
+        Particle p = (Particle) particles.get(i);
+        if (p == targetParticle)
           continue;
         
-        //particles[i].updateTransformedHist();
+        //p.updateTransformedHist();
 
         int updates_count = 0;
         int updates_max = 30;
 
         while ( updates_count < updates_max && 
-                particles[i].xyt_prime[2] < targetParticle.xyt_prime[2]// + 0.001
+                p.xyt_prime[2] < targetParticle.xyt_prime[2]// + 0.001
           ){
-          particles[i].update(dt);
+          p.update(dt);
           updates_count++;
         }
       }

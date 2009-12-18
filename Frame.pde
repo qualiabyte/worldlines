@@ -1,10 +1,10 @@
 interface Frame {
-/*
-  Position getPosition();
+
+  //Position getPosition();
   Velocity getVelocity();
-*/
+  
   float[] getPosition();
-  float[] getVelocity();
+  //float[] getVelocity();
 
   float[] getDisplayPosition();
 }

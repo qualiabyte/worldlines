@@ -3,50 +3,54 @@
 
 class Particle implements Frame {
   
-  
   // FRAME INTERFACE BEGIN
-  float[] getPosition () {
+  Velocity velocity;  
+  
+  float[] getPosition(){
     return xyt;
   }
   
-  float[] getVelocity () {
-    return vel_xy;
+  Velocity getVelocity(){
+    return velocity;
   }
   
   float[] getDisplayPosition(){
-    return xyt_prime;
+    //return xyt_prime;
+    return Relativity.displayTransform(targetParticle.velocity, xyt);
+    //return Relativity.selectDisplayComponents(xyt, xyt_prime);
   }
   // FRAME INTERFACE END
 
   Particle () {
-    this.pos = new PVector(0,0,0);
-    this.vel = new PVector(0,0);
-    Velocity v = new Velocity();
-    //this.Frame = new Frame(pos, vel);
+    this(
+      new PVector(0,0,0), //pos
+      new PVector(0,0)    //vel
+    );
   }
   
   Particle( PVector pos, PVector vel ){
     this.pos = pos;
-    setVel(vel);
-
-    colorMode(RGB,1.0);//255);
-    setPathColor(color(0,0.8,0.8,LIGHTING_WORLDLINES));//180));
+    this.velocity = new Velocity(vel.x, vel.y);
+    
+    colorMode(RGB,1.0);
+    setPathColor(color(0,0.8,0.8,LIGHTING_WORLDLINES));
 
     updateHist();
   }
 
   void update(float dt){
-
+    
     updateImpulse();
-
-    xyt[0] = pos.x += vel.x * dt;
-    xyt[1] = pos.y += vel.y * dt;
+    
+    xyt[0] = pos.x += velocity.vx * dt;
+    xyt[1] = pos.y += velocity.vy * dt;
     xyt[2] = pos.z += dt;
-        
+    
     Relativity.applyTransforms(xyt, xyt_prime);
-
-    properTime += dt / this.gamma;
-
+    //xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
+    
+    properTime += dt / this.velocity.gamma;
+    
     if((frameCount & 0xF) == 0 && frameCount > frameCountLastHistUpdate) {
       frameCountLastHistUpdate = frameCount;
       histCount++;
@@ -72,14 +76,10 @@ class Particle implements Frame {
   }
 
   void drawGL(GL gl){
-    //drawHead();
     drawPathGL(gl);
   }
+  
   /*
-  void draw() {
-    drawHead();
-  }
-
   void drawHead(){
     drawHead( 
       TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : pos.x,
@@ -88,12 +88,10 @@ class Particle implements Frame {
   }
   */
   void drawHead(float x, float y, float z) {
-    float heading = atan2(vel.y, vel.x)-PI/2;
-
     pushMatrix();
 
     translate(x, y, z);
-    rotate(heading);
+    rotate(velocity.direction - PI/2);
 
     fill(fillColor);
 
@@ -151,8 +149,8 @@ class Particle implements Frame {
     impulseX -= dp_x;
     impulseY -= dp_y;
 
-    float p_x = mass * gamma * vel.x;
-    float p_y = mass * gamma * vel.y;
+    float p_x = mass * velocity.gamma * velocity.vx;
+    float p_y = mass * velocity.gamma * velocity.vy;
 
     float p_x_final = p_x + dp_x;
     float p_y_final = p_y + dp_y;
@@ -165,25 +163,8 @@ class Particle implements Frame {
     float v_mag_final = 1.0/sqrt(pow((mass/p_mag_final), 2) + C*C);
 
     v_mag_final = constrain(v_mag_final, 0.0, 1 - 1E-7);
-
-    setVel( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
-  }
-
-  void setVel(PVector vel) {
-    this.vel = vel;
-    setVel(vel.x, vel.y);
-  }
-
-  void setVel(float x, float y) {
-    vel.x = vel_xy[0] = x;
-    vel.y = vel_xy[1] = y;
-
-    velMag = sqrt(x*x + y*y);
-
-    //velNormX = vel.x / velMag;
-    //velNormY = vel.y / velMag;
-
-    gamma = Relativity.gamma(velMag);
+    
+    velocity.setComponents( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
   }
 
   void setPathColor(color c) {
@@ -196,7 +177,6 @@ class Particle implements Frame {
   }
   
   PVector pos;
-  PVector vel;
 
   float properTime;
   float mass = 1.0;
@@ -209,15 +189,8 @@ class Particle implements Frame {
   float[] posHistX = new float[histCountMax];
   float[] posHistY = new float[histCountMax];
   float[] posHistZ = new float[histCountMax];
-
-  //float[][] velHist = new float[histCountMax][3];
+  
   float[] properTimeHist = new float[histCountMax];
-
-  // Convenience vars
-  float velMag;
-  //float velNormX, velNormY;
-  float[] vel_xy = new float[2];
-  float gamma;
 
   // Predeclare arrays
   float[] xyt = new float[3];

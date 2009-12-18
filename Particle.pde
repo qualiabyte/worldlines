@@ -1,8 +1,30 @@
 // Particle
 // tflorez
 
-class Particle {
+class Particle implements Frame {
+  
+  
+  // FRAME INTERFACE BEGIN
+  float[] getPosition () {
+    return xyt;
+  }
+  
+  float[] getVelocity () {
+    return vel_xy;
+  }
+  
+  float[] getDisplayPosition(){
+    return xyt_prime;
+  }
+  // FRAME INTERFACE END
 
+  Particle () {
+    this.pos = new PVector(0,0,0);
+    this.vel = new PVector(0,0);
+    Velocity v = new Velocity();
+    //this.Frame = new Frame(pos, vel);
+  }
+  
   Particle( PVector pos, PVector vel ){
     this.pos = pos;
     setVel(vel);
@@ -17,39 +39,54 @@ class Particle {
 
     updateImpulse();
 
-    pos.x += vel.x * dt;
-    pos.y += vel.y * dt;
-    pos.z += dt;
+    xyt[0] = pos.x += vel.x * dt;
+    xyt[1] = pos.y += vel.y * dt;
+    xyt[2] = pos.z += dt;
+        
+    Relativity.applyTransforms(xyt, xyt_prime);
 
     properTime += dt / this.gamma;
 
-    if((frameCount & 0xF) == 0) {
+    if((frameCount & 0xF) == 0 && frameCount > frameCountLastHistUpdate) {
+      frameCountLastHistUpdate = frameCount;
       histCount++;
     }
     updateHist();
   }
 
   void updateHist(){
-    posHistX[histCount] = pos.x;
-    posHistY[histCount] = pos.y;
-    posHistZ[histCount] = pos.z;
-
+    xyt_hist[histCount][0] = posHistX[histCount] = pos.x;
+    xyt_hist[histCount][1] = posHistY[histCount] = pos.y;
+    xyt_hist[histCount][2] = posHistZ[histCount] = pos.z;
+    
+    System.arraycopy(xyt_prime, 0, xyt_prime_hist[histCount], 0, 3);
+    
     properTimeHist[histCount] = properTime;
+  }
+  
+  void updateTransformedHist(){
+    
+    for (int i=0; i<histCount; i++){
+      Relativity.applyTransforms(xyt_hist[i], xyt_prime_hist[i]);
+    }
   }
 
   void drawGL(GL gl){
     //drawHead();
     drawPathGL(gl);
   }
-  
+  /*
   void draw() {
     drawHead();
   }
 
   void drawHead(){
-    drawHead(pos.x, pos.y, pos.z);
+    drawHead( 
+      TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : pos.x,
+      TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[1] : pos.y,
+      TOGGLE_TEMPORAL_TRANSFORM ? xyt_prime[2]: pos.z );
   }
-
+  */
   void drawHead(float x, float y, float z) {
     float heading = atan2(vel.y, vel.x)-PI/2;
 
@@ -87,16 +124,17 @@ class Particle {
       g = pathColorG - harmonic;
       b = pathColorB;
       a = alphaFactor * g * i * (1 + sin(TWO_PI * 0.01 * properTimeHist[i]%100));
-
+/*
       xyt[0] = posHistX[i];
       xyt[1] = posHistY[i];
       xyt[2] = posHistZ[i];
 
       Relativity.applyTransforms(xyt, xyt_prime);
-
+*/
       gl.glColor4f(r, g, b, a);
-      gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
+      gl.glVertex3f(xyt_prime_hist[i][0], xyt_prime_hist[i][1], xyt_prime_hist[i][2]);
     }
+    //gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
     gl.glEnd();
   }
 
@@ -137,15 +175,15 @@ class Particle {
   }
 
   void setVel(float x, float y) {
-    vel.x = x;
-    vel.y = y;
+    vel.x = vel_xy[0] = x;
+    vel.y = vel_xy[1] = y;
 
     velMag = sqrt(x*x + y*y);
 
-    velNormX = vel.x / velMag;
-    velNormY = vel.y / velMag;
+    //velNormX = vel.x / velMag;
+    //velNormY = vel.y / velMag;
 
-    gamma = Relativity.gamma(velMag);    
+    gamma = Relativity.gamma(velMag);
   }
 
   void setPathColor(color c) {
@@ -165,7 +203,9 @@ class Particle {
   
   int histCount;
   int histCountMax = 1000;
+  int frameCountLastHistUpdate = 0;
 
+  // Permanent record of particle's path
   float[] posHistX = new float[histCountMax];
   float[] posHistY = new float[histCountMax];
   float[] posHistZ = new float[histCountMax];
@@ -175,12 +215,16 @@ class Particle {
 
   // Convenience vars
   float velMag;
-  float velNormX, velNormY;
+  //float velNormX, velNormY;
+  float[] vel_xy = new float[2];
   float gamma;
 
   // Predeclare arrays
   float[] xyt = new float[3];
   float[] xyt_prime = new float[3];
+  
+  float[][] xyt_hist = new float[histCountMax][3];
+  float[][] xyt_prime_hist = new float[histCountMax][3];
 
   // Accumulated impulse (add to momentum smoothly)
   float impulseX, impulseY;
@@ -243,9 +287,4 @@ class Particle {
  endShape();
  }
  */
-
-
-
-
-
 

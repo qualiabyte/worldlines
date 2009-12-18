@@ -90,5 +90,3 @@ class VTextRenderer
   Font font;
 }
 
-
-

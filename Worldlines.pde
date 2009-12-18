@@ -4,6 +4,8 @@
 import processing.opengl.*;
 import javax.media.opengl.GL;
 import controlP5.*;
+import javax.vecmath.*;
+import org.apache.commons.math.*;
 
 PGraphicsOpenGL pgl;
 GL gl;
@@ -14,15 +16,20 @@ Particle[] particles;
 Particle targetParticle;
 ArrayList targets;
 
+ParticleUpdater particleUpdater;
+
 ParticlesLayer particlesLayer;
 InputDispatch inputDispatch;
+
+Axes targetAxes;
+ParticleGrid particleGrid;
 
 float C = 1.0;
 float timeDelta = 0.2;
 
 // GUI Control Vars
 public int MAX_PARTICLES = 1000;
-public int PARTICLES = MAX_PARTICLES/3;
+public int PARTICLES = MAX_PARTICLES/10; ///3;
 public int TARGETS = 1;
 public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
@@ -64,6 +71,8 @@ public void toggleTemporalTransform () {
   TOGGLE_TEMPORAL_TRANSFORM = Relativity.TOGGLE_TEMPORAL_TRANSFORM ^= true;
 }
 
+public float PARTICLE_SIZE = 1.3;//0.75;
+public float PARTICLE_SIZE_MAX = 10;
 public float LIGHTING_PARTICLES = 0.75;
 public float LIGHTING_WORLDLINES = 0.8;
 public float STROKE_WIDTH = 2.0;
@@ -80,7 +89,7 @@ public boolean INPUT_UP;
 public boolean INPUT_DOWN;
 
 // Data Files
-String PARTICLE_IMAGE = "particle.png";
+String PARTICLE_IMAGE = "particle.png";//_reticle.png";
 String bundledFont = "VeraMono.ttf";
 
 float fpsRecent, prevFrameCount;
@@ -92,7 +101,7 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(1280, 900, OPENGL);
+  size(900, 540, OPENGL);//1280, 900, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -122,6 +131,7 @@ void setup() {
   controlP5.addSlider("HARMONIC_FRINGES", 0, HARMONIC_FRINGES_MAX, HARMONIC_FRINGES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("HARMONIC_CONTRIBUTION", HARMONIC_CONTRIBUTION_MIN, HARMONIC_CONTRIBUTION_MAX, HARMONIC_CONTRIBUTION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("INPUT_RESPONSIVENESS", 0f, MAX_INPUT_RESPONSIVENESS, INPUT_RESPONSIVENESS, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
+  controlP5.addSlider("PARTICLE_SIZE", 0f, PARTICLE_SIZE_MAX, PARTICLE_SIZE, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("LIGHTING_PARTICLES", 0f, 1.0f, LIGHTING_PARTICLES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("LIGHTING_WORLDLINES", 0f, 1.0f, LIGHTING_WORLDLINES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
   controlP5.addSlider("STROKE_WIDTH", 0f, STROKE_WIDTH_MAX, STROKE_WIDTH, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
@@ -178,6 +188,14 @@ void setup() {
 
   particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera);
   inputDispatch = new InputDispatch(targets);
+  
+  particleGrid = new ParticleGrid(3*50, 5*1000);
+  //targetAxes = new Axes(targetParticle.xyt, targetParticle.xyt_prime, targetParticle.vel_xy);
+  targetAxes = new Axes((Frame)targetParticle);
+  
+  // THREADING
+  particleUpdater = new ParticleUpdater(targetParticle, particles);
+  //particleUpdater.start();
 
   frameRate(30);
   //hint(DISABLE_DEPTH_SORT);
@@ -214,33 +232,60 @@ void draw() {
 
   // UPDATE SCENE
   inputDispatch.update();
-
+  
   float dilationFactor = TOGGLE_TIMESTEP_SCALING ? targetParticle.gamma : 1.0;
   float dt = timeDelta * dilationFactor;
   
-  for (int i=0; i<PARTICLES; i++) {
-    particles[i].update(dt);
-  }
+  particleUpdater.dt = dt;
 
-  // CAMERA PREP
+  // UPDATE TARGET  
+  targetParticle.update(dt);
+  targetParticle.updateTransformedHist();
+
+  // UPDATE TRANSFORMS FOR TARGET'S FRAME
   targetParticle.pos.get(xyt);
   Relativity.loadObserver(xyt);
   Relativity.loadVel(targetParticle.vel.x, targetParticle.vel.y);
   Relativity.applyTransforms(xyt, xyt_prime);
   
+  // UPDATE NON-TARGETS
+  for (int i=0; i<PARTICLES; i++) {
+    //particles[i].updateTransformedHist();
+    
+    if ( particles[i] == targetParticle)
+    {
+      //println("Skipping target particle: particles[" + i + "]");
+      continue;
+    } 
+    else if( particles[i].xyt_prime[2] > targetParticle.xyt_prime[2] )
+    {
+      //particles[i].update(dt / 10);
+      particles[i].updateTransformedHist();
+      continue;
+    } else {
+      particles[i].update(dt);
+      particles[i].updateTransformedHist();
+    }
+  }
+  
+  // CAMERA PREP
   kamera.updateTarget(xyt_prime);
   kamera.update(timeDelta);
   
   // RENDER
   particlesLayer.draw();
-
+  //particleGrid.draw(targetParticle.xyt);
+  //targetAxes.drawAxes();
+  //((Frame)targetParticle).drawAxes();
+  
+  
   // UPDATE FPS
   seconds = 0.001 * millis();
   deltaSeconds = seconds - prevSeconds;
   
   if (deltaSeconds > 1) {
     fpsRecent = (frameCount - prevFrameCount) / deltaSeconds;
-    prevSeconds = seconds; 
+    prevSeconds = seconds;
     prevFrameCount = frameCount;
   }
   
@@ -276,12 +321,13 @@ class ParticlesLayer {
   }
   
   void draw() {
-
+    
     // GL SECTION
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
   
     for (int i=0; i<PARTICLES; i++) {
+      particles[i].update(0);
       particles[i].drawGL(gl);
     }
     gl.glBlendFunc(GL.GL_SRC_ALPHA , GL.GL_ALPHA);
@@ -291,6 +337,8 @@ class ParticlesLayer {
     pushMatrix();
     imageMode(CENTER);
     for (int i=0; i<PARTICLES; i++) {
+      
+      targetAxes.drawAxes((Frame)particles[i]);
       
       particles[i].pos.get(xyt);
       Relativity.applyTransforms(xyt, xyt_prime);
@@ -320,7 +368,7 @@ class ParticlesLayer {
 
       float pulseFactor = 1 - 0.5*sin(particles[i].properTime);
       float dim = LIGHTING_PARTICLES * constrain(dxyz * 0.005, 0, 1);
-      scale(0.1*pulseFactor*0.0015*dxyz);
+      scale(PARTICLE_SIZE * 0.1*pulseFactor*0.0015*dxyz);
       
       tint(lerpColor(#FFFFFF, particles[i].fillColor, 0.5*pulseFactor), pulseFactor);
       image(particleImage, 0, 0);

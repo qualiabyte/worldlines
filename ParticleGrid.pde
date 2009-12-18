@@ -1,6 +1,4 @@
 
-//import javax.vecmath.*;
-
 class ParticleGrid {
   float spacing;
   float distance;

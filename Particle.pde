@@ -1,71 +1,112 @@
 // Particle
 // tflorez
 
+import geometry.*;
+
 class Particle implements Frame {
   
   // FRAME INTERFACE BEGIN
-  Velocity velocity;  
+  Velocity velocity = new Velocity();
+  DefaultFrame headFrame = new DefaultFrame();
   
   float[] getPosition(){
-    return xyt;
+    //return xyt;
+    return headFrame.getPosition();
   }
   
   Velocity getVelocity(){
-    return velocity;
+    //return velocity;
+    return headFrame.getVelocity();
   }
   
   float[] getDisplayPosition(){
     //return xyt_prime;
     //return Relativity.displayTransform(targetParticle.velocity, xyt);
-    return Relativity.selectDisplayComponents(xyt, xyt_prime);
-  }
-  // FRAME INTERFACE END
-
-  Particle () {
-    this(
-      new PVector(0,0,0), //pos
-      new PVector(0,0)    //vel
-    );
+    //return Relativity.selectDisplayComponents(xyt, xyt_prime);
+    
+    return headFrame.getDisplayPosition();
   }
   
-  Particle( PVector pos, PVector vel ){
-    this.pos = pos;
-    this.velocity = new Velocity(vel.x, vel.y);
-    
+  Plane getSimultaneityPlane(){
+    return headFrame.getSimultaneityPlane();
+  }
+  // FRAME INTERFACE END
+  
+  {
     colorMode(RGB,1.0);
     setPathColor(color(0,0.8,0.8,LIGHTING_WORLDLINES));
-
-    updateHist();
   }
-
+  
+  Particle( Vector3f pos, Vector3f vel ){
+    
+    setPosition(pos);
+    setVelocity(vel.x, vel.y);
+  }
+  
+  Particle () {
+  }
+  
+  void setPosition(Vector3f v){
+    setPosition(v.x, v.y, v.z);
+  }
+  
+  void setPosition(float x, float y, float z){
+    position.set(x, y, z);
+    updatePosition();
+  }
+  
+  void updatePosition() {
+    xyt[0] = position.x;
+    xyt[1] = position.y;
+    xyt[2] = position.z;
+    
+    xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
+        
+    updateHistory();
+    
+    headFrame.setPosition(position);
+  }
+   
+  void setVelocity(float x, float y){
+    velocity.setComponents(x, y);
+    headFrame.setVelocity(x, y);
+  }
+  
   void update(float dt){
     
     updateImpulse();
     
-    xyt[0] = pos.x += velocity.vx * dt;
-    xyt[1] = pos.y += velocity.vy * dt;
-    xyt[2] = pos.z += dt;
+    position.x += velocity.vx * dt;
+    position.y += velocity.vy * dt;
+    position.z += dt;
     
-    //Relativity.applyTransforms(xyt, xyt_prime);
-    xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
+    setPosition(position);
+    setProperTime(this.properTime + dt / this.velocity.gamma);
+     
+    //updateHist();
+  }
+  
+  void setProperTime(float time){
+    this.properTime = time;
+    properTimeHist[histCount] = properTime;
+  }
+
+  void updateHistory(){
     
-    properTime += dt / this.velocity.gamma;
-    
-    if((frameCount & 0xF) == 0 && frameCount > frameCountLastHistUpdate) {
+    if(((frameCount & 0xF) == 2) && (frameCount > frameCountLastHistUpdate)) {
+      
       frameCountLastHistUpdate = frameCount;
       histCount++;
     }
-    updateHist();
-  }
-
-  void updateHist(){
-    xyt_hist[histCount][0] = posHistX[histCount] = pos.x;
-    xyt_hist[histCount][1] = posHistY[histCount] = pos.y;
-    xyt_hist[histCount][2] = posHistZ[histCount] = pos.z;
+    xyt_hist[histCount][0] = position.x;
+    xyt_hist[histCount][1] = position.y;
+    xyt_hist[histCount][2] = position.z;
     
+    System.arraycopy(xyt, 0, xyt_hist[histCount], 0, 3);
     System.arraycopy(xyt_prime, 0, xyt_prime_hist[histCount], 0, 3);
     
-    properTimeHist[histCount] = properTime;
+    velHistX[histCount] = velocity.vx;
+    velHistY[histCount] = velocity.vy;
   }
   
   void updateTransformedHist(){
@@ -73,26 +114,23 @@ class Particle implements Frame {
     for (int i=0; i<=histCount; i++){
       Relativity.applyTransforms(xyt_hist[i], xyt_prime_hist[i]);
     }
-    Relativity.applyTransforms(xyt, xyt_prime);
+    //Relativity.applyTransforms(xyt, xyt_prime);
   }
 
   void drawGL(GL gl){
+    //drawHeadGL(gl);
     drawPathGL(gl);
   }
   
-  /*
   void drawHead(){
-    drawHead( 
-      TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : pos.x,
-      TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[1] : pos.y,
-      TOGGLE_TEMPORAL_TRANSFORM ? xyt_prime[2]: pos.z );
+    drawHead(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
   }
-  */
+  
   void drawHead(float x, float y, float z) {
     pushMatrix();
 
     translate(x, y, z);
-    rotate(velocity.direction - PI/2);
+    rotate(velocity.direction - HALF_PI);
 
     fill(fillColor);
 
@@ -100,13 +138,25 @@ class Particle implements Frame {
     popMatrix();
   }
   
+  void drawHeadGL(GL gl, float[] pos){
+    drawHeadGL(gl, pos[0], pos[1], pos[2]); 
+  }
+  
   void drawHeadGL(GL gl){
+    drawHeadGL(gl, xyt_prime);
+  }
+  
+  void drawHeadGL(GL gl, Vector3f V){
+    drawHeadGL(gl, V.x, V.y, V.z);
+  }
+  
+  void drawHeadGL(GL gl, float x, float y, float z) {
     gl.glPushMatrix();
     
     //gl.glColor4f(0.941, 0.105, 0.367, 1.0);
     gl.glColor4fv(fillColor4fv, 0);
     
-    gl.glTranslatef(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
+    gl.glTranslatef(x, y, z);
     gl.glRotatef(degrees(velocity.direction-PI/2), 0, 0, 1);
     
     gl.glBegin(GL.GL_TRIANGLES);
@@ -117,41 +167,62 @@ class Particle implements Frame {
     
     gl.glPopMatrix();
   }
-
+  
+  Vector3f getIntersection(Frame f) {
+    
+    Plane plane = f.getSimultaneityPlane();
+    Line line = this.headFrame.getVelocityLine();
+    
+    // Testing with initial state for now:
+    //line.setPoint(xyt_hist[1]);
+    //line.setDirection(velHistX[1], velHistY[1], 1);
+    
+    
+    //Velocity vel = this.headFrame.getVelocity();
+    //line.setPoint(this.headFrame.getPosition());
+    //line.setDirection(vel.vx, vel.vy, 1);
+    
+    
+    Vector3f intersection = new Vector3f();
+    
+    plane.getIntersection(line, intersection);
+    
+    intersection = Relativity.displayTransform(targetParticle.velocity, intersection);
+    
+    return intersection;
+  }
+  
+  void drawIntersectionGL(GL gl, Frame f){
+    
+    drawHeadGL(gl, getIntersection(f));
+  }
+  
   // A variation on drawPath using glBegin() and glVertex()
-
   void drawPathGL(GL gl){
-
+    
     gl.glBegin(GL.GL_LINE_STRIP);
-
+    
     float r, g, b, a;
-
+    
     //float alphaFactor = 0.5 * pathColorA / ((float)histCount);
     float alphaFactor = 0.5 * LIGHTING_WORLDLINES / ((float)histCount);
-
-
-    float wavenumberFactor = TWO_PI * HARMONIC_FRINGES / pos.z;
+    
+    float wavenumberFactor = TWO_PI * HARMONIC_FRINGES / position.z;
     //float redWavenumberFactor = TWO_PI / 800;
     
     for (int i=0; i <= histCount; i++) {
-
+      
       float harmonic = HARMONIC_CONTRIBUTION * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
-
+      
       r = (pathColorR+properTimeHist[i]%400)/400;
       g = pathColorG - harmonic;
       b = pathColorB;
       a = alphaFactor * g * i * (1 + sin(TWO_PI * 0.01 * properTimeHist[i]%100));
-/*
-      xyt[0] = posHistX[i];
-      xyt[1] = posHistY[i];
-      xyt[2] = posHistZ[i];
-
-      Relativity.applyTransforms(xyt, xyt_prime);
-*/
+      
       gl.glColor4f(r, g, b, a);
       gl.glVertex3f(xyt_prime_hist[i][0], xyt_prime_hist[i][1], xyt_prime_hist[i][2]);
     }
-    gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
+    //gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
     gl.glEnd();
   }
 
@@ -183,14 +254,17 @@ class Particle implements Frame {
 
     v_mag_final = constrain(v_mag_final, 0.0, 1 - 1E-7);
     
-    velocity.setComponents( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
+    //velocity.setComponents( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
+    setVelocity( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final );
   }
 
   float[] getColor4fv(color c) {
+    colorMode(RGB, 1.0f);
+    
     return new float[] {
       red(c),
-      blue(c),
       green(c),
+      blue(c),
       alpha(c)
     };
   }
@@ -209,22 +283,20 @@ class Particle implements Frame {
     pathColorA = alpha(c);
   }
   
-  PVector pos;
+  Vector3f position = new Vector3f();
 
   float properTime;
   float mass = 1.0;
   
-  int histCount = 1;
+  int histCount = 0;
   int histCountMax = 1000;
   int frameCountLastHistUpdate = 0;
 
-  // Permanent record of particle's path
-  float[] posHistX = new float[histCountMax];
-  float[] posHistY = new float[histCountMax];
-  float[] posHistZ = new float[histCountMax];
-  
+  float[] velHistX = new float[histCountMax];
+  float[] velHistY = new float[histCountMax];
+    
   float[] properTimeHist = new float[histCountMax];
-
+  
   // Predeclare arrays
   float[] xyt = new float[3];
   float[] xyt_prime = new float[3];

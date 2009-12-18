@@ -5,7 +5,7 @@ import processing.opengl.*;
 import javax.media.opengl.GL;
 import controlP5.*;
 import javax.vecmath.*;
-//import org.apache.commons.math.*;
+import geometry.*;
 
 PGraphicsOpenGL pgl;
 GL gl;
@@ -15,6 +15,8 @@ Kamera kamera;
 Particle[] particles;
 Particle targetParticle;
 ArrayList targets;
+
+DefaultFrame restFrame;
 
 ParticleUpdater particleUpdater;
 
@@ -28,7 +30,7 @@ float C = 1.0;
 float timeDelta = 0.2;
 
 // GUI Control Vars
-public int MAX_PARTICLES = 1000;
+public int MAX_PARTICLES = 500;
 public int PARTICLES = MAX_PARTICLES/10; ///3;
 public int TARGETS = 1;
 public int TARGET_COLOR = #F01B5E;
@@ -152,18 +154,21 @@ void setup() {
   controlP5.addSlider("START_VEL_ECCENTRICITY", 0, MAX_START_VEL_ECCENTRICITY, START_VEL_ECCENTRICITY, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
 
   // SCENE OBJECTS
-  particles = new Particle[MAX_PARTICLES];
-  
-  particles[0] = new Particle(new PVector(0,0,0), new PVector(1E-7,0));
-  targetParticle = particles[0];
+  //targetParticle = new Particle(new Vector3f(0,0,0), new Vector3f(1E-7, 0, 0));
+  targetParticle = new Particle();
+  targetParticle.setVelocity(1E-7, 0);
+  targetParticle.setPosition(0, 0, 0);
   targetParticle.setFillColor(color(#F01B5E));
+  
+  particles = new Particle[MAX_PARTICLES];
+  particles[0] = targetParticle;  
 
   for(int i=1; i<MAX_PARTICLES; i++){
 
     float x = pow(10, START_POS_DISPERSION_X);
     float y = pow(10, START_POS_DISPERSION_Y);
     
-    PVector pos = new PVector(random(-x, +x), random(-y, +y));
+    Vector3f pos = new Vector3f(random(-x, +x), random(-y, +y), 0);
     
     // Exponentially weight distribution of velocities towards lightspeed
     float vel_mag = 1-pow(random(1, 2), -START_VEL_DISPERSION);
@@ -172,13 +177,13 @@ void setup() {
     float vx = vel_mag*cos(heading);
     float vy = vel_mag*sin(heading)*(pow(1.5, -START_VEL_ECCENTRICITY));
     
-    PVector vel = new PVector(vx, vy);
+    Vector3f vel = new Vector3f(vx, vy, 0);
     
     particles[i] = new Particle(pos, vel);
-    particles[i].fillColor = color(#1B83F0);
+    particles[i].setFillColor(color(#1B83F0));
   }
   
-  println("target pos: " + targetParticle.pos.x + ", " + targetParticle.pos.y );
+  println("target pos: " + targetParticle.position.x + ", " + targetParticle.position.y );
   println("target direction: " + targetParticle.velocity.direction);
   println("target magnitude: " + targetParticle.velocity.magnitude);
   println("target gamma:     " + targetParticle.velocity.gamma);
@@ -189,13 +194,17 @@ void setup() {
   }
   
   kamera = new Kamera();
-  kamera.target = targetParticle.pos.get();
   
   particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera);
   inputDispatch = new InputDispatch(targets);
   
   particleGrid = new ParticleGrid(3*50, 5*1000);
   targetAxes = new Axes((Frame)targetParticle);
+  
+  Velocity restFrameVel = new Velocity(0, 0);
+  
+  restFrame = new DefaultFrame();
+  restFrame.setVelocity(0,0);
   
   // THREADING
   particleUpdater = new ParticleUpdater(targetParticle, particles);
@@ -301,7 +310,7 @@ void draw() {
   myInfobox.print(
   + (int) seconds + " seconds\n"
   + (int) fpsRecent +  "fps (" + (int)(frameCount / seconds) + "avg)\n"
-  + "targetParticle.pos.z:      " + nf(targetParticle.pos.z, 3, 2) + " seconds\n"
+  + "targetParticle.pos.z:      " + nf(targetParticle.position.z, 3, 2) + " seconds\n"
   + "kamera.target.pos.x:      " + nf(kamera.target.x, 3, 2) + " seconds\n"
   + "targetParticle.properTime: " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
   + "targetParticle.velMag:     " + nf(targetParticle.velocity.magnitude, 1, 8) + " c\n"
@@ -331,15 +340,40 @@ class ParticlesLayer {
   
   void draw() {
     
+    restFrame.setPosition(targetParticle.getPosition());
+    restFrame.setVelocity(0, 0);
+        
     // GL SECTION
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
     
-    for (int i=0; i<PARTICLES; i++) {
-      //particles[i].update(0);
-      particles[i].drawHeadGL(gl);
-      particles[i].drawGL(gl);
-      targetAxes.drawAxes2((Frame)particles[i]);
+    Frame[] displayFrames = new Frame[] {
+      restFrame,
+      targetParticle
+    };
+    
+    targetParticle.drawHeadGL(gl);
+    Vector3f[] intersections = new Vector3f[MAX_PARTICLES*displayFrames.length];
+    int intersectionCount = 0;
+    
+    Vector3f intersection = new Vector3f();
+    
+    for (int i=0; i < PARTICLES; i++) {
+      
+      particles[i].drawPathGL(gl);
+      targetAxes.drawGL(gl, (Frame)particles[i]);
+      
+      for (int j=0; j < displayFrames.length; j++) {
+        
+        intersection = particles[i].getIntersection(displayFrames[j]);
+        
+        particles[i].drawHeadGL(gl, intersection);
+        intersections[intersectionCount++] = intersection;
+        
+        //particles[i].drawIntersectionGL(gl, displayFrames[j]);
+        //particles[i].drawIntersectionGL(gl, (Frame)targetParticle);
+        //particles[i].drawIntersectionGL(gl, (Frame)restFrame);
+      }
     }
     gl.glBlendFunc(GL.GL_SRC_ALPHA , GL.GL_ALPHA);
     pgl.endGL();
@@ -348,17 +382,19 @@ class ParticlesLayer {
     pushMatrix();
     imageMode(CENTER);
     
-    for (int i=0; i<PARTICLES; i++) {
+    //for (int i=0; i<PARTICLES; i++) {
+    for (int i=0; i<intersectionCount; i++) {
       
-      float[] xyt_prime = particles[i].getDisplayPosition();
-      //float[] xyt_prime = particles[i].xyt_prime;
+      //float[] xyt_prime = new float[3];
+      //intersections[i].get(xyt_prime);
       
-      float x = xyt_prime[0];
-      float y = xyt_prime[1];
-      float z = xyt_prime[2];
+      //float[] xyt_prime = particles[i].getDisplayPosition();
+      
+      float x = intersections[i].x;
+      float y = intersections[i].y;
+      float z = intersections[i].z;
       
       //noStroke();
-      //particles[i].drawHead(x, y, z);
       
       // BILLBOARDING
       pushMatrix();
@@ -371,12 +407,12 @@ class ParticlesLayer {
       
       float theta_ct = atan2(dy, dx);
       float phi_ct = atan2(dz, dxy);
-
+  
       translate(x, y, z);
       rotateZ(theta_ct);
       rotateY(-HALF_PI-phi_ct);
       rotateZ(-HALF_PI);
-
+  
       float pulseFactor = 1 - 0.5*sin(particles[i].properTime);
       float dim = LIGHTING_PARTICLES * constrain(dxyz * 0.005, 0, 1);
       scale(PARTICLE_SIZE * 0.1*pulseFactor*0.0015*dxyz);
@@ -415,7 +451,7 @@ class InputDispatch {
       else if (INPUT_RIGHT){ x += 1.0; }
   
       float direction = atan2(y, x);
-      float offset = kamera.azimuth - PI/2.0;
+      float offset = kamera.azimuth - HALF_PI;
       
       buttonPressure += (1 - buttonPressure) * buttonAccumulateFactor;
       constrain(buttonPressure, 0, 1.0);      
@@ -441,8 +477,8 @@ class InputDispatch {
       
       float p = particle.mass * particle.velocity.gamma * v_mag;
       
-      float vx = targetParticle.velocity.x;
-      float vy = targetParticle.velocity.y;
+      float vx = targetParticle.velocity.vx;
+      float vy = targetParticle.velocity.vy;
       
       float heading_initial = particle.velocity.direction;
       

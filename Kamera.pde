@@ -7,9 +7,9 @@ class Kamera {
     radius = 100;
     azimuth = PI;
     zenith = PI/6.0;
-    target = new PVector(0,0,0);
+    target = new Vector3f(0,0,0);
     
-    pos = new PVector();
+    pos = new Vector3f(0,0,0);
     updatePosition();
     
     float fov = PI/3.0;
@@ -86,7 +86,8 @@ class Kamera {
   
   void updateRight() {
     
-    PVector.cross(look, up, right);
+    right.cross(look, up);
+    //PVector.cross(look, up, right);
   }
   
   void updateUp() {
@@ -129,9 +130,10 @@ class Kamera {
   
   float upX, upY, upZ;
   
-  PVector pos;
-  PVector target;
-  PVector look = new PVector();
-  PVector up = new PVector();
-  PVector right= new PVector();
+  
+  Vector3f pos;
+  Vector3f target;
+  Vector3f look = new Vector3f();
+  Vector3f up = new Vector3f();
+  Vector3f right= new Vector3f();
 }

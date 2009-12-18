@@ -1,8 +1,22 @@
-public class Velocity extends PVector {
+public class Velocity {
   float vx,  vy;
   float direction;
   float magnitude;
   float gamma;
+  
+  Vector3f[] basis = new Vector3f[] {
+    new Vector3f(15, 0, 0),
+    new Vector3f(0, 15, 0),
+    new Vector3f(0, 0, 15)
+  };
+  
+  // Orthonormal basis after lorentz inverse transform; ie, in frame measuring our vel
+  Vector3f[] basis_inverse = new Vector3f[] {
+    new Vector3f(), new Vector3f(), new Vector3f()
+  };
+  
+  // Normal vector to plane of simultaneity in rest frame coords; ie, basis: x cross y
+  Vector3f normal = new Vector3f();
   
   Velocity (float vx, float vy) {
     setComponents(vx, vy);
@@ -19,6 +33,11 @@ public class Velocity extends PVector {
     direction = atan2(vy, vx);
     magnitude = (float)Math.sqrt(vx*vx + vy*vy);
     updateGamma();
+    
+    for (int i=0; i<3; i++) {
+      basis_inverse[i] = new Vector3f();
+    }
+    updateBasis();
   }
   
   void setDirection(float direction) {
@@ -37,9 +56,21 @@ public class Velocity extends PVector {
   void updateComponents() {
     vx = magnitude * cos(direction);
     vy = magnitude * sin(direction);
+    updateBasis();
   }
   
   void updateGamma() {
     gamma = Relativity.gamma(magnitude);
   }
+  
+  void updateBasis() {
+    
+    for (int i=0; i<3; i++) {
+      basis_inverse[i].set(Relativity.inverseTransform(this, basis[i]));
+    }
+    
+    // n = basis_x cross basis_y :
+    normal.cross(basis_inverse[0], basis_inverse[1]);
+  }
 }
+

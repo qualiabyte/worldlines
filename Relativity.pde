@@ -25,7 +25,7 @@ static class Relativity {
       v.magnitude*v.gamma, 0,    v.gamma              // T
     );
   }
-  
+  /*
   public static Matrix3f getLorentzInverseDisplayMatrix(){
     
     Matrix3f M = getLorentzInverseMatrix();
@@ -46,7 +46,7 @@ static class Relativity {
     
     return M;
   }
-  
+  */
   public static Matrix3f getRotationMatrix(float a, float x, float y, float z) {
     
     float c = cos(a);
@@ -60,7 +60,7 @@ static class Relativity {
     
     return M;
   }
-  
+  /*
   public static void applyInverseDisplayTransforms(float[] xyt, float[] xyt_prime) {
     Vector3f xyt_v3f = new Vector3f(xyt);
     Vector3f xyt_prime_v3f = new Vector3f();
@@ -81,12 +81,10 @@ static class Relativity {
     
     xyt_prime_v3f.get(xyt_prime);
   }
-  
-  public static float[] inverseTransform(Velocity vel, float[] xyt) {
-    
+  */
+  public static Vector3f inverseTransform(Velocity vel, Vector3f xyt_v3f) {
+
     loadVelocity(vel);
-    
-    Vector3f xyt_v3f = new Vector3f(xyt);
     Vector3f xyt_prime_v3f = new Vector3f();
     
     Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
@@ -100,18 +98,38 @@ static class Relativity {
     
     M.transform(xyt_v3f, xyt_prime_v3f);
     
+    return xyt_prime_v3f;
+  }
+  
+  public static float[] inverseTransform(Velocity vel, float[] xyt) {
+    
     float[] xyt_prime = new float[3];
-    xyt_prime_v3f.get(xyt_prime);
+    
+    Vector3f xyt_v3f = new Vector3f(xyt);    
+    
+    inverseTransform(vel, xyt_v3f).get(xyt_prime);
     
     return xyt_prime;
   }
   
-  public static float[] transform(Velocity vel, float[] xyt) {
+  public static float[] inverseDisplayTransform(Velocity vel, float[] xyt) {
     
+    return selectInverseDisplayComponents(xyt, inverseTransform(vel, xyt));
+  }
+  /*
     loadVelocity(vel);
     
-    Vector3f xyt_v3f = new Vector3f(xyt);
-    Vector3f xyt_prime_v3f = new Vector3f();
+    float[] xyt_prime = inverseTransform(vel, xyt);
+    selectInverseDisplayComponents(xyt, xyt_prime, xyt_prime);
+    
+    return xyt_prime;
+  }
+  */
+  
+  public static void transform(Velocity vel, Vector3f xyt_v3f, Vector3f target){
+    
+    loadVelocity(vel);
+    //Vector3f xyt_prime_v3f = new Vector3f();
     
     Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
     Matrix3f lorentz = getLorentzMatrix();
@@ -122,20 +140,30 @@ static class Relativity {
     M.mul(lorentz);
     M.mul(rotHeadingInverse);
     
-    M.transform(xyt_v3f, xyt_prime_v3f);
-    
-    float[] xyt_prime = new float[3];
-    xyt_prime_v3f.get(xyt_prime);
-    
-    return xyt_prime;
+    M.transform(xyt_v3f, target);
   }
   
-  public static float[] inverseDisplayTransform(Velocity vel, float[] xyt) {
+  public static Vector3f displayTransform(Velocity vel, Vector3f v) {
+    Vector3f v_prime = new Vector3f();
+    
+    transform(vel, v, v_prime);
+    selectDisplayComponents(v, v_prime, v_prime);
+    
+    return v_prime;
+  }
+  
+  public static float[] transform(Velocity vel, float[] xyt) {
     
     loadVelocity(vel);
     
-    float[] xyt_prime = inverseTransform(vel, xyt);
-    selectInverseDisplayComponents(xyt, xyt_prime, xyt_prime);
+    Vector3f v = new Vector3f(xyt);
+    Vector3f v_prime = new Vector3f();
+    
+    transform(vel, v, v_prime);
+    
+    float[] xyt_prime = new float[3];
+    
+    v_prime.get(xyt_prime);
     
     return xyt_prime;
   }
@@ -150,9 +178,23 @@ static class Relativity {
     return xyt_prime;
   }
   
+  public static void selectDisplayComponents(Vector3f v, Vector3f v_prime, Vector3f v_target){
+    v_target.set(
+      TOGGLE_SPATIAL_TRANSFORM ? v_prime.x : v.x,
+      TOGGLE_SPATIAL_TRANSFORM ? v_prime.y : v.y,
+      TOGGLE_TEMPORAL_TRANSFORM ? v_prime.z : v.z
+    );
+  }
+  
   public static float[] selectDisplayComponents(float[] xyt, float[] xyt_prime){
     float[] xyt_target = new float[3];
     selectDisplayComponents(xyt, xyt_prime, xyt_target);
+    return xyt_target;    
+  }
+  
+  public static float[] selectInverseDisplayComponents(float[] xyt, float[] xyt_prime){
+    float[] xyt_target = new float[3];
+    selectInverseDisplayComponents(xyt, xyt_prime, xyt_target);
     return xyt_target;    
   }
   

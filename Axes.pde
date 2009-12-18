@@ -11,6 +11,7 @@ class Position extends PVector{
   }
 }
 */
+
 static class Basis {
   static float scale = 15;
   static float[] x_hat = new float[] {scale,0,0};
@@ -22,37 +23,56 @@ class Axes {
 
   Frame frame;
   float alpha = 0.4;
-
-  Axes(Frame f) {
-    this.frame = f;
-  }
+  float length = 50;//15;
   
-  void drawAxes() {
-    drawAxes(this.frame);
-  }
+  float[][] basis = {{1,0,0},{0,1,0},{0,0,1}};
+  float[][] basis_prime = new float[3][3];
   
-  float[][] basis = new float[][] {
-    {15, 0,  0},
-    {0,  15, 0},
-    {0,  0,  15}
-  };
-  
-  float[][] basis_prime = new float[3][];
-       
   float[][] axis_colors = new float[][] {
     {1.0, 0.5, 0.5, alpha+0.1},
     {0.5, 0.5, 1.0, alpha+0.1},
     {0.5, 1.0, 0.5, alpha+0.1}
   };
   
-  void drawAxes2(Frame f) { 
+  Axes(Frame f) {
+    this.frame = f;
+    setLength(length);
+  }
+  
+  void setLength(float L) {
+    length = L;
+    
+    basis = new float[][] {
+      {L, 0, 0},
+      {0, L, 0},
+      {0, 0, L}
+    };
+  }
+  
+  /*
+  void drawAxes() {
+    drawAxes(this.frame);
+  }
+  */
+  
+  void drawGL(GL gl, Frame f) {
+    drawAxesGL(gl, f);
+  }
+  
+  // Variation on drawAxes which iterates over basis array
+  void drawAxesGL(GL gl, Frame f) {
     
     float[] pos = f.getDisplayPosition();
     Velocity vel = f.getVelocity();
     
+    //float[][] basis_inverse = new float[3][3];
+    
     for (int i=0; i<3; i++) {
            
-      basis_prime[i] = Relativity.inverseTransform(vel, basis[i]);
+      //basis_inverse[i] = Relativity.inverseTransform(vel, basis[i]);
+      //basis_display[i] = Relativity.displayTransform(targetParticle.velocity, basis_prime[i]);
+      
+      vel.basis_inverse[i].get(basis_prime[i]);      
       basis_prime[i] = Relativity.displayTransform(targetParticle.velocity, basis_prime[i]);
     }
     
@@ -69,7 +89,8 @@ class Axes {
     gl.glEnd();
   }
   
-  void drawAxes(Frame f) {
+  // Old function repeats calls for each named basis vector
+  void drawNamedAxes(Frame f) {
     float[] pos = f.getDisplayPosition();
     Velocity vel = f.getVelocity();
     
@@ -136,16 +157,6 @@ class Axes {
   
   void drawPlane(float[] origin, float[] v1, float[] v2) {
     
-    PVector normVec = new PVector(v1[0], v1[1], v1[2]
-    ).cross(new PVector(v2[0], v2[1], v2[2]));
-    
-    normVec.normalize();
-    
-    float[] norm = new float[3];
-    normVec.get(norm);
-    //gl.glNormal3f(0,0,1);
-    gl.glNormal3fv(norm, 0);
-    
     gl.glBegin(GL.GL_QUADS);
     
     gl.glVertex3fv(origin, 0);
@@ -161,11 +172,25 @@ class Axes {
     
     gl.glEnd();
     
+    /*
+    PVector V1 = new PVector(v1[0], v1[1], v1[2]);
+    PVector V2 = new PVector(v2[0], v2[1], v2[2]);
+    
+    PVector normVec = V1.cross(V2);
+    
+    normVec.normalize();
+    
+    float[] norm = new float[3];
+    normVec.get(norm);
+    //gl.glNormal3f(0,0,1);
+    gl.glNormal3fv(norm, 0);
+    
     gl.glBegin(GL.GL_LINES);
     gl.glColor4f(0.5, 1, 1, alpha);
     gl.glVertex3fv(origin, 0);
     gl.glVertex3fv(sum(origin, norm), 0);
     gl.glEnd();
+    */
   }
   
   void drawGrid(float[] pos, float[] v1, float[] v2) {
@@ -190,10 +215,11 @@ class Axes {
     }
     gl.glEnd();
   }
-  
+  /*
   void lyne (float[] a, float[] b) {
     line(a[0], a[1], a[2], b[0], b[1], b[2]);
   }
+  */
 
   float[] sum(float[] a, float[] b) {
   

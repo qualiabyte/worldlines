@@ -5,7 +5,7 @@ import processing.opengl.*;
 import javax.media.opengl.GL;
 import controlP5.*;
 import javax.vecmath.*;
-import org.apache.commons.math.*;
+//import org.apache.commons.math.*;
 
 PGraphicsOpenGL pgl;
 GL gl;
@@ -101,7 +101,7 @@ ControlP5 controlP5;
 Infobox myInfobox;
 
 void setup() {
-  size(900, 540, OPENGL);//1280, 900, OPENGL);
+  size(900, 540, OPENGL);//900, 540, 1280, 900, OPENGL);
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -156,7 +156,7 @@ void setup() {
   
   particles[0] = new Particle(new PVector(0,0,0), new PVector(1E-7,0));
   targetParticle = particles[0];
-  targetParticle.fillColor = color(#F01B5E);
+  targetParticle.setFillColor(color(#F01B5E));
 
   for(int i=1; i<MAX_PARTICLES; i++){
 
@@ -229,8 +229,8 @@ void draw() {
   
   // SCENE PREP
   background(30);
-  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
-  directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
+  //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
+  //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
   //strokeWeight(STROKE_WIDTH);
   
   // UPDATE SCENE
@@ -243,31 +243,36 @@ void draw() {
   
   Relativity.loadFrame(targetParticle);
   
-  // UPDATE TARGET  
-  targetParticle.update(dt);  
-  targetParticle.updateTransformedHist();
+  boolean SIMPLE_UPDATES = true;
   
-  // UPDATE TRANSFORMS FOR TARGET'S FRAME  
-  //Relativity.loadFrame(targetParticle);
-  //Relativity.applyTransforms(xyt, xyt_prime);
-  
-  // UPDATE NON-TARGETS
-  for (int i=0; i<PARTICLES; i++) {
-    //particles[i].updateTransformedHist();
+  if (SIMPLE_UPDATES){
     
-    if ( particles[i] == targetParticle)
-    {
-      //println("Skipping target particle: particles[" + i + "]");
-      continue;
-    } 
-    else if( particles[i].xyt_prime[2] > targetParticle.xyt_prime[2] )
-    {
-      //particles[i].update(dt / 10);
-      particles[i].updateTransformedHist();
-      continue;
-    } else {
+    for (int i=0; i<PARTICLES; i++) {
       particles[i].update(dt);
       particles[i].updateTransformedHist();
+    }
+  }
+  else {
+    // UPDATE TARGET  
+    targetParticle.update(dt);  
+    targetParticle.updateTransformedHist();
+    
+    // UPDATE NON-TARGETS
+    for (int i=0; i<PARTICLES; i++) {
+      
+      if ( particles[i] == targetParticle)
+      {
+        continue;
+      }
+      else if( particles[i].xyt_prime[2] > targetParticle.xyt_prime[2] )
+      {
+        particles[i].updateTransformedHist();
+        continue;
+      } 
+      else {
+        particles[i].update(dt);
+        particles[i].updateTransformedHist();
+      }
     }
   }
   
@@ -278,7 +283,7 @@ void draw() {
   // RENDER
   particlesLayer.draw();
   //particleGrid.draw(targetParticle.xyt);
-  //targetAxes.drawAxes();  
+  //targetAxes.drawAxes();
   
   // UPDATE FPS
   seconds = 0.001 * millis();
@@ -329,29 +334,31 @@ class ParticlesLayer {
     // GL SECTION
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
-  
+    
     for (int i=0; i<PARTICLES; i++) {
       //particles[i].update(0);
+      particles[i].drawHeadGL(gl);
       particles[i].drawGL(gl);
+      targetAxes.drawAxes2((Frame)particles[i]);
     }
     gl.glBlendFunc(GL.GL_SRC_ALPHA , GL.GL_ALPHA);
     pgl.endGL();
-
+    
     // PROCESSING SECTION
     pushMatrix();
     imageMode(CENTER);
     
     for (int i=0; i<PARTICLES; i++) {
       
-      targetAxes.drawAxes((Frame)particles[i]);
-      
       float[] xyt_prime = particles[i].getDisplayPosition();
+      //float[] xyt_prime = particles[i].xyt_prime;
       
       float x = xyt_prime[0];
       float y = xyt_prime[1];
       float z = xyt_prime[2];
       
-      particles[i].drawHead(x, y, z);
+      //noStroke();
+      //particles[i].drawHead(x, y, z);
       
       // BILLBOARDING
       pushMatrix();
@@ -482,7 +489,7 @@ void keyPressed() {
   if (key == ' ') {
     int i = (int)random(PARTICLES);
     targetParticle = particles[i];
-    targetParticle.fillColor = color(#F01B5E);
+    targetParticle.setFillColor(color(#F01B5E));
     targets.add(particles[i]);
   }
 }

@@ -16,8 +16,8 @@ class Particle implements Frame {
   
   float[] getDisplayPosition(){
     //return xyt_prime;
-    return Relativity.displayTransform(targetParticle.velocity, xyt);
-    //return Relativity.selectDisplayComponents(xyt, xyt_prime);
+    //return Relativity.displayTransform(targetParticle.velocity, xyt);
+    return Relativity.selectDisplayComponents(xyt, xyt_prime);
   }
   // FRAME INTERFACE END
 
@@ -46,8 +46,8 @@ class Particle implements Frame {
     xyt[1] = pos.y += velocity.vy * dt;
     xyt[2] = pos.z += dt;
     
-    Relativity.applyTransforms(xyt, xyt_prime);
-    //xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
+    //Relativity.applyTransforms(xyt, xyt_prime);
+    xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
     
     properTime += dt / this.velocity.gamma;
     
@@ -70,9 +70,10 @@ class Particle implements Frame {
   
   void updateTransformedHist(){
     
-    for (int i=0; i<histCount; i++){
+    for (int i=0; i<=histCount; i++){
       Relativity.applyTransforms(xyt_hist[i], xyt_prime_hist[i]);
     }
+    Relativity.applyTransforms(xyt, xyt_prime);
   }
 
   void drawGL(GL gl){
@@ -97,6 +98,24 @@ class Particle implements Frame {
 
     triangle(0, 1, -.5, -1, .5, -1); // box(5, 5, 1);
     popMatrix();
+  }
+  
+  void drawHeadGL(GL gl){
+    gl.glPushMatrix();
+    
+    //gl.glColor4f(0.941, 0.105, 0.367, 1.0);
+    gl.glColor4fv(fillColor4fv, 0);
+    
+    gl.glTranslatef(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
+    gl.glRotatef(degrees(velocity.direction-PI/2), 0, 0, 1);
+    
+    gl.glBegin(GL.GL_TRIANGLES);
+    gl.glVertex2f(0, 1);
+    gl.glVertex2f(-0.5, -1);
+    gl.glVertex2f(+0.5, -1);
+    gl.glEnd();
+    
+    gl.glPopMatrix();
   }
 
   // A variation on drawPath using glBegin() and glVertex()
@@ -132,7 +151,7 @@ class Particle implements Frame {
       gl.glColor4f(r, g, b, a);
       gl.glVertex3f(xyt_prime_hist[i][0], xyt_prime_hist[i][1], xyt_prime_hist[i][2]);
     }
-    //gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
+    gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
     gl.glEnd();
   }
 
@@ -167,6 +186,20 @@ class Particle implements Frame {
     velocity.setComponents( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
   }
 
+  float[] getColor4fv(color c) {
+    return new float[] {
+      red(c),
+      blue(c),
+      green(c),
+      alpha(c)
+    };
+  }
+  
+  void setFillColor(color c) {
+    this.fillColor = c;
+    fillColor4fv = getColor4fv(c);
+  }
+
   void setPathColor(color c) {
     colorMode(RGB,1.0f);
     pathColor = c;
@@ -181,7 +214,7 @@ class Particle implements Frame {
   float properTime;
   float mass = 1.0;
   
-  int histCount;
+  int histCount = 1;
   int histCountMax = 1000;
   int frameCountLastHistUpdate = 0;
 
@@ -203,6 +236,7 @@ class Particle implements Frame {
   float impulseX, impulseY;
 
   color fillColor;
+  float[] fillColor4fv;
 
   float pathColorR, pathColorG, pathColorB, pathColorA;
   color pathColor;

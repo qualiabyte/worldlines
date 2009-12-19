@@ -163,5 +163,41 @@ class ControlMap extends HashMap {
       return null;
     }
   }
+  
+  void handleControlEvent(controlP5.ControlEvent event) {
+    
+    Controller controller = event.controller();
+    
+    String label = controller.label();
+    float controllerValue = controller.value();
+    
+    Object prefValue = (Object) prefs.get(label);
+    /*
+    if ( (label != lastControlEventLabel) || (controllerValue != lastControlEventValue) ) {
+      Dbg.say("ControlEvent : '" + label + "', '" + controllerValue + "' (" + controller + ")");
+      lastControlEventLabel = label;
+      lastControlEventValue = controllerValue;
+    }
+    */
+    
+    if (prefValue != null) {
+      
+      if (controller instanceof controlP5.Toggle) {
+        
+        boolean newPrefValue = (controllerValue == 0) ? false : true;
+        
+        prefs.getBooleanControl(label).setValue(newPrefValue);
+        
+        Dbg.say("prefs.get('" + label + "') now: " + prefs.get(label));
+      }
+      else if (controller instanceof controlP5.Slider) {
+  
+        prefs.getFloatControl(label).setValue(controllerValue);
+      }
+    }
+    else {
+      Dbg.warn("Controller '" + label + "' failed assignment to null preference '" + label + "'");
+    }
+  }
 }
 

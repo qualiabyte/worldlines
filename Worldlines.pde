@@ -43,9 +43,7 @@ float C = 1.0;
 float timeDelta = 0.2;
 
 // GUI Control Vars
-//public int MAX_PARTICLES = 500;
-public int PARTICLES = 50;//MAX_PARTICLES/10;
-//public int TARGETS = 1;
+public int PARTICLES = 50;
 
 public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
@@ -53,8 +51,10 @@ public int PARTICLE_COLOR = #1B83F0;
 public void randomize() {
   
   String[] floatLabels = new String[] {
-    "START_POS_DISPERSION_X",
-    "START_POS_DISPERSION_Y",
+    "START_POS_RADIUS",
+    "START_POS_XY_RATIO",
+    //"START_POS_DISPERSION_X",
+    //"START_POS_DISPERSION_Y",
     "START_VEL_DISPERSION", 
     "START_VEL_ECCENTRICITY"
   };
@@ -92,51 +92,14 @@ ControlP5 controlP5;
 String lastControlEventLabel = "";
 float lastControlEventValue = 0;
 
-void controlEvent(ControlEvent event) {
-  
-  Controller controller = event.controller();
-  
-  String label = controller.label();
-  float controllerValue = controller.value();
-  
-  Object prefValue = (Object) prefs.get(label);
-  /*
-  if ( (label != lastControlEventLabel) || (controllerValue != lastControlEventValue) ) {
-    Dbg.say("ControlEvent : '" + label + "', '" + controllerValue + "' (" + controller + ")");
-    lastControlEventLabel = label;
-    lastControlEventValue = controllerValue;
-  }
-  */
-  
-  if (prefValue != null) {
-    
-    if (controller instanceof controlP5.Toggle) {
-      
-      boolean newPrefValue = (controllerValue == 0) ? false : true;
-      
-      prefs.getBooleanControl(label).setValue(newPrefValue);
-      
-      Dbg.say("prefs.get('" + label + "') now: " + prefs.get(label));
-    }
-    else if (controller instanceof controlP5.Slider) {
-
-      prefs.getFloatControl(label).setValue(controllerValue);
-    }
-  }
-  else {
-    Dbg.warn("Controller '" + label + "' failed assignment to null preference '" + label + "'");
-  }
-}
-
 void setup() {
-  //size(900, 530, OPENGL);
-  size(900, 540, OPENGL);
-  //size(1280, 900, OPENGL);
+  //size(900, 540, OPENGL);
+  size(1280, 900, OPENGL);
   
   frameRate(45);
   //hint(DISABLE_DEPTH_SORT);
   
-  restart();//  initScene();
+  restart(); //initScene();
 }
 
 VTextRenderer myVTextRenderer;
@@ -146,17 +109,16 @@ Labelor myLabelor;
 ControlPanel[] controlPanels;
 ControlMap prefs;
 
+void controlEvent(controlP5.ControlEvent event) {
+  prefs.handleControlEvent(event);
+}
+
 //void initScene() {
 void restart() {
   
   Control restart = new ButtonControl("restart");
   Control randomize = new ButtonControl("randomize");
-  /*
-  // Global Tab
-  ControlPanel globalPanel = new ControlPanel("global");
-  globalPanel.addControl(restart);
-  globalPanel.addControl(randomize);
-  */
+  
   ControlPanel panel;
   
   // SETUP PANEL
@@ -165,7 +127,10 @@ void restart() {
   panel.addControl(restart);
   panel.addControl(randomize);
   panel.putFloat("PARTICLES", PARTICLES, 0, PARTICLES*5);
-  panel.putFloat("TARGETS", 3f, 0, PARTICLES);
+  panel.putFloat("TARGETS", 3f, 1, PARTICLES);
+  panel.putFloat("START_POS_RADIUS", 2.6, 0, 4);
+  panel.putFloat("START_POS_XY_RATIO", 1, 0.5, 2);
+  panel.putFloat("cauchyGamma", 1, 0, 4);
   panel.putFloat("START_POS_DISPERSION_X", 2.6, 0, 3);
   panel.putFloat("START_POS_DISPERSION_Y", 2.6, 0, 3);
   panel.putFloat("START_VEL_DISPERSION", 5.4, 0, 20);
@@ -209,7 +174,6 @@ void restart() {
   if (controlPanels == null) {
     controlPanels = new ControlPanel[] {
       setupPanel,
-      //globalPanel,
       mainPanel,
       debugPanel,
       graphicsPanel
@@ -218,8 +182,8 @@ void restart() {
   
   // PREFERENCES
   prefs = new ControlMap(controlPanels);
-    
-  prefs.put("particleImagePath", "particle.png");
+  
+  prefs.put("particleImagePath", "particle.png");//"particle.png");
   prefs.put("selectedParticleImagePath", "particle_reticle.png");
   prefs.put("startPosWeight", "cauchy");
   
@@ -246,15 +210,6 @@ void restart() {
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
   controlP5.setColorForeground(#093967);
-  /*
-  // Global Controls (All Tabs)
-  //controlP5.addButton("setup", 0, xOffsetGlobal, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
-  //controlP5.controller("setup").setLabel("RESTART");
-  controlP5.addButton("initScene", 0, xOffsetGlobal, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
-  controlP5.controller("initScene").setLabel("RESTART");
-  controlP5.addButton("randomize", 0, (int)3*bWidth, numGlobalControls*bSpacingY, (int)(2.6*bWidth), bHeight).moveTo("global");
-  controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++numGlobalControls*bSpacingY, sliderWidth, bHeight).moveTo("global");
-  */
   
   // BUILD CONTROLP5
   for (int panelIndex=0; panelIndex<controlPanels.length; panelIndex++) {
@@ -329,12 +284,17 @@ void restart() {
     
     float x, y;
     
+    float rScale = pow(10, prefs.getFloat("START_POS_RADIUS"));
+    float xyRatio = prefs.getFloat("START_POS_XY_RATIO");
+    
     if (prefs.getString("startPosWeight") == "cauchy") {
-      float cauchyGamma = 0.1;
-      float radius = cauchyWeightedRandom(cauchyGamma);
+      float cauchyGamma = prefs.getFloat("cauchyGamma");//0.1;
+      float radius = rScale * cauchyWeightedRandom(cauchyGamma);
       float theta = random(0, TWO_PI);
-      x = radius * cos(theta) * xScale;
-      y = radius * sin(theta) * yScale;
+//      x = radius * cos(theta) * xScale;
+//      y = radius * sin(theta) * yScale;
+        x = radius * cos(theta) * xyRatio; 
+        y = radius * sin(theta);
     }
     else {
       x = random(-xScale, +xScale);
@@ -385,8 +345,8 @@ void restart() {
   restFrame = new DefaultFrame();
   restFrame.setVelocity(0,0);
   
-  particleSelector = new Selector(particles);
-  particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera, particleSelector.selection);
+  particleSelector = new Selector(particles, targets);
+  particlesLayer = new ParticlesLayer(particles, prefs.getString("particleImagePath"), kamera, particleSelector.selection);
   
   inputDispatch = new InputDispatch(targets);
   
@@ -519,7 +479,7 @@ void draw() {
   endBillboardGL();
   
   //myLabelor.drawLabelGL(gl, "mouse", mouse);
-  myLabelor.drawLabelGL(gl, "targetParticle", targetParticle.getDisplayPositionVec(), false);
+  //myLabelor.drawLabelGL(gl, "targetParticle", targetParticle.getDisplayPositionVec(), false);
   
   pgl.endGL();
   
@@ -635,8 +595,6 @@ class ParticlesLayer {
     Texture texture = null;
     
     try {
-      //TextureData td = TextureIO.newTextureData(textureStream, true, TextureIO.PNG);
-      //texture = TextureIO.newTexture(td);
       texture = TextureIO.newTexture(textureStream, true, TextureIO.PNG);
       //texture.setTexParameteri(GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR_MIPMAP_NEAREST);
       //texture.setTexParameteri(GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_NEAREST);
@@ -696,122 +654,100 @@ class ParticlesLayer {
         p.drawHeadGL(gl, intersection);
       }
     }
-    pgl.endGL();
     
-    if (prefs.getBoolean("useGL")) {
-      
-      pgl.beginGL();
-      
-      particleTexture.enable(); //gl.glEnable(GL.GL_TEXTURE_2D); //gl.glEnable(particleTexture.getTarget());
-      particleTexture.bind(); //gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]); //gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-      
-      Vector3f toParticle = new Vector3f();
-      
-      for (int i=0; i<intersectionCount; i++) {
-        Particle p = (Particle)particles.get(i/2);
-        
-        float x = intersections[i].x;
-        float y = intersections[i].y;
-        float z = intersections[i].z;
-        
-        toParticle.set(intersections[i]);
-        toParticle.sub(kamera.pos);
-        
-        float distToParticle = toParticle.length();
-        float pulseFactor = 1.0 - 0.5*sin(p.properTime);
-        
-        float scale = distToParticle * 0.05* PARTICLE_SIZE * pulseFactor;
-        color c = lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor);
-        
-        //beginBillboardGL(kamera, x, y, z);
-        beginCylindricalBillboardGL(x, y, z);
-          
-          gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
-          gl.glScalef(scale, scale, scale);
-          simpleQuadGL(gl);
-          
-        endBillboardGL();
-      }
-      particleTexture.disable(); //particleTexture.dispose(); //gl.glDisable(GL.GL_TEXTURE_2D);
-      
-      // SELECTION DISPLAY
-      selectedParticleTexture.bind();
-      selectedParticleTexture.enable();
-      
-      Vector3f displayPos = new Vector3f(); //Vector3f toParticle = new Vector3f();
-      
-      for (int i=0; i<selection.size(); i++) {
-        Particle p = (Particle) selection.get(i);
-        
-        displayPos = p.getDisplayPositionVec();
-        
-        toParticle.sub(displayPos, kamera.pos);
-        
-        float distToParticle = toParticle.length();
-        float scale = 0.25*distToParticle;
-        
-        gl.glColor4f(1, 1, 1, 0.35);
-        beginCylindricalBillboardGL(displayPos.x, displayPos.y, displayPos.z);
-          gl.glScalef(scale, scale, scale);
-          simpleQuadGL(gl);
-        endBillboardGL();
-                
-        String label = ""; 
-        
-        if (targets.contains(p)) {
-          label += "Target: " + targets.indexOf(p);
-        }
-        else {
-          label += "Particle: " + i;
-        }
-        
-        gl.glColor4f(0.1, 0.1, 0.1, 0.5);
-        simpleQuadGL(gl);
-        boolean fullScale = particleSelector.hover.contains(p);
-        myLabelor.drawLabelGL(gl, label, displayPos, fullScale);
-      }
-      selectedParticleTexture.disable();
-      
-      pgl.endGL();
-    }
-    else {
+    // PARTICLES (TEXTURE BILLBOARDS)
+    particleTexture.enable(); //gl.glEnable(GL.GL_TEXTURE_2D); //gl.glEnable(particleTexture.getTarget());
+    particleTexture.bind(); //gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]); //gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
     
-      // PROCESSING SECTION
-      imageMode(CENTER);
-      
-      Vector3f toParticle = new Vector3f();
-      float distToParticle;
-      
-      for (int i=0; i<intersectionCount; i++) {
-        Particle p = (Particle)particles.get(i/2);
-        
-        float[] pos = new float[3];
-        intersections[i].get(pos);
-        
-        toParticle.set(intersections[i]);
-        toParticle.sub(kamera.pos);
-        
-        distToParticle = toParticle.length();
-        
-        float pulseFactor = 1 - 0.5*sin(p.properTime);
-        //float dim = LIGHTING_PARTICLES * constrain(distToParticle * 0.005, 0, 1);
-        
-        //scale *= PARTICLE_SIZE * 0.1 * pulseFactor*0.0015*log(distToParticle);
-        float scale = PARTICLE_SIZE * 0.1 * pulseFactor*0.0015*distToParticle;
-        
-        tint(lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor), pulseFactor);
-        
-        p.drawHead(pos[0], pos[1], pos[2]);
-        drawBillboard(particleImage, scale, kamera, pos[0], pos[1], pos[2]);
-        
-        noTint();
-      }
-    }
-    /*
+    Vector3f toParticle = new Vector3f();
+    
     for (int i=0; i<intersectionCount; i++) {
-      myLabelor.drawLabelGL(gl, )
+      Particle p = (Particle)particles.get(i/2);
+      
+      float x = intersections[i].x;
+      float y = intersections[i].y;
+      float z = intersections[i].z;
+      
+      toParticle.set(intersections[i]);
+      toParticle.sub(kamera.pos);
+      
+      float distToParticle = toParticle.length();
+      float pulseFactor = 1.0 - 0.5*sin(p.properTime);
+      
+      float scale = distToParticle * 0.05* PARTICLE_SIZE * pulseFactor;
+      
+      // SCALEBOUNDS BEGIN
+      //float s = min(distToParticle*0.1, 0.3);
+      //s = max(s, distToParticle * 0.005);
+      //float scale = s*10 *PARTICLE_SIZE * pulseFactor;
+      
+      color c = lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor);
+      
+      //beginBillboardGL(kamera, x, y, z);
+      beginCylindricalBillboardGL(x, y, z);
+        
+        gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
+        gl.glScalef(scale, scale, scale);
+        simpleQuadGL(gl);
+        
+      endBillboardGL();
     }
-    */
+    particleTexture.disable(); //particleTexture.dispose(); //gl.glDisable(GL.GL_TEXTURE_2D);
+    
+    // SELECTION (TEXTURE BILLBOARDS)
+    selectedParticleTexture.bind();
+    selectedParticleTexture.enable();
+    
+    for (int i=0; i<selection.size(); i++) {
+      Particle p = (Particle) selection.get(i);
+      Vector3f displayPos = p.getDisplayPositionVec();
+      
+      toParticle.sub(displayPos, kamera.pos);
+      
+      float distToParticle = toParticle.length();
+      float scale = 0.25*distToParticle;
+      
+      gl.glColor4f(1, 1, 1, 0.35);
+      beginCylindricalBillboardGL(displayPos.x, displayPos.y, displayPos.z);
+        gl.glScalef(scale, scale, scale);
+        simpleQuadGL(gl);
+      endBillboardGL();
+    }
+    selectedParticleTexture.disable();
+    
+    // SELECTION LABELS
+    for (int i=0; i<selection.size(); i++) {
+      Particle p = (Particle) selection.get(i);
+      Vector3f displayPos = p.getDisplayPositionVec();
+      
+      String label; 
+      
+      if (targets.contains(p)) {
+        label = "Target: " + targets.indexOf(p);
+      }
+      else if (emissions.contains(p)) {
+        label = "Emission: " + emissions.indexOf(p);
+      }
+      else {
+        label = "Particle: " + i;
+      }
+      
+      gl.glColor4f(0.1, 0.1, 0.1, 0.5);
+      boolean fullScale = particleSelector.hover.contains(p);
+      myLabelor.drawLabelGL(gl, label, displayPos, fullScale);
+    }
+    
+    // TARGETS (LINK INTERSECTIONS WITH HORIZONTAL PLANE)
+    gl.glBegin(GL.GL_LINE_LOOP);
+    for (int i=0; i < targets.size(); i++) {
+      Particle p = (Particle) targets.get(i);
+      Vector3f linkPos = p.getDisplayPositionVec();
+      
+      gl.glVertex3f(linkPos.x, linkPos.y, linkPos.z);
+    }
+    gl.glEnd();
+    
+    pgl.endGL();
   }
 }
 
@@ -1151,11 +1087,11 @@ class Selector extends ArrayList {
   void update(Kamera theKamera) {
     
     if (millis() - millisLastUpdateHover > 100) {
-      updateHoverAndPick(theKamera.pos, getPickDirection(theKamera, mouseX, mouseY));
+      updateHoverAndPick((java.util.List)this.selection, theKamera.pos, getPickDirection(theKamera, mouseX, mouseY));
     }
   }
   
-  void updateHoverAndPick (Vector3f cameraPos, Vector3f pickingRayDirection) {
+  void updateHoverAndPick (java.util.List theSelectables, Vector3f cameraPos, Vector3f pickingRayDirection) {
     
     millisLastUpdateHover = millis();
     hover.clear();
@@ -1167,9 +1103,9 @@ class Selector extends ArrayList {
         
     Vector3f cameraToParticle = new Vector3f();
     
-    for (int i=0; i<selectables.size(); i++) {
+    for (int i=0; i<theSelectables.size(); i++) {
       
-      Particle p = (Particle) selectables.get(i);
+      Particle p = (Particle) theSelectables.get(i);
       
       cameraToParticle.sub(p.getDisplayPositionVec(), cameraPos);
       
@@ -1195,7 +1131,7 @@ class Selector extends ArrayList {
   //Particle pickPoint(Vector3f cameraPos, Vector3f pickingRayDirection) {
   Particle pickPoint(Kamera theKamera, int theMouseX, int theMouseY) {
     
-    updateHoverAndPick(theKamera.pos, getPickDirection(theKamera, theMouseX, theMouseY));
+    updateHoverAndPick((java.util.List)this.selectables, theKamera.pos, getPickDirection(theKamera, theMouseX, theMouseY));
     
     if (angleToBestPick < minSelectionAngle) {
       return (Particle) bestPick;
@@ -1246,16 +1182,16 @@ class Labelor {
       
       gl.glScalef(s, s, s);
       gl.glTranslatef(-lx, 0, 0);
-      
+      /*
       // LABEL BACKGROUND
       gl.glPushMatrix();
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
         gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
         gl.glTranslatef(lx, ly, 0);
-        simpleQuadGL(gl);
-        //simpleQuadGL(gl, (0.5*1.2)*lw, lh);
+        //simpleQuadGL(gl);
+        simpleQuadGL(gl, (0.5*1.2)*lw, lh);
       gl.glPopMatrix();
-  
+      */
       // LABEL TEXT
       myVTextRenderer.print(msg, 0, yOffset, 0);
       gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);

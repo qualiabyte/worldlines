@@ -88,6 +88,8 @@ class Kamera {
   void mouseWheel(int delta) {
     mouseWheel -= delta;
     radiusVel += mouseWheel;
+    
+    println("mouseWheel: " + mouseWheel);
   }
   
   void update(float dt) {

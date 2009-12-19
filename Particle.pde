@@ -39,6 +39,14 @@ class Particle implements Frame, Selectable {
     return headFrame.getSimultaneityPlane();
   }
   
+  float getAge() {
+    return headFrame.getAge();
+  }
+  
+  float getAncestorsAge() {
+    return headFrame.getAncestorsAge();
+  }
+  
   AxesSettings getAxesSettings() {
     return this.headFrame.axesSettings;
   }
@@ -108,12 +116,14 @@ class Particle implements Frame, Selectable {
     //updateHist();
   }
   
-  void setProperTime(float time){
+  void setProperTime(float time) {
     this.properTime = time;
     properTimeHist[histCount] = properTime;
-  }
     
-  void updateHistory(){
+    headFrame.setAge(this.properTime - frameHist[histCount].getAncestorsAge());
+  }
+  
+  void updateHistory() {
     
     Velocity velLast = frameHist[histCount-1].getVelocity();
     
@@ -130,9 +140,13 @@ class Particle implements Frame, Selectable {
   
   void recordStateToPathHistory() {
     
-    frameHist[histCount] = new DefaultFrame(headFrame.position, headFrame.velocity);
+//    frameHist[histCount] = new DefaultFrame(headFrame.position, headFrame.velocity);
+//    frameHist[histCount].setAncestorsAge(properTimeHist[histCount]);
+    frameHist[histCount] = headFrame.clone();
+    
     histCount++;
     frameHist[histCount] = headFrame;
+    headFrame.setAncestorsAge(this.properTime);
     
     frameCountLastHistUpdate = frameCount;
   }
@@ -322,7 +336,7 @@ class Particle implements Frame, Selectable {
       
       //emission.setPosition(this.position);
       emission.mass = 0.001 * this.mass;
-      //emission.mass = this.emissionMomentumTotal * C;
+      //emission.mass = this.emissionMomentumTotal * C;ddddddddd
       
       emission.addImpulse(-emissionMomentumX / emission.mass, -emissionMomentumY / emission.mass);
       //println("emission.velocity.magnitude: " + emission.velocity.magnitude);

@@ -125,6 +125,7 @@ class ParticlesLayer {
       }
     }
     
+    // INTERSECTION CALCULATION
     HashMap frameIntersections = new HashMap();
     for (int i=0; i<displayFrames.length; i++) {
       frameIntersections.put(displayFrames[i], new Vector3f[particles.size()]);
@@ -152,6 +153,66 @@ class ParticlesLayer {
       }
     }
     
+    // PARTICLE CLOCK PULSES
+    particleTexture.enable();
+    particleTexture.bind();
+    
+    for (int i=0; i < particles.size(); i++) {      
+      Particle p = (Particle)particles.get(i);
+      Vector3f tickPos = new Vector3f();
+      Vector3f tickDisplayPos = new Vector3f();
+      
+//      if (emissions.indexOf(p) == 0) {
+//        intervalSay(45, "Emission0, p.histCount: " + p.histCount);
+//      }
+      
+      float tickSpacing = 10;
+      
+      float tickSpacingExponent = (int) ( log(p.getAge() + p.getAncestorsAge()) / log(10) );
+      tickSpacing = pow(10, tickSpacingExponent);
+      
+      if (p == targetParticle) {
+        intervalSay(45, "p.getAge(): " + p.getAge() + ", p.getAncestorsAge(): " + p.getAncestorsAge());
+        intervalSay(45, "tickSpacingExponent: " + tickSpacingExponent + ", tickSpacing: " + tickSpacing);
+        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length); 
+        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length);
+        intervalSay(45, "p.frameHist[" + p.histCount + "]:" +  p.frameHist[p.histCount]);
+        intervalSay(45, "p.frameHist[" + (p.histCount + 1) + "]: " + p.frameHist[(p.histCount + 1)]);
+        
+      }
+      
+      for (int j=0; j<p.histCount; j++) {
+        Frame f = p.frameHist[j];
+        Frame fNext = p.frameHist[j+1];
+        
+//        if (p == targetParticle) {
+//          intervalSay(45, "p.frameHist[" + i + "]: " + p.frameHist[i]);
+//          intervalSay(45, "p.frameHist[" + (i+1) + "]: " + p.frameHist[i+1]);
+//        }
+        
+        Vector3f threeVelocity = fNext.getVelocity().getThreeVelocity();
+        
+        tickPos.scaleAdd(tickSpacing - f.getAncestorsAge() % tickSpacing, threeVelocity, f.getPositionVec());
+        Plane nextSimultPlane = fNext.getSimultaneityPlane();
+        
+        //while ( ! nextSimultPlane.liesBelow(tickPos) ) {
+        while ( tickPos.z < fNext.getPositionVec().z ) {
+          Relativity.displayTransform(lorentzMatrix, tickPos, tickDisplayPos);
+          
+          beginCylindricalBillboardGL(tickDisplayPos.x, tickDisplayPos.y, tickDisplayPos.z);
+          beginDistanceScaleGL(tickDisplayPos, kamera.pos, 1, 1, 0.01);
+            
+            simpleQuadGL(gl);
+            
+          endDistanceScaleGL();
+          endBillboardGL();
+          
+          tickPos.scaleAdd(tickSpacing, threeVelocity, tickPos);
+        }
+      }
+    }
+    particleTexture.disable();
+    
     float PARTICLE_SIZE = prefs.getFloat("PARTICLE_SIZE");
     
     // PARTICLES (TEXTURED BILLBOARDS)
@@ -165,7 +226,7 @@ class ParticlesLayer {
       Vector3f[] intersections = (Vector3f[]) frameIntersections.get(theFrame);
       
       for (int i=0; i<intersections.length; i++) {
-        Particle p = (Particle)particles.get(i);
+        Particle p = (Particle) particles.get(i);
         
         if (intersections[i] == null) {
           continue;
@@ -182,11 +243,6 @@ class ParticlesLayer {
         float pulseFactor = 1.0 - 0.5*sin(p.properTime);
         
         float scale = distToParticle * 0.05* PARTICLE_SIZE * pulseFactor;
-        
-        // SCALEBOUNDS BEGIN
-        //float s = min(distToParticle*0.1, 0.3);
-        //s = max(s, distToParticle * 0.005);
-        //float scale = s*10 *PARTICLE_SIZE * pulseFactor;
         
         color c = lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor);
         
@@ -225,44 +281,17 @@ class ParticlesLayer {
     selectedParticleTexture.disable();
     
     // SELECTION LABELS
-    Vector3f targetToParticle = new Vector3f();
-    Vector3f targetToParticlePrime = new Vector3f();
-    
     for (Iterator iter = selection.iterator(); iter.hasNext(); ) {
       Particle p = (Particle) iter.next();
+      
       Vector3f displayPos = p.getDisplayPositionVec();
-      
-      String label = "";
-      
-      if (targets.contains(p)) {
-        label += "ControlParticle(" + targets.indexOf(p) + ")\n";
-      }
-      else if (emissions.contains(p)) {
-        label +=
-          "Emission(" + emissions.indexOf(p) + ")\n";
-      }
-      else if (particles.contains(p)) { 
-        label += "Particles(" + particles.indexOf(p) + ")\n";
-      }
-      
-      targetToParticle.sub(p.getPositionVec(), targetParticle.getPositionVec());
-      //Relativity.displayTransform(lorentzMatrix, targetToParticle, targetToParticlePrime);
-      lorentzMatrix.transform(targetToParticle, targetToParticlePrime);
-      
-      label += (
-        "p : " + nfVec(p.getPositionVec(), 3) + "\n" +
-        "p': " + nfVec(displayPos, 3) + "\n" +
-        "fromTarget : " + nfVec(targetToParticle, 3) + "\n" +
-        "fromTarget': " + nfVec(targetToParticlePrime, 3) + "\n" +
-        "velocity: (" + nf(p.velocity.magnitude, 0, 4) + ")\n" +
-        "mass: ("  + nf(p.mass, 0, 4) + ")\n" +
-        "age: (" + nf(p.properTime, 0, 1) + ")\n"
-        );
       
       gl.glColor4f(1, 1, 1, 0.5);
       
+      String label = buildParticleLabel(p);
       float labelScale = particleSelector.getHoverScale(p);
-      myLabelor.drawLabelGL(gl, label, displayPos, labelScale); //fullScale);
+      
+      myLabelor.drawLabelGL(gl, label, displayPos, labelScale);
     }
     
     // FAN SELECTION (MENU FROM RIGHT CLICK ON SELECTABLE)
@@ -289,7 +318,7 @@ class ParticlesLayer {
     //Vector3f[] restIntersections = (Vector3f[])frameIntersections.get(restFrame);
     // RIGID BODIES
     if (prefs.getBoolean("show_Rigid_Bodies") == true) {
-        
+      
       for (Iterator iter=rigidBodies.iterator(); iter.hasNext(); ) {
         RigidBody rb = (RigidBody) iter.next();
         rb.drawGL(gl);
@@ -300,6 +329,45 @@ class ParticlesLayer {
     }
     
     pgl.endGL();
+  }
+  
+  String buildParticleLabel(Particle p) {
+    
+    Vector3f targetToParticle = new Vector3f();
+    Vector3f targetToParticlePrime = new Vector3f(); 
+    
+    String label = "";
+    
+    if (targets.contains(p)) {
+      label += "ControlParticle(" + targets.indexOf(p) + ")\n";
+    }
+    else if (emissions.contains(p)) {
+      label +=
+        "Emission(" + emissions.indexOf(p) + ")\n";
+    }
+    else if (particles.contains(p)) {
+      label += "Particles(" + particles.indexOf(p) + ")\n";
+    }
+    
+    targetToParticle.sub(p.getPositionVec(), targetParticle.getPositionVec());
+    //Relativity.displayTransform(lorentzMatrix, targetToParticle, targetToParticlePrime);
+    lorentzMatrix.transform(targetToParticle, targetToParticlePrime);
+    
+    Vector3f displayPos = p.getDisplayPositionVec();
+    
+    label += (
+      "p : " + nfVec(p.getPositionVec(), 3) + "\n" +
+      "p': " + nfVec(displayPos, 3) + "\n" +
+      "fromTarget : " + nfVec(targetToParticle, 3) + "\n" +
+      "fromTarget': " + nfVec(targetToParticlePrime, 3) + "\n" +
+      "velocity: (" + nf(p.velocity.magnitude, 0, 4) + ")\n" +
+      "mass: ("  + nf(p.mass, 0, 4) + ")\n" +
+      "age: (" + nf(p.properTime, 0, 1) + ")\n" +
+      
+      "headFrame.getAncestorsAge(): " + nf(p.headFrame.getAncestorsAge(), 0, 2) + "\n" +
+      "headFrame.getAge(): " + nf(p.headFrame.getAge(), 0, 2)  + "\n"
+      );
+    return label;
   }
 }
 

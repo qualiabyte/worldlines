@@ -13,6 +13,10 @@ interface Frame extends Selectable {
   Plane getSimultaneityPlane();
   
   AxesSettings getAxesSettings();
+  
+  float getAge();
+  float getAncestorsAge();
+  //void setAge(float age);
 }
 
 class DefaultFrame implements Frame {
@@ -23,6 +27,9 @@ class DefaultFrame implements Frame {
   Velocity velocity = new Velocity();
   Plane simultaneityPlane = new Plane();
   Line velocityLine = new Line();
+  
+  float age;
+  float ancestorsAge;
 
   AxesSettings axesSettings = new AxesSettings();
 //  boolean axesVisible = true;
@@ -42,6 +49,13 @@ class DefaultFrame implements Frame {
   
   DefaultFrame() {
     this(new Vector3f(), new Vector3f());
+  }
+  
+  DefaultFrame clone() {
+    DefaultFrame clone = new DefaultFrame(this.position, this.velocity);
+    clone.setAge(this.getAge());
+    clone.setAncestorsAge(this.getAncestorsAge());
+    return clone;  
   }
   
   void setPosition(float x, float y, float z) {
@@ -116,6 +130,22 @@ class DefaultFrame implements Frame {
   
   Line getVelocityLine() {
     return velocityLine;
+  }
+  
+  void setAge(float age) {
+    this.age = age;
+  }
+  
+  float getAge() {
+    return age;
+  }
+  
+  void setAncestorsAge(float ancestorsAge) {
+    this.ancestorsAge = ancestorsAge;
+  }
+  
+  float getAncestorsAge() {
+    return ancestorsAge;
   }
   
   AxesSettings getAxesSettings() {

@@ -23,6 +23,8 @@ public class Velocity {
     new Vector3f(), new Vector3f(), new Vector3f()
   };
   
+  Vector3f threeVelocity = new Vector3f();
+  
   // Normal vector to plane of simultaneity in rest frame coords; ie, basis: x cross y
   Vector3f normal = new Vector3f();
   
@@ -73,10 +75,22 @@ public class Velocity {
   
   void updateBasis() {
     
+    //threeVelocity.set(0,0,0);
+    
     for (int i=0; i<3; i++) {
       basisInverse[i].set(Relativity.inverseTransform(this, basis[i]));
     }
+
+    threeVelocity.set(basisInverse[2]);
     normal.cross(basisInverse[0], basisInverse[1]);
+  }
+  /*
+  Vector3f[] getBasisInverse() {
+    return basisInverse;
+  }
+  */
+  Vector3f getThreeVelocity() {
+    return threeVelocity;
   }
   /*
   Vector3f[] getInverseDisplayBasis() {

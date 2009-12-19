@@ -277,6 +277,14 @@ class Labelor {
     beginCylindricalBillboardGL(position.x, position.y, position.z);
       
       //SCALE
+      float unclampedScale = 0.1;
+      float nearClampRatio = 0.001;
+      float farClampRatio = 0.00085*scale * 1280f / width;
+      
+      //float nearClampRatio = 0.001;
+      
+      beginDistanceScaleGL(position, kamera.pos, unclampedScale, nearClampRatio, farClampRatio);
+      /*
       Vector3f toKamera = new Vector3f(kamera.pos);
       toKamera.sub(position);
       float distToKamera = toKamera.length();
@@ -286,7 +294,7 @@ class Labelor {
       //s = max(s, distToKamera * 0.0008 * scale);
       
       gl.glScalef(s, s, s);
-      
+      */
       // LABEL TEXT
       String[] msgLines = msg.split("\n");
       
@@ -303,9 +311,6 @@ class Labelor {
         float lx = (float)labelRect.getCenterX();
         float ly = -(float)labelRect.getCenterY() + yOffset;
         
-//        if(msgLines.length > 3) {
-//          intervalSay(45, "yOffset: " + nf(yOffset, 3, 0) + ", lh: " + nf(lh, 3, 0) + ", msgLines[i]: " + msgLines[i]);
-//        }
         /*
         // LABEL BACKGROUND
         gl.glPushMatrix();
@@ -322,14 +327,46 @@ class Labelor {
         myVTextRenderer.print(msgLines[i], -lx, yOffset, 0);
       }
       
-//      myVTextRenderer.print(msg, 0, yOffset, 0);
-//      myInfobox.print(msg);
       gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+      
+      endDistanceScaleGL();
     endBillboardGL();
   }
 }
 
+void beginDistanceScaleGL(Vector3f objectPos, Vector3f kameraPos, float scale) {
+
+  float s = scale * getDistance(objectPos, kameraPos);
+  gl.glPushMatrix();
+  gl.glScalef(s, s, s);
+}
+
+void beginDistanceScaleGL(Vector3f objectPos, Vector3f kameraPos, float scale, float nearClampRatio, float farClampRatio) {
+  
+//  Vector3f toKamera = new Vector3f(kamera.pos);
+//  toKamera.sub(objectPos);
+//  float distToKamera = toKamera.length();
+
+  float distToKamera = getDistance(objectPos, kameraPos);
+  float s = min(distToKamera * nearClampRatio, scale);
+  s = max(s, distToKamera * farClampRatio);
+  
+  gl.glPushMatrix();
+  gl.glScalef(s, s, s);
+}
+
+void endDistanceScaleGL() {
+  gl.glPopMatrix();
+}
+
 //Vector3f Utils
+float getDistance(Vector3f va, Vector3f vb) {
+  float x = va.x - vb.x;
+  float y = va.y - vb.y;
+  float z = va.z - vb.z;
+  return sqrt(x*x + y*y + z*z);
+}
+
 void scaleVectors(Vector3f[] v, float scale) {
   for (int i=0; i<v.length; i++) {
     v[i].scale(scale);

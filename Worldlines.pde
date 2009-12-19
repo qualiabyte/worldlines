@@ -102,11 +102,10 @@ float fpsMovingAvg;
 
 ControlP5 controlP5;
 
-
 void setup() {
   //size(900, 540, OPENGL);
-  //size(1280, 900, OPENGL);
-  size(1100, 700, OPENGL);
+  size(1280, 900, OPENGL);
+  //size(1100, 700, OPENGL);
   
   frameRate(45);
   //hint(DISABLE_DEPTH_SORT);
@@ -374,7 +373,7 @@ float cauchyWeightedRandom(float gamma) {
     }
   }
 }
- 
+
 float cauchyPDF(float x, float gamma) {
   return 1.0f / (PI*(1 + pow(x / gamma, 2.0)));
 }

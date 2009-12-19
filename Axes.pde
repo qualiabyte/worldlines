@@ -63,7 +63,9 @@ class Axes {
     }
     
     drawPlane(pos, basis_prime[0], basis_prime[1]);
-    //drawGrid(pos, basis_prime[0], basis_prime[1]);
+    if ( prefs.getBoolean("showAxesGrid") ) {
+      drawGrid(pos, basis_prime[0], basis_prime[1]);
+    }
     
     gl.glLineWidth(2);
     gl.glBegin(GL.GL_LINES);

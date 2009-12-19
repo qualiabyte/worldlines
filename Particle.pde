@@ -19,6 +19,10 @@ class Particle implements Frame {
     return headFrame.getVelocity();
   }
   
+  Vector3f getDisplayPositionVec() {
+    return headFrame.displayPosition;
+  }
+  
   float[] getDisplayPosition(){
     //return xyt_prime;
     //return Relativity.displayTransform(targetParticle.velocity, xyt);
@@ -38,12 +42,19 @@ class Particle implements Frame {
   }
   
   Particle( Vector3f pos, Vector3f vel ){
+    headFrame = new DefaultFrame(pos, vel);
+    recordStateToPathHistory();
     
-    setPosition(pos);
     setVelocity(vel.x, vel.y);
+    setPosition(pos);
+  }
+  
+  Particle( Vector3f pos, Velocity vel) {
+    this( pos, new Vector3f(vel.vx, vel.vy, 0) );
   }
   
   Particle () {
+    this(new Vector3f(1E-7,0,0), new Vector3f(0,0,0));
   }
   
   void setPosition(Vector3f v){
@@ -56,17 +67,20 @@ class Particle implements Frame {
   }
   
   void updatePosition() {
-    xyt[0] = position.x;
-    xyt[1] = position.y;
-    xyt[2] = position.z;
+//    xyt[0] = position.x;
+//    xyt[1] = position.y;
+//    xyt[2] = position.z;
     
-    xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
-        
-    updateHistory();
+    //xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
+//    Vector3f target = new Vector3f();
+//    Relativity.displayTransform(lorentzMatrix, position, target);
+//    target.get(xyt_prime);
     
     headFrame.setPosition(position);
+    
+    updateHistory();
   }
-   
+  
   void setVelocity(float x, float y){
     velocity.setComponents(x, y);
     headFrame.setVelocity(x, y);
@@ -82,7 +96,7 @@ class Particle implements Frame {
     
     setPosition(position);
     setProperTime(this.properTime + dt / this.velocity.gamma);
-     
+    
     //updateHist();
   }
   
@@ -90,40 +104,65 @@ class Particle implements Frame {
     this.properTime = time;
     properTimeHist[histCount] = properTime;
   }
-
+    
   void updateHistory(){
     
-    if(((frameCount & 0xF) == 2) && (frameCount > frameCountLastHistUpdate)) {
+    Velocity velLast = frameHist[histCount-1].getVelocity();
+    
+    int elapsedFrames = frameCount - frameCountLastHistUpdate;
+    float directionChange = abs((velLast.direction - headFrame.getVelocity().direction) % PI);
+    float velocityChange = abs(velLast.magnitude - headFrame.getVelocity().magnitude);
+    
+    if ( (elapsedFrames > 12) && 
+         ( (directionChange > TWO_PI * 0.01) || (velocityChange > velocity.magnitude * 0.01) ) ) {
       
-      frameCountLastHistUpdate = frameCount;
-      histCount++;
+      recordStateToPathHistory();
+      
+//      if (this == targetParticle && frameCount % 30 == 0) {
+//        Dbg.say("targetParticle: velocityChange: " + velocityChange + "\tdirectionChange:" + directionChange);
+//        Dbg.say("                frameHist[histCount]: " + frameHist[histCount] + "\theadFrame: " + headFrame);
+//        Dbg.say("velLast.magnitude: " + velLast.magnitude + "headFrame.getVelocity().magnitude" + headFrame.getVelocity().magnitude);
+//      }
     }
-    xyt_hist[histCount][0] = position.x;
-    xyt_hist[histCount][1] = position.y;
-    xyt_hist[histCount][2] = position.z;
-    
-    System.arraycopy(xyt, 0, xyt_hist[histCount], 0, 3);
-    System.arraycopy(xyt_prime, 0, xyt_prime_hist[histCount], 0, 3);
-    
-    velHistX[histCount] = velocity.vx;
-    velHistY[histCount] = velocity.vy;
   }
   
-  void updateTransformedHist(){
+  void recordStateToPathHistory() {
+    ///xyt_hist[histCount][0] = headFrame.position.x;
+    ///xyt_hist[histCount][1] = headFrame.position.y;
+    ///xyt_hist[histCount][2] = headFrame.position.z;
+  
+    //System.arraycopy(xyt, 0, xyt_hist[histCount], 0, 3);
+    //System.arraycopy(xyt_prime, 0, xyt_prime_hist[histCount], 0, 3);
     
-    for (int i=0; i<=histCount; i++){
-      Relativity.applyTransforms(xyt_hist[i], xyt_prime_hist[i]);
-    }
-    //Relativity.applyTransforms(xyt, xyt_prime);
+    //velHistX[histCount] = velocity.vx;
+    //velHistY[histCount] = velocity.vy;
+    
+    frameHist[histCount] = new DefaultFrame(headFrame.position, headFrame.velocity);
+    histCount++;
+    frameHist[histCount] = headFrame;
+    
+    frameCountLastHistUpdate = frameCount;
   }
-
+  
+  void updateTransformedHist(Matrix3f lorentzMatrix){
+    
+    Vector3f source = new Vector3f();
+    Vector3f target = new Vector3f();
+    
+    for (int i=0; i<=histCount; i++) {
+      
+      frameHist[i].updatePosition();
+    }
+  }
+  
   void drawGL(GL gl){
     //drawHeadGL(gl);
     drawPathGL(gl);
   }
   
   void drawHead(){
-    drawHead(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
+    float[] displayPos = this.getDisplayPosition();
+    drawHead(displayPos[0], displayPos[1], displayPos[2]);
   }
   
   void drawHead(float x, float y, float z) {
@@ -143,7 +182,8 @@ class Particle implements Frame {
   }
   
   void drawHeadGL(GL gl){
-    drawHeadGL(gl, xyt_prime);
+    float[] displayPos = this.getDisplayPosition();
+    drawHeadGL(gl, displayPos);
   }
   
   void drawHeadGL(GL gl, Vector3f V){
@@ -153,7 +193,6 @@ class Particle implements Frame {
   void drawHeadGL(GL gl, float x, float y, float z) {
     gl.glPushMatrix();
     
-    //gl.glColor4f(0.941, 0.105, 0.367, 1.0);
     gl.glColor4fv(fillColor4fv, 0);
     
     gl.glTranslatef(x, y, z);
@@ -173,10 +212,6 @@ class Particle implements Frame {
     Plane plane = f.getSimultaneityPlane();
     Line line = this.headFrame.getVelocityLine();
     
-    // Testing with initial state for now:
-    //line.setPoint(xyt_hist[1]);
-    //line.setDirection(velHistX[1], velHistY[1], 1);
-    
     //Velocity vel = this.headFrame.getVelocity();
     //line.setPoint(this.headFrame.getPosition());
     //line.setDirection(vel.vx, vel.vy, 1);
@@ -185,9 +220,11 @@ class Particle implements Frame {
     
     plane.getIntersection(line, intersection);
     
-    intersection = Relativity.displayTransform(targetParticle.velocity, intersection);
+    Vector3f intersection_target = new Vector3f();
+    //intersection = Relativity.displayTransform(targetParticle.velocity, intersection);
+    Relativity.displayTransform(lorentzMatrix, intersection, intersection_target);
     
-    return intersection;
+    return intersection_target;
   }
   
   void drawIntersectionGL(GL gl, Frame f){
@@ -218,14 +255,18 @@ class Particle implements Frame {
       a = alphaFactor * g * i * (1 + sin(TWO_PI * 0.01 * properTimeHist[i]%100));
       
       gl.glColor4f(r, g, b, a);
-      gl.glVertex3f(xyt_prime_hist[i][0], xyt_prime_hist[i][1], xyt_prime_hist[i][2]);
+      //gl.glVertex3f(xyt_prime_hist[i][0], xyt_prime_hist[i][1], xyt_prime_hist[i][2]);
+      gl.glVertex3fv(frameHist[i].getDisplayPosition(), 0);
     }
-    //gl.glVertex3f(xyt_prime[0], xyt_prime[1], xyt_prime[2]);
+    //float[] head = frameHist[histCount].getDisplayPosition();
+    //float[] head = this.getDisplayPosition();
+    
+    //gl.glVertex3f(head[0], head[1], head[2]);
     gl.glEnd();
   }
   
   void propelSelf(float momentumDeltaX, float momentumDeltaY) {
-    
+    //TODO
     addImpulse(momentumDeltaX, momentumDeltaY);
     
     emissionMomentumX += momentumDeltaX;
@@ -246,10 +287,12 @@ class Particle implements Frame {
       println("millisDiff: " + millisDiff);
     }
     */
+    int emissionGenerationDelay = 500;
+    
     if ( (emissionMomentumTotal > 1E-4) && //0.02 * this.mass * velocity.magnitude) &&
-         ((millis() - millisLastEmission) > 3000) ) {
+         ((millis() - millisLastEmission) > emissionGenerationDelay) ) {
       
-      Particle emission = new Particle();
+      Particle emission = new Particle(this.position, this.velocity);
       
       emission.setPosition(this.position);
       emission.mass = 0.001 * this.mass;
@@ -263,11 +306,13 @@ class Particle implements Frame {
   void emit(Particle emission) {
     
     addEmission(emission);
-    emissionMomentumX = emissionMomentumY = emissionMomentumTotal = 0;
     millisLastEmission = millis();
     //println("emission: millis() = " + millis());
+    
     //TODO: more realistic emission energy & mass
     this.mass -= emission.mass;
+    //addImpulse(emissionMomentumX, emissionMomentumY);
+    emissionMomentumX = emissionMomentumY = emissionMomentumTotal = 0;
   }
 
   void updateImpulse() {
@@ -325,7 +370,7 @@ class Particle implements Frame {
   }
   
   Vector3f position = new Vector3f();
-
+  
   float properTime;
   float mass = 1.0;
   
@@ -335,19 +380,17 @@ class Particle implements Frame {
   int millisLastEmission = 0;
   
   float emissionMomentumX, emissionMomentumY, emissionMomentumTotal;
-
-  float[] velHistX = new float[histCountMax];
-  float[] velHistY = new float[histCountMax];
-    
-  float[] properTimeHist = new float[histCountMax];
   
-  // Predeclare arrays
+  float[] properTimeHist = new float[histCountMax];
+  /*
   float[] xyt = new float[3];
   float[] xyt_prime = new float[3];
   
   float[][] xyt_hist = new float[histCountMax][3];
   float[][] xyt_prime_hist = new float[histCountMax][3];
-
+  */
+  DefaultFrame[] frameHist = new DefaultFrame[histCountMax];
+  
   // Accumulated impulse (add to momentum smoothly)
   float impulseX, impulseY, impulseTotal;
   Particle impulseParticle;

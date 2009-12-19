@@ -7,19 +7,83 @@ class Kamera {
     radius = 100;
     azimuth = PI;
     zenith = PI/6.0;
-    target = new Vector3f(0,0,0);
     
-    pos = new Vector3f(0,0,0);
+    target = new Vector3f();
+    pos = new Vector3f();
+    
     updatePosition();
+    updateTarget(target.x, target.y, target.z);
     
-    float fov = PI/3.0;
-    perspective(fov, width/height, 1, 15000000);
+    //float fov = PI/3.0; //perspective(fov, width/height, 1, 15000000);
     
     addMouseWheelListener(new java.awt.event.MouseWheelListener() { 
       public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) { 
       mouseWheel(evt.getWheelRotation());
       }
     });
+    
+    updateScreenToKameraMap();
+  }
+  
+  void updateScreenToKameraMap() {
+    
+    screenToKameraMap = getScreenToKameraCoordinateMap();
+    println("screenToKameraMap: \n" + screenToKameraMap);
+  }
+  
+  Matrix3f getScreenToKameraCoordinateMap()
+  {
+    // PICKING (SETUP)
+    // FIND RATIOS BETWEEN KAMERA AND SCREEN XY PLANES
+    Vector3f kamX = new Vector3f();
+    Vector3f kamY = new Vector3f();
+    
+    float n = prefs.getFloat("kam_units_scale");
+    
+    kamX.set(this.pos);
+    kamX.scaleAdd(1, this.look, kamX);
+    
+    kamY.set(kamX);
+    
+    kamX.scaleAdd(n, this.right, kamX);
+    kamY.scaleAdd(n, this.up, kamY);
+    
+    float screenx = screenX(kamX.x, kamX.y, kamX.z) - width / 2;
+    float screeny = screenY(kamY.x, kamY.y, kamY.z) - height / 2;
+    
+    float kameraToScreenRatioX = n / screenx;
+    float kameraToScreenRatioY = n / screeny;
+    
+    // MATRIX TO MAP SCREEN TO KAMERA COORDS
+    Matrix3f screenToKameraMatrix = new Matrix3f(new float[] {
+      kameraToScreenRatioX, 0,                    0,
+      0,                    kameraToScreenRatioY, 0,
+      0,                    0,                    0
+    } );
+    
+    return screenToKameraMatrix;
+  }
+  
+  Vector3f screenToModel(float theScreenX, float theScreenY) {
+    
+    //screenToKameraMap = getScreenToKameraCoordinateMap();
+    //intervalSay(45, "screenToKameraMap: \n" + screenToKameraMap);
+    
+    Vector3f screenVec = new Vector3f(theScreenX - width/2, theScreenY - height/2, 0);
+    Vector3f kameraVec = new Vector3f();
+    
+    // SCALE TO KAMERA XY
+    screenToKameraMap.transform(screenVec, kameraVec);
+    
+    // TRANSLATE TO MODEL XYZ
+    Vector3f model = new Vector3f();
+    
+    model.set(this.pos);
+    model.scaleAdd(1,           this.look,  model);
+    model.scaleAdd(kameraVec.x, this.right, model);
+    model.scaleAdd(kameraVec.y, this.up,    model);
+    
+    return model;
   }
   
   void mouseWheel(int delta) {
@@ -59,9 +123,7 @@ class Kamera {
   }
   
   void updateTarget(float x, float y, float z) {
-    target.x = x;
-    target.y = y;
-    target.z = z;
+    target.set(x, y, z);
     
     updatePosition();
     //updateUp();
@@ -80,6 +142,7 @@ class Kamera {
     look.x = target.x - pos.x;
     look.y = target.y - pos.y;
     look.z = target.z - pos.z;
+    look.normalize();
     
     updateRight();
     updateUp();
@@ -94,10 +157,12 @@ class Kamera {
   */
   void updateRight() {
     right.cross(look, zBasis);
+    right.normalize();
   }
   
   void updateUp() {
-    up.cross(look, right);
+    up.cross(right, look);
+    up.normalize();
   }
   /*
   void updateUp() {
@@ -128,7 +193,8 @@ class Kamera {
            target.x,  target.y,  target.z,
            up.x,      up.y,      up.z);
   }
-//           upX,       upY,      upZ);
+  
+  Matrix3f screenToKameraMap;
   
   float mouseWheel;
   
@@ -144,12 +210,11 @@ class Kamera {
   
 //  float upX, upY, upZ;
   
-  
   Vector3f pos;
   Vector3f target;
   Vector3f look = new Vector3f();
   Vector3f up = new Vector3f();
   Vector3f right= new Vector3f();
   
-  Vector3f zBasis = new Vector3f(0,0,1);
+  Vector3f zBasis = new Vector3f(0,0,-1);
 }

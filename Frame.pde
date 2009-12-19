@@ -7,6 +7,9 @@ interface Frame {
   //float[] getVelocity();
 
   float[] getDisplayPosition();
+  
+  Vector3f getDisplayPositionVec();
+  
   Plane getSimultaneityPlane();
 }
 
@@ -26,6 +29,11 @@ class DefaultFrame implements Frame {
     setVelocity(vel);
   }
   
+  DefaultFrame(Vector3f position, Velocity vel) {
+    setPosition(position);
+    setVelocity(vel);
+  }
+  
   DefaultFrame() {
     
   }
@@ -37,7 +45,8 @@ class DefaultFrame implements Frame {
   
   void updatePosition() {
     
-    displayPosition = Relativity.displayTransform(targetParticle.velocity, position);
+    //displayPosition = Relativity.displayTransform(targetParticle.velocity, position);
+    Relativity.displayTransform(lorentzMatrix, position, displayPosition);
     
     simultaneityPlane.setPoint(position);
     velocityLine.setPoint(position);
@@ -57,6 +66,10 @@ class DefaultFrame implements Frame {
     
     simultaneityPlane.setNormal(this.velocity.normal);
     velocityLine.setDirection(this.velocity.vx, this.velocity.vy, 1);
+  }
+  
+  void setVelocity(Velocity theVel) {
+    setVelocity(theVel.vx, theVel.vy);
   }
   
   void setVelocity(float[] vel) {
@@ -81,6 +94,10 @@ class DefaultFrame implements Frame {
     float[] pos = new float[3];
     displayPosition.get(pos);
     return pos;
+  }
+  
+  Vector3f getDisplayPositionVec() {
+    return displayPosition;
   }
   
   Plane getSimultaneityPlane() {

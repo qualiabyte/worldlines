@@ -19,7 +19,7 @@ class ParticleUpdater implements Runnable {
     while(true) {
 
       targetParticle.update(dt);
-      targetParticle.updateTransformedHist();
+      targetParticle.updateTransformedHist(lorentzMatrix);
 
       for (int i=0; i<PARTICLES; i++) {
         Particle p = (Particle) particles.get(i);
@@ -30,9 +30,9 @@ class ParticleUpdater implements Runnable {
 
         int updates_count = 0;
         int updates_max = 30;
-
+        
         while ( updates_count < updates_max && 
-                p.xyt_prime[2] < targetParticle.xyt_prime[2]// + 0.001
+                p.getDisplayPosition()[2] < targetParticle.getDisplayPosition()[2]// + 0.001
           ){
           p.update(dt);
           updates_count++;

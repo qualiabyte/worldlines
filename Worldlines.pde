@@ -17,11 +17,14 @@ GL gl;
 
 Kamera kamera;
 
-//Particle[] particles;
+Matrix3f lorentzMatrix;
+
 ArrayList particles;
 Particle targetParticle;
 ArrayList targets;
 ArrayList emissions;
+
+Selector particleSelector;
 
 DefaultFrame restFrame;
 
@@ -44,6 +47,7 @@ public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
 
 public float MAX_START_POS_DISPERSION = 3;
+/*
 public float START_POS_DISPERSION_X = 0;
 public float START_POS_DISPERSION_Y = 0;
 
@@ -52,13 +56,32 @@ public float START_VEL_DISPERSION = 5.4; //4.2; //1.8;
 
 public float MAX_START_VEL_ECCENTRICITY = 15;
 public float START_VEL_ECCENTRICITY = 1.95;
-
+*/
 public void randomize() {
+  
+  String[] floatLabels = new String[] {
+    "START_POS_DISPERSION_X",
+    "START_POS_DISPERSION_Y",
+    "START_VEL_DISPERSION", 
+    "START_VEL_ECCENTRICITY"
+  };
+  
+  for (int i=0; i<floatLabels.length; i++) {
+    String label = floatLabels[i];
+    FloatControl control = prefs.getFloatControl(label);
+    
+    float randomValue = random(control.max);
+    
+    control.setValue(randomValue);
+    //prefs.put(label, Float.valueOf(randomValue));
+  }
+  /*
   START_POS_DISPERSION_X = random(MAX_START_POS_DISPERSION);
   START_POS_DISPERSION_Y = random(MAX_START_POS_DISPERSION);
   START_VEL_DISPERSION = random(MAX_START_VEL_DISPERSION);
   START_VEL_ECCENTRICITY = random(MAX_START_VEL_ECCENTRICITY);
-  TARGETS = (int)random(PARTICLES) / 3;
+  */
+  TARGETS = (int)(random(1, PARTICLES/3));
   setup();
 }
 
@@ -107,11 +130,123 @@ float fpsMovingAvg;
 
 ControlP5 controlP5;
 
-Infobox myInfobox;
+String lastControlEventLabel = "";
+float lastControlEventValue = 0;
+
+void controlEvent(ControlEvent event) {
+  
+  Controller controller = event.controller();
+  
+  String label = controller.label();
+  float controllerValue = controller.value();
+  
+  Object prefValue = (Object) prefs.get(label);
+  /*
+  if ( (label != lastControlEventLabel) || (controllerValue != lastControlEventValue) ) {
+    Dbg.say("ControlEvent : '" + label + "', '" + controllerValue + "' (" + controller + ")");
+    lastControlEventLabel = label;
+    lastControlEventValue = controllerValue;
+  }
+  */
+  
+  if (prefValue != null) {
+    
+    if (controller instanceof controlP5.Toggle) {
+      
+      boolean newPrefValue = (controllerValue == 0) ? false : true;
+      
+      prefs.getBooleanControl(label).setValue(newPrefValue);
+      
+      Dbg.say("prefs.get('" + label + "') now: " + prefs.get(label));
+    }
+    else if (controller instanceof controlP5.Slider) {
+
+      prefs.getFloatControl(label).setValue(controllerValue);
+    }
+  }
+  else {
+    Dbg.warn("Controller '" + label + "' failed assignment to null preference '" + label + "'");
+  }
+}
+
+ControlMap buildPreferencesControlMap(ControlPanel[] controlPanels) {
+  
+  ControlMap controlMap = new ControlMap();
+  
+  for (int p=0; p<controlPanels.length; p++) { 
+    
+    ArrayList controls = controlPanels[p].controls;
+    
+    for (int i=0; i<controls.size(); i++) {
+      Control c = (Control) controls.get(i);
+      controlMap.putControl(c);
+    }
+  }
+  return controlMap;
+}
+
+Hashtable buildPreferences(ControlPanel[] controlPanels) {
+  
+  Hashtable hash = new Hashtable();
+  
+  for (int p=0; p<controlPanels.length; p++) { 
+    
+    ArrayList controls = controlPanels[p].controls;
+    
+    for (int i=0; i<controls.size(); i++) {
+      Control c = (Control) controls.get(i);
+      hash.put(c.getLabel(), c.getValue());
+    }
+  }
+  return hash;
+}
 
 void setup() {
-  size(900, 540, OPENGL);
+  size(900, 530, OPENGL);
+  ////size(900, 540, OPENGL);
   //size(1280, 900, OPENGL);
+  
+  frameRate(45);
+  //hint(DISABLE_DEPTH_SORT);
+  
+  initScene();
+}
+
+Infobox myInfobox;
+ControlPanel[] controlPanels;
+ControlMap prefs;
+//Hashtable prefs;
+
+void initScene() {
+  
+  ControlPanel dynamicPanel = new ControlPanel("dynamic");
+  dynamicPanel.putBoolean("useEmissions", true);
+  dynamicPanel.putBoolean("useGL", true);
+  dynamicPanel.putBoolean("showAxesGrid", false);
+  //dynamicPanel.putBoolean("useMatrixForPathTransform", true);
+  dynamicPanel.putFloat("backgroundColorHue", 0.65f);
+  dynamicPanel.putFloat("backgroundColorSaturation", 0.65f);
+  dynamicPanel.putFloat("backgroundColorBrightness", 0.17f);
+  dynamicPanel.putFloat("kam_units_scale", 1, 0, 8);
+  
+  ControlPanel setupPanel = new ControlPanel("setup2");
+  setupPanel.putFloat("START_POS_DISPERSION_X", 2.6, 0, 3);
+  setupPanel.putFloat("START_POS_DISPERSION_Y", 2.6, 0, 3);
+  setupPanel.putFloat("START_VEL_DISPERSION", 5.4, 0, 20);
+  setupPanel.putFloat("START_VEL_ECCENTRICITY", 1.95, 0, 15);
+  
+  if (controlPanels == null ) {
+    controlPanels = new ControlPanel[] { setupPanel, dynamicPanel };
+  }
+  
+  // PREFERENCES
+  prefs = buildPreferencesControlMap(controlPanels);
+  
+  prefs.put("particleImagePath", "particle.png");
+  prefs.put("selectedParticleImagePath", "particle_reticle.png");
+  
+  Dbg.say("prefs.getFloat(\"START_POS_DISPERSION_X\"): " + prefs.getFloat("START_POS_DISPERSION_X"));
+  Dbg.say("prefs.getFloat(\"backgroundColorBrightness\"): " + prefs.getFloat("backgroundColorBrightness"));
   
   myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
   
@@ -124,15 +259,21 @@ void setup() {
   int bSpacingY = bHeight + 15;
   int sliderWidth = bWidth*5;
   
+  int xOffsetGlobal = 10;
+  
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
   controlP5.setColorForeground(#093967);
   
   // Global Controls (All Tabs)
-  controlP5.addButton("setup", 0, 10, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
-  controlP5.controller("setup").setLabel("RESTART");
+  //controlP5.addButton("setup", 0, xOffsetGlobal, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
+  //controlP5.controller("setup").setLabel("RESTART");
+  controlP5.addButton("initScene", 0, xOffsetGlobal, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
+  controlP5.controller("initScene").setLabel("RESTART");
   controlP5.addButton("randomize", 0, (int)3*bWidth, numGlobalControls*bSpacingY, (int)(2.6*bWidth), bHeight).moveTo("global");
   controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++numGlobalControls*bSpacingY, sliderWidth, bHeight).moveTo("global");
+  
+  int yOffsetGlobal = numGlobalControls*bSpacingY + bHeight;
   
   // Main Tab
   tabLabel = "Main";
@@ -151,48 +292,96 @@ void setup() {
   
   Relativity.TOGGLE_SPATIAL_TRANSFORM = TOGGLE_SPATIAL_TRANSFORM;
   Relativity.TOGGLE_TEMPORAL_TRANSFORM = TOGGLE_TEMPORAL_TRANSFORM;
-
+  /*
   // Setup Tab
   tabLabel = "SETUP";
   controlP5.addTab(tabLabel);
   numTabControls = numGlobalControls;
-  controlP5.addSlider("START_POS_DISPERSION_X", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_X, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
-  controlP5.addSlider("START_POS_DISPERSION_Y", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_Y, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
-  controlP5.addSlider("START_VEL_DISPERSION", 0, MAX_START_VEL_DISPERSION, START_VEL_DISPERSION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
-  controlP5.addSlider("START_VEL_ECCENTRICITY", 0, MAX_START_VEL_ECCENTRICITY, START_VEL_ECCENTRICITY, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);;
-
+  controlP5.addSlider("START_POS_DISPERSION_X", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_X, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
+  controlP5.addSlider("START_POS_DISPERSION_Y", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_Y, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
+  controlP5.addSlider("START_VEL_DISPERSION", 0, MAX_START_VEL_DISPERSION, START_VEL_DISPERSION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
+  controlP5.addSlider("START_VEL_ECCENTRICITY", 0, MAX_START_VEL_ECCENTRICITY, START_VEL_ECCENTRICITY, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
+  */
+  // Dynamic Tab (TESTING)
+  for (int panelIndex=0; panelIndex<controlPanels.length; panelIndex++) {
+    ControlPanel panel = controlPanels[panelIndex];
+    tabLabel = panel.name;
+    
+    controlP5.addTab(tabLabel);
+    
+    boolean defaultValue = false;
+    int xPadding = 10;
+    int yPadding = 15;
+    
+    int toggleWidth = 20;
+    int toggleHeight = 20;
+    
+    int xOffset = xOffsetGlobal;
+    int yOffset = yPadding + yOffsetGlobal;
+    
+    for (int i=0; i<panel.controls.size(); i++) {
+      Control control = (Control) panel.controls.get(i);
+      
+      Object prefValue = control.getValue();
+      String label =  control.getLabel();
+      
+      String className = prefValue.getClass().getName();
+      
+      println("Controller for control('" + label + "' : " + prefValue + ") (" + className +")");
+      
+      if (prefValue instanceof java.lang.Boolean) {
+        
+        controlP5.addToggle(label, (Boolean) prefValue, xOffset, yOffset, toggleWidth, toggleHeight).moveTo(tabLabel);
+        //Toggle t = (Toggle) controlP5.controller(keyName);
+        
+        yOffset += toggleHeight + yPadding;
+      }
+      else if (prefValue instanceof java.lang.Float) {
+        float minValue = ((FloatControl)control).min;
+        float maxValue = ((FloatControl)control).max;
+        
+        controlP5.addSlider(label, minValue, maxValue, (Float) prefValue, xOffset, yOffset, sliderWidth, bHeight).moveTo(tabLabel);
+        yOffset += bHeight + yPadding;
+      }
+    }
+  }
+  
+  Velocity targetVelocity = new Velocity(1E-7f,0f);
+  lorentzMatrix = Relativity.getLorentzTransformMatrix(targetVelocity);
+  
   // SCENE OBJECTS
-  //targetParticle = new Particle(new Vector3f(0,0,0), new Vector3f(1E-7, 0, 0));
+  //targetParticle = new Particle(targetPos, targetVel);
+  //addTarget(targetParticle);
   targetParticle = new Particle();
-  targetParticle.setVelocity(1E-7, 0);
+  targetParticle.setVelocity(targetVelocity.vx, targetVelocity.vy);
   targetParticle.setPosition(0, 0, 0);
   targetParticle.setFillColor(color(#F01B5E));
   
-  particles = new ArrayList(); //particles = new Particle[MAX_PARTICLES];
-  particles.add(targetParticle); //particles[0] = targetParticle;  
-
+  particles = new ArrayList();
+  particles.add(targetParticle);
+  
   for(int i=1; i<PARTICLES; i++){
-
-    float x = pow(10, START_POS_DISPERSION_X);
-    float y = pow(10, START_POS_DISPERSION_Y);
+    
+    float x = pow(10, prefs.getFloat("START_POS_DISPERSION_X"));
+    float y = pow(10, prefs.getFloat("START_POS_DISPERSION_Y"));
     
     Vector3f pos = new Vector3f(random(-x, +x), random(-y, +y), 0);
     
     // Exponentially weight distribution of velocities towards lightspeed
-    float vel_mag = 1-pow(random(1, 2), -START_VEL_DISPERSION);
+    float vel_mag = 1-pow(random(1, 2), -prefs.getFloat("START_VEL_DISPERSION"));
     float heading = random(TWO_PI);
     
     float vx = vel_mag*cos(heading);
-    float vy = vel_mag*sin(heading)*(pow(1.5, -START_VEL_ECCENTRICITY));
+    float vy = vel_mag*sin(heading)*(pow(1.5, -prefs.getFloat("START_VEL_ECCENTRICITY")));
     
     Vector3f vel = new Vector3f(vx, vy, 0);
     
     Particle p = new Particle(pos, vel);
     p.setFillColor(color(#1B83F0));
-    particles.add(p); //particles[i] = p;
+    particles.add(p);
   }
   
-  println("target pos: " + targetParticle.position.x + ", " + targetParticle.position.y );
+  println("target pos: " + targetParticle.position.x + ", " + targetParticle.position.y);
   println("target direction: " + targetParticle.velocity.direction);
   println("target magnitude: " + targetParticle.velocity.magnitude);
   println("target gamma:     " + targetParticle.velocity.gamma);
@@ -205,14 +394,12 @@ void setup() {
   emissions = new ArrayList();
   
   kamera = new Kamera();
-    
+  
   restFrame = new DefaultFrame();
   restFrame.setVelocity(0,0);
   
-  pgl = (PGraphicsOpenGL)g;
-  gl = pgl.beginGL();
-    particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera);
-  pgl.endGL();
+  particleSelector = new Selector(particles);
+  particlesLayer = new ParticlesLayer(particles, PARTICLE_IMAGE, kamera, particleSelector.selection);
   
   inputDispatch = new InputDispatch(targets);
   
@@ -225,9 +412,6 @@ void setup() {
   particleUpdater = new ParticleUpdater(targetParticle, particles);
   //Relativity.loadFrame(targetParticle);
   //particleUpdater.start();
-
-  frameRate(30);
-  //hint(DISABLE_DEPTH_SORT);
 }
 
 void addTarget(Particle p){
@@ -237,9 +421,11 @@ void addTarget(Particle p){
 }
 
 void addEmission(Particle e){
-  emissions.add(e);
-  particles.add(e);
-  e.setFillColor(color(0, 1, 0));
+  if ( prefs.getBoolean("useEmissions") ) {
+    emissions.add(e);
+    particles.add(e);
+    e.setFillColor(color(0, 1, 0));
+  }
 }
 
 float[] vel = new float[3];
@@ -251,8 +437,9 @@ void draw() {
   gl.glScalef(1,1,1);
   
   gl.glEnable(GL.GL_BLEND);
-  gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
-  //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+  //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
+  gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+  //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
   gl.glDisable(GL.GL_DEPTH_TEST);
   gl.glDepthMask(false);
   
@@ -260,14 +447,18 @@ void draw() {
   pgl.endGL();
   
   // SCENE PREP
-  background(30);
-  //colorMode(HSB, 255);
-  //background((frameCount * 0.5)%255, 100, 75, 255);//  background(#3473F7);
-  //background((frameCount * 0.5)%255, 200, 24, 255);//  background(#3473F7);
-  //colorMode(RGB, 1.0f);
+  //color c = #000020; //#3473F7;
+  colorMode(HSB, 1.0f); //c = color((frameCount * 0.5)%255, 100, 75, 255);
+  color c = color(
+    prefs.getFloat("backgroundColorHue"),
+    prefs.getFloat("backgroundColorSaturation"),
+    prefs.getFloat("backgroundColorBrightness")
+  );
+  background(c); //background((Float)prefs.get("backgroundColor"));
+  colorMode(RGB, 1.0f);
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
-  //strokeWeight(STROKE_WIDTH);
+  strokeWeight(STROKE_WIDTH);
   
   // UPDATE SCENE
   inputDispatch.update();
@@ -277,28 +468,32 @@ void draw() {
   
   particleUpdater.dt = dt;
   
-  Relativity.loadFrame(targetParticle);
+  targetParticle.update(dt);
+  
+  //Relativity.loadFrame(targetParticle);
+  lorentzMatrix = Relativity.getLorentzTransformMatrix(targetParticle.velocity);
+  
+  targetParticle.updateTransformedHist(lorentzMatrix);
   
   boolean SIMPLE_UPDATES = true;
   
   if (SIMPLE_UPDATES){
     
-    for (int i=0; i<PARTICLES; i++) {
-      Particle p = (Particle)particles.get(i);//Particle p = particles[i];
-      p.update(dt);
-      p.updateTransformedHist();
+    for (int i=0; i<particles.size(); i++) {
+      Particle p = (Particle)particles.get(i);
+      if (p == targetParticle) {
+        continue;
+      }
+      else {
+        p.update(dt);
+        p.updateTransformedHist(lorentzMatrix);
+      }
     }
-    
-    for (int i=0; i<emissions.size(); i++) {
-      Particle e = (Particle) emissions.get(i);
-      e.update(dt);
-      e.updateTransformedHist();
-    }
-  }
+  }/*
   else {
     // UPDATE TARGET  
     targetParticle.update(dt);  
-    targetParticle.updateTransformedHist();
+    targetParticle.updateTransformedHist(lorentzMatrix);
     
     // UPDATE NON-TARGETS
     for (int i=0; i<PARTICLES; i++) {
@@ -308,26 +503,46 @@ void draw() {
       {
         continue;
       }
-      else if( p.xyt_prime[2] > targetParticle.xyt_prime[2] )
+      else if( p.xyt_prime[2] > targetParticle.prime[2] )
       {
-        p.updateTransformedHist();
+        p.updateTransformedHist(lorentzMatrix);
         continue;
       } 
       else {
         p.update(dt);
-        p.updateTransformedHist();
+        p.updateTransformedHist(lorentzMatrix);
       }
     }
   }
-  
+  */
   // CAMERA PREP
   kamera.updateTarget(targetParticle.getDisplayPosition());
   kamera.update(timeDelta);
   
   // RENDER
-  particlesLayer.draw();
-  //particleGrid.draw(targetParticle.xyt);
-  //targetAxes.drawAxes();
+  particlesLayer.draw(); //particleGrid.draw(targetParticle.xyt);
+  
+  // PICKING PROCESS
+  
+  Vector3f model = kamera.screenToModel(mouseX, mouseY);
+  
+  pgl = (PGraphicsOpenGL)g;
+  gl = pgl.beginGL();
+  
+  beginCylindricalBillboardGL(model.x, model.y, model.z);
+  float s = 0.1; //0.03;
+  gl.glScalef(s, s, s);
+  gl.glRotatef(25, 0, 0, 1);
+  gl.glRotatef(20, 1, 0, 0);
+  gl.glRotatef(0.4*millis(), 0, 1, 0);
+  gl.glTranslatef(0, -1, 0);
+  glTriangle(gl);
+  //gl.glTranslatef(0, 0, -0.1);
+  gl.glRotatef(35, 0, 1, 0);
+  glTriangle(gl);
+  endBillboardGL();
+  
+  pgl.endGL();
   
   // UPDATE FPS
   seconds = 0.001 * millis();
@@ -345,12 +560,15 @@ void draw() {
   myInfobox.print(
   + (int) seconds + " seconds\n"
   + (int) fpsRecent +  "fps (" + (int)(frameCount / seconds) + "avg)\n"
-  + "targetParticle.pos.z:      " + nf(targetParticle.position.z, 3, 2) + " seconds\n"
-  + "kamera.target.pos.x:      " + nf(kamera.target.x, 3, 2) + " seconds\n"
-  + "targetParticle.properTime: " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
-  + "targetParticle.velMag:     " + nf(targetParticle.velocity.magnitude, 1, 8) + " c\n"
-  + "Controls: W,A,S,D to move; Right mouse button toggles camera rotation"
-  + "\n displayPos: " + p1[0] + " " + p1[1] + " " + p1[2]
+  + "particles: " + particles.size() + "\n"
+  //+ "targetParticle.pos.z: " + nf(targetParticle.position.z, 3, 2) + " seconds\n"
+  //+ "kamera.target.x:      " + nf(kamera.target.x, 3, 2) + " seconds\n"
+  + "target age:        " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
+  + "target speed:      " + nf(targetParticle.velocity.magnitude, 1, 8) + " c\n"
+  + "target gamma:      " + nf(targetParticle.velocity.gamma, 1, 8) + " c\n"
+  + "target position:   " + targetParticle.position.toString() + "\n"
+  + "target displayPos: " + p1[0] + " " + p1[1] + " " + p1[2]
+  //+ "Controls: W,A,S,D to move; Right mouse button toggles camera rotation"
   );
   
   // GUI LAYER
@@ -363,22 +581,33 @@ void draw() {
 }
 
 class ParticlesLayer {
-  ArrayList particles; //Particle[] particles;
+  ArrayList particles;
+  ArrayList selection;
+  
   PImage particleImage;
   Kamera kamera;
   
   boolean useGL = true;
   
   Texture particleTexture;
+  Texture selectedParticleTexture;
+  
   int[] textures = new int[3];
     
-  ParticlesLayer (ArrayList particles, String particleImagePath, Kamera kamera) {
+  ParticlesLayer (ArrayList particles, String particleImagePath, Kamera kamera, ArrayList selection) {
     this.particles = particles;
+    this.selection = selection;
+    
     this.kamera = kamera;
     this.particleImage = loadImage(particleImagePath);
-    this.particleTexture = loadTexture(particleImagePath);
-    //this.particleTexture = loadTextureFromStream(openStream(particleImagePath));
+    //this.particleTexture = loadTexture(particleImagePath);
+    pgl = (PGraphicsOpenGL)g;
+    gl = pgl.beginGL();
+    this.particleTexture = loadTextureFromStream(openStream(particleImagePath));
+    //println("prefs.getString('selectedParticleImagePath'): " + prefs.getString("selectedParticleImagePath"));
+    this.selectedParticleTexture = loadTextureFromStream(openStream(prefs.getString("selectedParticleImagePath")));
     //loadTextureGL(openStream(particleImagePath));
+    pgl.endGL();
   }
   
   void loadTextureGL(InputStream textureStream){
@@ -398,13 +627,6 @@ class ParticlesLayer {
     int bytesPerPixel = 4;
     
     Buffer textureBuffer = textureData.getBuffer();
-    //ByteBuffer textureByteBuffer = BufferUtil.newByteBuffer(imgWidth*imgHeight*bytesPerPixel);
-    
-    //ByteBuffer textureByteBuffer = textureData.getBuffer();
-    
-    //byte[] textureBytes = new byte[32];
-    //textureByteBuffer.get(textureBytes);
-    //dumpBytes(textureBytes, 32);
     
     gl.glGenTextures(1, textures, 0);
     gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]);
@@ -419,7 +641,6 @@ class ParticlesLayer {
       GL.GL_UNSIGNED_BYTE,//GL.GL_INT,//GL.GL_BYTE,//
       GL.GL_RGBA,
       textureBuffer
-      //textureByteBuffer
     );
     
     if (textureBuffer != null) {
@@ -434,27 +655,18 @@ class ParticlesLayer {
     
     Texture texture = null;
     
-    //dumpStreamBytes(textureStream, 32);
     try {
-      //textureData = TextureIO.newTextureData(textureStream, true, TextureIO.PNG);
-      texture = TextureIO.newTexture(textureStream, false, TextureIO.PNG);
-      texture.setTexParameteri(GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-      texture.setTexParameteri(GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
+      //TextureData td = TextureIO.newTextureData(textureStream, true, TextureIO.PNG);
+      //texture = TextureIO.newTexture(td);
+      texture = TextureIO.newTexture(textureStream, true, TextureIO.PNG);
+      //texture.setTexParameteri(GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR_MIPMAP_NEAREST);
+      //texture.setTexParameteri(GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_NEAREST);
     }
     catch(Exception e) {
       println("Error loading texture: " + e);
     }
     
     return texture;
-    /*
-    if (textureData != null) {
-      texture = TextureIO.newTexture(textureData);
-      println("textureData.toString(): " + textureData.toString());
-    }
-    else {
-      println("textureData was null");
-    }
-    */
   }
   
   Texture loadTexture(String pImagePath) {
@@ -482,14 +694,17 @@ class ParticlesLayer {
     //targetParticle.drawHeadGL(gl);
     
     Vector3f intersection = new Vector3f();
-    Vector3f[] intersections = new Vector3f[MAX_PARTICLES*displayFrames.length];
+    Vector3f[] intersections = new Vector3f[particles.size()*displayFrames.length];
     int intersectionCount = 0;
     
     for (int i=0; i < particles.size(); i++) {
       Particle p = (Particle)particles.get(i);
-      
+            
       p.drawPathGL(gl);
-      targetAxes.drawGL(gl, (Frame)p);
+      
+      if ( !emissions.contains(p) ) {
+        targetAxes.drawGL(gl, (Frame)p);
+      }
       
       for (int j=0; j < displayFrames.length; j++) {
         
@@ -498,15 +713,11 @@ class ParticlesLayer {
         intersections[intersectionCount++] = intersection;
         
         p.drawHeadGL(gl, intersection);
-        
-        //p.drawIntersectionGL(gl, displayFrames[j]);
-        //p.drawIntersectionGL(gl, (Frame)targetParticle);
-        //p.drawIntersectionGL(gl, (Frame)restFrame);
       }
     }
     pgl.endGL();
     
-    if (useGL) {
+    if (prefs.getBoolean("useGL")) {
       
       pgl.beginGL();
       
@@ -514,7 +725,7 @@ class ParticlesLayer {
       particleTexture.bind(); //gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]); //gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
       
       Vector3f toParticle = new Vector3f();
-            
+      
       for (int i=0; i<intersectionCount; i++) {
         Particle p = (Particle)particles.get(i/2);
         
@@ -527,23 +738,47 @@ class ParticlesLayer {
         
         float distToParticle = toParticle.length();
         float pulseFactor = 1.0 - 0.5*sin(p.properTime);
-                
+        
         float scale = distToParticle * 0.05* PARTICLE_SIZE * pulseFactor;
         color c = lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor);
         
         //beginBillboardGL(kamera, x, y, z);
-        beginCylindricalBillboardGL(kamera, x, y, z);
+        beginCylindricalBillboardGL(x, y, z);
           
           gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
           gl.glScalef(scale, scale, scale);
-          simpleQuad(gl);
+          simpleQuadGL(gl);
           
         endBillboardGL();
       }
       particleTexture.disable(); //particleTexture.dispose(); //gl.glDisable(GL.GL_TEXTURE_2D);
       
-      pgl.endGL();
+      // SELECTION DISPLAY
+      selectedParticleTexture.bind();
+      selectedParticleTexture.enable();
       
+      Vector3f displayPos = new Vector3f();
+      //Vector3f toParticle = new Vector3f();
+      
+      gl.glColor4f(1, 1, 1, 0.5);
+      for (int i=0; i<selection.size(); i++) {
+        Particle p = (Particle) selection.get(i);
+        
+        displayPos = p.getDisplayPositionVec();
+        
+        toParticle.sub(displayPos, kamera.pos);
+        
+        float distToParticle = toParticle.length();
+        float scale = 0.25*distToParticle;
+        
+        beginCylindricalBillboardGL(displayPos.x, displayPos.y, displayPos.z);
+          gl.glScalef(scale, scale, scale);
+          simpleQuadGL(gl);
+        endBillboardGL();
+      }
+      selectedParticleTexture.disable();
+      
+      pgl.endGL();
     }
     else {
     
@@ -579,51 +814,32 @@ class ParticlesLayer {
       }
     }
   }
-  
-  void simpleQuad(GL gl) {
-    gl.glBegin(GL.GL_QUADS);
-    gl.glTexCoord2f(1,1); gl.glVertex2f(1,1);
-    gl.glTexCoord2f(1,0); gl.glVertex2f(1,-1);
-    gl.glTexCoord2f(0,0); gl.glVertex2f(-1,-1);
-    gl.glTexCoord2f(0,1); gl.glVertex2f(-1,1);
-    gl.glEnd();
-  }
 }
 
-void dumpStreamBytes(InputStream inputStream, int numBytes) {
-  try {
-    byte[] b = new byte[numBytes];
-    inputStream.read(b, 0, numBytes);
-    
-    println("inputStream.toString(): " + inputStream.toString());
-    println("inputStream Bytes[0.."+numBytes+"]:");
-    
-    dumpBytes(b, numBytes);
-    
-  }
-  catch (Exception e){
-    println("Error reading inputStream: ");
-  }
+void simpleQuadGL(GL gl, float x, float y, float z) {
+  gl.glPushMatrix();
+  gl.glTranslatef(x, y, z);
+  simpleQuadGL(gl);
+  gl.glPopMatrix();
 }
 
-void dumpBytes(byte[] b, int numBytes){
-  
-  for (int i=0; i<numBytes/8; i++){
-    for (int j=0; j<8; j++){
-      print(" " + b[i*8+j]);
-    }
-    println("\t");
-  }
+void simpleQuadGL(GL gl) {
+  gl.glBegin(GL.GL_QUADS);
+  gl.glTexCoord2f(1,1); gl.glVertex2f(1,1);
+  gl.glTexCoord2f(1,0); gl.glVertex2f(1,-1);
+  gl.glTexCoord2f(0,0); gl.glVertex2f(-1,-1);
+  gl.glTexCoord2f(0,1); gl.glVertex2f(-1,1);
+  gl.glEnd();
 }
-/*
+
+
 void glTriangle(GL gl) {
-        gl.glBegin(GL.GL_TRIANGLES);
-        gl.glVertex2f(0, 1);
-        gl.glVertex2f(-0.5, -1);
-        gl.glVertex2f(+0.5, -1);
-        gl.glEnd();
+  gl.glBegin(GL.GL_TRIANGLES);
+  gl.glVertex2f(0, 1);
+  gl.glVertex2f(-0.5, -1);
+  gl.glVertex2f(+0.5, -1);
+  gl.glEnd();
 }
-*/
 
 void beginBillboardGL(Kamera k, float x, float y, float z){
   gl.glPushMatrix();
@@ -650,7 +866,7 @@ void endBillboardGL(){
   gl.glPopMatrix();
 }
 
-void beginCylindricalBillboardGL(Kamera k, float x, float y, float z){
+void beginCylindricalBillboardGL(float x, float y, float z){
   gl.glPushMatrix();
   
   gl.glTranslatef(x, y, z);
@@ -769,7 +985,20 @@ void mousePressed() {
   
   if (mouseButton == RIGHT) {
     MOUSELOOK = !MOUSELOOK;
-    cursor(MOUSELOOK ? MOVE : ARROW);
+    //cursor(MOUSELOOK ? MOVE : ARROW);
+    if (MOUSELOOK) {
+      cursor(MOVE);
+    } else {
+      noCursor();
+    }
+  }
+  else if (mouseButton == LEFT) {
+    Vector3f direction = new Vector3f();
+    
+    direction.sub(kamera.screenToModel(mouseX, mouseY), kamera.pos);
+    Particle particle = particleSelector.pickPoint(kamera.pos, direction);
+    
+    particleSelector.invertSelectionStatus(particle);
   }
 }
 
@@ -812,9 +1041,120 @@ void keyReleased() {
   }
 }
 
+void intervalSay(int frameInterval, String msg) {
+  if (frameCount % frameInterval == 0) {
+    Dbg.say(msg);
+  }
+}
+
 static class Dbg {
+  
+  static void say(String msg) {
+    println(msg);
+  }
+  
+  static void warn(String msg) {
+    println("WARNING: " + msg);
+  }
+  
   static void dumphex(String name, int i) {
     println("hex(" + name + "): " + hex(i));
+  }
+  
+  static void dumpStreamBytes(InputStream inputStream, int numBytes) {
+    try {
+      byte[] b = new byte[numBytes];
+      inputStream.read(b, 0, numBytes);
+      
+      println("inputStream.toString(): " + inputStream.toString());
+      println("inputStream Bytes[0.."+numBytes+"]:");
+      
+      dumpBytes(b, numBytes);
+      
+    }
+    catch (Exception e){
+      println("Error reading inputStream: ");
+    }
+  }
+  
+  static void dumpBytes(byte[] b, int numBytes){
+    
+    for (int i=0; i<numBytes/8; i++){
+      for (int j=0; j<8; j++){
+        print(" " + b[i*8+j]);
+      }
+      println("\t");
+    }
+  }
+}
+
+class Selector {
+  ArrayList selectables;
+  ArrayList selection;
+  
+  Selector (ArrayList theSelectables, ArrayList theSelection) {
+    this.selectables = theSelectables;
+    this.selection = theSelection;
+  }
+  
+  Selector (ArrayList theSelectables) {
+    this(theSelectables, new ArrayList());
+  }
+  
+  void invertSelectionStatus(Object theSelectable) {
+    
+    if (theSelectable == null) {
+      return;
+    }
+    
+    if (selection.contains(theSelectable)) {
+      selection.remove(theSelectable);
+    }
+    else {
+      selection.add(theSelectable);
+    }
+  }
+  
+  Particle pickPoint(Vector3f cameraPos, Vector3f pickingRayDirection) {
+    
+    Particle bestPick = null;
+    
+    float distToBestPick = Float.MAX_VALUE;
+    float angleToBestPick = PI;
+    
+    float minSelectionAngle = radians(5);
+    float minAngleToPreferClosest = radians(1.5);
+    
+    Particle p;
+    
+    Vector3f cameraToParticle = new Vector3f();
+    
+    for (int i=0; i<selectables.size(); i++) {
+      
+      p = (Particle) selectables.get(i);
+      
+      cameraToParticle.sub(p.getDisplayPositionVec(), cameraPos);
+      
+      float distToParticle = cameraToParticle.length();
+      
+      float angleRayToParticle = cameraToParticle.angle(pickingRayDirection);
+      
+      if ( (angleRayToParticle < angleToBestPick) || 
+           ( (angleRayToParticle < minAngleToPreferClosest)
+              && (distToParticle < distToBestPick) ) )
+      {
+        distToBestPick = distToParticle;
+        angleToBestPick = angleRayToParticle;
+        bestPick = p;
+      }
+    }
+    
+    if (angleToBestPick < minSelectionAngle) {
+      return bestPick;
+    }
+    else {
+      return null;
+    }
   }
 }
 

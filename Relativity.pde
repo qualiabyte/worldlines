@@ -25,28 +25,7 @@ static class Relativity {
       v.magnitude*v.gamma, 0,    v.gamma              // T
     );
   }
-  /*
-  public static Matrix3f getLorentzInverseDisplayMatrix(){
-    
-    Matrix3f M = getLorentzInverseMatrix();
-    
-    if (TOGGLE_SPATIAL_TRANSFORM) {
-      //M[1][0] = 0;
-      //M[1][1] = 1;
-      
-      M.setRow(0, 1, 0, 0);
-    }
-    
-    if (TOGGLE_TEMPORAL_TRANSFORM) {
-      //M[0][0] = 1;
-      //M[0][1] = 0;
-      
-      M.setRow(2, 0, 0, 1);
-    }
-    
-    return M;
-  }
-  */
+  
   public static Matrix3f getRotationMatrix(float a, float x, float y, float z) {
     
     float c = cos(a);
@@ -60,28 +39,7 @@ static class Relativity {
     
     return M;
   }
-  /*
-  public static void applyInverseDisplayTransforms(float[] xyt, float[] xyt_prime) {
-    Vector3f xyt_v3f = new Vector3f(xyt);
-    Vector3f xyt_prime_v3f = new Vector3f();
-    
-    float heading = atan2(v.vy, v.vx);
-    
-    Matrix3f rotHeadingInv = getRotationMatrix(-heading, 0, 0, 1);
-    Matrix3f lorentzInverse = getLorentzInverseDisplayMatrix();
-    Matrix3f rotHeading = getRotationMatrix(heading, 0, 0, 1);
-    
-    Matrix3f inverseDisplayMatrix = new Matrix3f();
-    
-    inverseDisplayMatrix.set(rotHeading);
-    inverseDisplayMatrix.mul(lorentzInverse);
-    inverseDisplayMatrix.mul(rotHeadingInv);
-
-    inverseDisplayMatrix.transform(xyt_v3f, xyt_prime_v3f);
-    
-    xyt_prime_v3f.get(xyt_prime);
-  }
-  */
+  
   public static Vector3f inverseTransform(Velocity vel, Vector3f xyt_v3f) {
 
     loadVelocity(vel);
@@ -116,20 +74,9 @@ static class Relativity {
     
     return selectInverseDisplayComponents(xyt, inverseTransform(vel, xyt));
   }
-  /*
-    loadVelocity(vel);
-    
-    float[] xyt_prime = inverseTransform(vel, xyt);
-    selectInverseDisplayComponents(xyt, xyt_prime, xyt_prime);
-    
-    return xyt_prime;
-  }
-  */
   
-  public static void transform(Velocity vel, Vector3f xyt_v3f, Vector3f target){
-    
+  public static Matrix3f getLorentzTransformMatrix(Velocity vel) {
     loadVelocity(vel);
-    //Vector3f xyt_prime_v3f = new Vector3f();
     
     Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
     Matrix3f lorentz = getLorentzMatrix();
@@ -140,13 +87,20 @@ static class Relativity {
     M.mul(lorentz);
     M.mul(rotHeadingInverse);
     
+    return M;
+  }
+  
+  public static void lorentzTransform(Velocity vel, Vector3f xyt_v3f, Vector3f target){
+    
+    Matrix3f M = getLorentzTransformMatrix(vel);
+    
     M.transform(xyt_v3f, target);
   }
   
   public static Vector3f displayTransform(Velocity vel, Vector3f v) {
     Vector3f v_prime = new Vector3f();
     
-    transform(vel, v, v_prime);
+    lorentzTransform(vel, v, v_prime);
     selectDisplayComponents(v, v_prime, v_prime);
     
     return v_prime;
@@ -159,7 +113,7 @@ static class Relativity {
     Vector3f v = new Vector3f(xyt);
     Vector3f v_prime = new Vector3f();
     
-    transform(vel, v, v_prime);
+    lorentzTransform(vel, v, v_prime);
     
     float[] xyt_prime = new float[3];
     
@@ -172,10 +126,12 @@ static class Relativity {
     
     loadVelocity(vel);
     
-    float[] xyt_prime = transform(vel, xyt);
-    selectDisplayComponents(xyt, xyt_prime, xyt_prime);
-    
-    return xyt_prime;
+    return selectDisplayComponents(xyt, transform(vel, xyt));
+  }
+  
+  public static void displayTransform(Matrix3f theLorentzMatrix, Vector3f source, Vector3f target) {
+    theLorentzMatrix.transform(source, target);
+    selectDisplayComponents(source, target, target);
   }
   
   public static void selectDisplayComponents(Vector3f v, Vector3f v_prime, Vector3f v_target){
@@ -290,12 +246,10 @@ static class Relativity {
   }
 
   public static void loadFrame(Frame f) {
-    //float[] vel = f.getVelocity();
     float[] pos = f.getPosition();
     
     Velocity vel = f.getVelocity();
     loadVelocity(vel);
-    //loadVel(velocity.vx, velocity.vy);
     
     obs_x = xyt_observer[0];
     obs_y = xyt_observer[1];
@@ -334,17 +288,9 @@ static class Relativity {
   static Velocity v;
   
   // PRELOAD VARS
-  
-  //static float vx;
-  //static float vy;
   static float vx_norm;
   static float vy_norm;
-  //static float v_mag, beta;
-  //static float gamma;
-
-  // Normal to surface of simult.
-  // Pvector simult_norm;
-
+  
   static float obs_x;
   static float obs_y;
   static float obs_t;

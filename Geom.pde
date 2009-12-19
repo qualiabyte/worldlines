@@ -15,6 +15,23 @@ public class Line {
     d.set(direction);
   }
   
+  public Line(Vector3f point, Vector3f direction) {
+    p.set(point);
+    d.set(direction);
+  }
+  
+  public void defineBySegment(Vector3f va, Vector3f vb) {
+    p.set(va);
+    setDirection(
+      vb.x - va.x,
+      vb.y - va.y,
+      vb.z - va.z );
+  }
+  
+  public void setPoint(float x, float y, float z) {
+    p.set(x, y, z);
+  }
+  
   public void setPoint(float[] point){
     p.set(point);
   }
@@ -52,7 +69,7 @@ public class Plane {
     p.set(0,0,0);
     n.set(1,1,1);
   }
- 
+  
   public Plane(float[] point, float[] normal){
     
     p = new Vector3f(point);
@@ -71,8 +88,18 @@ public class Plane {
     updateABCD();
   }
   
+  public void setPoint(float x, float y, float z) {
+    p.set(x, y, z);
+    updateABCD();
+  }
+  
   public void setNormal(Vector3f normal){
     n.set(normal);
+    updateABCD();
+  }
+  
+  public void setNormal(float x, float y, float z) {
+    n.set(x, y, z);
     updateABCD();
   }
   

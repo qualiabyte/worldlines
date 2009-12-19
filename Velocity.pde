@@ -78,7 +78,8 @@ public class Velocity {
     //threeVelocity.set(0,0,0);
     
     for (int i=0; i<3; i++) {
-      basisInverse[i].set(Relativity.inverseTransform(this, basis[i]));
+      //basisInverse[i].set(Relativity.inverseTransform(this, basis[i]));
+      basisInverse[i] = Relativity.inverseTransform(this, basis[i]);
     }
 
     threeVelocity.set(basisInverse[2]);

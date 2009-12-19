@@ -20,6 +20,7 @@ GL gl;
 Kamera kamera;
 
 Matrix3f lorentzMatrix;
+Matrix3f inverseLorentzMatrix;
 
 ArrayList particles;
 
@@ -240,6 +241,7 @@ void restart() {
   // INIT LORENTZ FOR PARTICLE CREATION
   Velocity targetVelocity = new Velocity(1E-7f,0f);
   lorentzMatrix = Relativity.getLorentzTransformMatrix(targetVelocity);
+  inverseLorentzMatrix = Relativity.getInverseLorentzTransformMatrix(targetVelocity);
   
   // TARGET PARTICLES
   //targetParticle = new Particle(targetPos, targetVel);
@@ -344,7 +346,7 @@ void restart() {
   restFrame = new DefaultFrame();
   restFrame.setVelocity(0,0);
   //restFrame.setAxesVisible(true);
-  //restFrame.setSimultaneityPlaneVisible(false);
+  //restFrame.getAxesSettings().setSimultaneityPlaneVisible(false);
   
   // SELECTABLES
   myFanSelection = null;
@@ -429,7 +431,7 @@ void draw() {
     prefs.getFloat("backgroundColorSaturation"),
     prefs.getFloat("backgroundColorBrightness")
   );
-  background(c); //background((Float)prefs.get("backgroundColor"));
+  background(c);
   colorMode(RGB, 1.0f);
   //float LIGHTING_PARTICLES = 0.9;
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
@@ -437,7 +439,7 @@ void draw() {
   prefs.getFloat("STROKE_WIDTH");
   
   // UPDATE SCENE
-  inputDispatch.update();
+//  inputDispatch.update();
   
   // UPDATE TARGET
   float dilationFactor = prefs.getBoolean("PROPERTIME_SCALING") ? targetParticle.velocity.gamma : 1.0;
@@ -454,6 +456,7 @@ void draw() {
   targetParticle.update(dt);
   
   lorentzMatrix = Relativity.getLorentzTransformMatrix(targetParticle.velocity);
+  inverseLorentzMatrix = Relativity.getInverseLorentzTransformMatrix(targetParticle.velocity);
   Relativity.TOGGLE_SPATIAL_TRANSFORM = prefs.getBoolean("toggle_Spatial_Transform");
   Relativity.TOGGLE_TEMPORAL_TRANSFORM = prefs.getBoolean("toggle_Temporal_Transform");
   
@@ -480,6 +483,8 @@ void draw() {
   
   // RENDER
   particlesLayer.draw();
+  
+  inputDispatch.update();
   
   // PICKER / MOUSE
   Vector3f mouse = kamera.screenToModel(mouseX, mouseY);
@@ -532,12 +537,14 @@ void draw() {
   );
   
   // GUI LAYER
-  imageMode(CORNERS);
   camera();
+  imageMode(CORNERS);
   noLights(); //lights();
   perspective(PI/3.0, float(width)/float(height), 0.1, 10E7);
-  
   controlP5.draw();
+  
+  // RESET CAMERA 
+  kamera.commit();
 }
 
 class InputDispatch {
@@ -567,7 +574,7 @@ class InputDispatch {
       float offset = kamera.azimuth - HALF_PI;
       
       buttonPressure += (1 - buttonPressure) * buttonAccumulateFactor;
-      constrain(buttonPressure, 0, 1.0);      
+      constrain(buttonPressure, 0, 1.0);
       
       //println("Nudge: Direction: " + direction / PI);
       //println("Nudge: Offset:    " + offset / PI);
@@ -591,6 +598,8 @@ class InputDispatch {
     else {
       buttonPressure *= buttonDecayFactor;
     }
+    
+    updateParticleDragging();
   }
   
   void energyNudge(Particle particle, float theta) {
@@ -634,13 +643,128 @@ class InputDispatch {
       
       particle.propelSelf(dp_x, dp_y);
   }
+  
+  void updateParticleDragging() {
+    
+    if ( dragInProgress && mouseButton == LEFT && !particleSelector.isEmpty() && clickedParticle != null) {
+      
+      Vector3f dragPointerDisplayPos = kamera.screenToModel(mouseX, mouseY);
+      Vector3f dragPointerPos = Relativity.inverseDisplayTransform(targetParticle.velocity, dragPointerDisplayPos);
+      
+      Vector3f kameraPos = Relativity.inverseDisplayTransform(targetParticle.velocity, kamera.pos);
+      
+//      Vector3f dragRayDirectionDisplay = new Vector3f();
+//      dragRayDirectionDisplay.sub(dragPointerDisplayPos, kamera.pos);
+//      Vector3f dragRayDirectionDisplayInverse = Relativity.inverseDisplayTransform(targetParticle.velocity, dragRayDirectionDisplay);
+      
+      Vector3f dragRayDirection = new Vector3f();
+      dragRayDirection.sub(dragPointerPos, kameraPos);
+      
+//      intervalSay(10, "kameraPos:                      " + nfVec(kameraPos, 1));
+//      intervalSay(10, "dragRayDirectionDisplayInverse: " + nfVec(dragRayDirectionDisplayInverse, 1));
+//      intervalSay(10, "dragRayDirection:               " + nfVec(dragRayDirection, 1));
+      
+      Line dragLine = new Line();
+      dragLine.defineBySegment(kamera.pos, dragPointerPos);
+//      Line dragLine = new Line(dragPointerPos, dragRayDirection);
+      Plane clickedPlane = clickedParticle.getSimultaneityPlane();
+      
+      Vector3f intersect = new Vector3f();
+      clickedPlane.getIntersection(dragLine, intersect);
+      
+      Vector3f intersectDisplayPos = new Vector3f();
+      Relativity.displayTransform(lorentzMatrix, intersect, intersectDisplayPos);
+      
+      intervalSay(10, "intersect: " + nfVec(intersect, 1));
+      
+      pgl = (PGraphicsOpenGL)g;
+      gl = pgl.beginGL();
+        
+        clickedParticle.drawHeadGL(gl, intersectDisplayPos);
+        
+        Frame draggedFrame = clickedParticle.headFrame.clone();
+        ((DefaultFrame)draggedFrame).setPosition(intersect);
+        
+        myAxes.drawGL(gl, draggedFrame);
+        intervalSay(45, "drawingClickedParticle: " + nfVec(intersectDisplayPos, 1));
+        intervalSay(45, "clickedParticle: " + clickedParticle);
+        
+      pgl.endGL();
+      
+      Vector3f dragDirMarker = new Vector3f();
+      dragDirMarker.scaleAdd(1, dragRayDirection, kameraPos);
+      //dragDirMarker.scaleAdd(1, dragRayDirection, dragPointerDisplayPos);
+      Vector3f dragDirMarkerDisplay = Relativity.displayTransform(targetParticle.velocity, dragDirMarker);
+      
+      Plane testPlane = new Plane();
+      testPlane.setPoint(0,0,0);
+      testPlane.setNormal(1,0,1);
+      
+      Line testLine = new Line();
+      testLine.setPoint(0, 0, 20);
+      testLine.setDirection(-1, 0, -1);
+      
+      Vector3f testIntersect = new Vector3f();
+      testPlane.getIntersection(testLine, testIntersect);
+      
+      stroke(1, 1, 1, 1);
+      color(1, 1, 1, 1);
+      
+      line(testIntersect.x, testIntersect.y, testIntersect.z, testLine.p.x, testLine.p.y, testLine.p.z);
+      line(testIntersect.x, testIntersect.y, testIntersect.z, 0, 0, 0);
+      
+      line(testPlane.p.x, testPlane.p.y, testPlane.p.z, 
+           testPlane.p.x + testPlane.n.x, testPlane.p.y + testPlane.n.y, testPlane.p.z + testPlane.n.z);
+      
+      noStroke();
+      
+      // DRAW DEBUG MARKERS
+      Vector3f[] debugMarkers = new Vector3f[] {
+        testIntersect,
+//        kamera.pos,
+//        dragPointerDisplayPos,
+        intersectDisplayPos,
+        dragDirMarkerDisplay,
+      };
+      
+      for (int i=0; i<debugMarkers.length; i++) {
+        drawSphere(debugMarkers[i], 1f);
+      }
+    }
+  }
 }
+
+void drawSphere(Vector3f pos, float radius) {
+  pushMatrix();
+    translate(pos.x, pos.y, pos.z);
+    sphere(radius);
+  popMatrix();
+}
+
+/*
+class ParticleDragger {
+  
+  boolean dragStarted;
+  float millisLastClick;
+  Particle clickedParticle;
+  Vector3f dragPointerIntersect;
+  Vector3f dragOffset;
+}
+*/
+Particle clickedParticle;
 
 void mousePressed() {
   
   Selectable pickedParticle = (Particle) particleSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pickedLabel = labelSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pick = (pickedLabel != null) ? pickedLabel : pickedParticle;
+  
+  if (pick instanceof Particle) {
+    clickedParticle = (Particle) pick;
+  }
+  else {
+    clickedParticle = null;
+  }
   
   Dbg.say("labelSelector.selectables: " + labelSelector.selectables);
   Dbg.say("pickedLabel: " + pickedLabel);
@@ -699,6 +823,21 @@ void mousePressed() {
     else if (pick instanceof FanSelection) {
       labelSelector.invertSelectionStatus(pick);
     }
+  }
+  
+}
+
+void mouseReleased() {
+  
+  dragInProgress = false;
+}
+
+boolean dragInProgress;
+
+void mouseDragged() {
+  
+  if (!dragInProgress) {
+      dragInProgress = true;
   }
 }
 

@@ -108,26 +108,28 @@ static class Relativity {
     
     return M;
   }
-
-  public static Vector3f inverseTransform(Velocity vel, Vector3f xyt_v3f) {
-
-    loadVelocity(vel);
-    Vector3f xyt_prime_v3f = new Vector3f();
+  
+  public static Vector3f inverseTransform(Velocity vel, Vector3f v) {
     
-    Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
-    Matrix3f lorentzInverse = getLorentzInverseMatrix();
-    Matrix3f rotHeading = getRotationMatrix(v.direction, 0, 0, 1);
+    Vector3f v_prime = new Vector3f();
     
-    Matrix3f M = new Matrix3f();
-    M.set(rotHeading);
-    M.mul(lorentzInverse);
-    M.mul(rotHeadingInverse);
+    Matrix3f M = getInverseLorentzTransformMatrix(vel);    
     
-    M.transform(xyt_v3f, xyt_prime_v3f);
+    M.transform(v, v_prime);
     
-    return xyt_prime_v3f;
+    return v_prime;
   }
   
+  public static Vector3f inverseDisplayTransform(Velocity vel, Vector3f v) {
+    
+    Vector3f v_prime = new Vector3f();
+    Vector3f v_inverse = inverseTransform(vel, v);
+
+    selectInverseDisplayComponents(v, v_inverse, v_inverse);
+    return v_inverse;
+  }
+  
+  /*
   public static float[] inverseTransform(Velocity vel, float[] xyt) {
     
     float[] xyt_prime = new float[3];
@@ -143,7 +145,7 @@ static class Relativity {
     
     return selectInverseDisplayComponents(xyt, inverseTransform(vel, xyt));
   }
-  
+  */
   public static void lorentzTransform(Velocity vel, Vector3f source, Vector3f target){
     
     Matrix3f M = getLorentzTransformMatrix(vel);

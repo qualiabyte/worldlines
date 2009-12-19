@@ -23,14 +23,14 @@ class DefaultFrame implements Frame {
   
   Vector3f position = new Vector3f();
   Vector3f displayPosition = new Vector3f();
-
+  
   Velocity velocity = new Velocity();
   Plane simultaneityPlane = new Plane();
   Line velocityLine = new Line();
   
   float age;
   float ancestorsAge;
-
+  
   AxesSettings axesSettings = new AxesSettings();
 //  boolean axesVisible = true;
 //  boolean axesGridVisible = false;
@@ -71,7 +71,7 @@ class DefaultFrame implements Frame {
     simultaneityPlane.setPoint(position);
     velocityLine.setPoint(position);
   }
-
+  
   void setPosition(float[] pos) {
     setPosition(pos[0], pos[1], pos[2]);
   }

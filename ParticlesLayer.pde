@@ -100,6 +100,8 @@ class ParticlesLayer {
   
   void draw() {
     
+    //inputDispatch.updateParticleDragging();
+    
     restFrame.setPosition(targetParticle.getPosition());
     Frame[] displayFrames = new Frame[] {restFrame, targetParticle};
     
@@ -157,7 +159,7 @@ class ParticlesLayer {
     particleTexture.enable();
     particleTexture.bind();
     
-    for (int i=0; i < particles.size(); i++) {      
+    for (int i=0; i < particles.size(); i++) {
       Particle p = (Particle)particles.get(i);
       Vector3f tickPos = new Vector3f();
       Vector3f tickDisplayPos = new Vector3f();
@@ -171,15 +173,14 @@ class ParticlesLayer {
       float tickSpacingExponent = (int) ( log(p.getAge() + p.getAncestorsAge()) / log(10) );
       tickSpacing = pow(10, tickSpacingExponent);
       
-      if (p == targetParticle) {
-        intervalSay(45, "p.getAge(): " + p.getAge() + ", p.getAncestorsAge(): " + p.getAncestorsAge());
-        intervalSay(45, "tickSpacingExponent: " + tickSpacingExponent + ", tickSpacing: " + tickSpacing);
-        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length); 
-        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length);
-        intervalSay(45, "p.frameHist[" + p.histCount + "]:" +  p.frameHist[p.histCount]);
-        intervalSay(45, "p.frameHist[" + (p.histCount + 1) + "]: " + p.frameHist[(p.histCount + 1)]);
-        
-      }
+//      if (p == targetParticle) {
+//        intervalSay(45, "p.getAge(): " + p.getAge() + ", p.getAncestorsAge(): " + p.getAncestorsAge());
+//        intervalSay(45, "tickSpacingExponent: " + tickSpacingExponent + ", tickSpacing: " + tickSpacing);
+//        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length); 
+//        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length);
+//        intervalSay(45, "p.frameHist[" + p.histCount + "]:" +  p.frameHist[p.histCount]);
+//        intervalSay(45, "p.frameHist[" + (p.histCount + 1) + "]: " + p.frameHist[(p.histCount + 1)]);
+//      }
       
       for (int j=0; j<p.histCount; j++) {
         Frame f = p.frameHist[j];

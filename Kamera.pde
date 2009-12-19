@@ -80,14 +80,14 @@ class Kamera {
     screenToKameraMap.transform(screenVec, kameraVec);
     
     // TRANSLATE TO MODEL XYZ
-    Vector3f model = new Vector3f();
+    Vector3f modelPos = new Vector3f();
     
-    model.set(this.pos);
-    model.scaleAdd(distToKameraPlane,           this.look,  model);
-    model.scaleAdd(kameraVec.x, this.right, model);
-    model.scaleAdd(kameraVec.y, this.up,    model);
+    modelPos.set(this.pos);
+    modelPos.scaleAdd(distToKameraPlane, this.look,  modelPos);
+    modelPos.scaleAdd(kameraVec.x, this.right, modelPos);
+    modelPos.scaleAdd(kameraVec.y, this.up,    modelPos);
     
-    return model;
+    return modelPos;
   }
   
   void mouseWheel(int delta) {

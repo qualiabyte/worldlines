@@ -5,10 +5,12 @@ interface Control {
 }
 
 class DefaultControl implements Control {
+  String name;
   String label;
   Object value;
   
   DefaultControl(String label, Object value) {
+    this.name = label;
     this.label = label;
     this.value = value;
   }
@@ -22,7 +24,7 @@ class DefaultControl implements Control {
   void setValue(Object theValue) { this.value = theValue; }
 }
 
-class FloatControl extends DefaultControl implements Control {
+class FloatControl extends DefaultControl {
   
   float min;
   float max;
@@ -43,7 +45,7 @@ class FloatControl extends DefaultControl implements Control {
   }
 }
 
-class BooleanControl extends DefaultControl implements Control {
+class BooleanControl extends DefaultControl {
   
   BooleanControl(String label, Boolean value) {
     this.label = label;
@@ -55,17 +57,36 @@ class BooleanControl extends DefaultControl implements Control {
   }
 }
 
+class ButtonControl extends DefaultControl {
+  ButtonControl(String label) {
+    this.label = label;
+    this.value = label;
+  }
+}
+
 class ControlPanel {
   ArrayList controls;
   String name;
+  String label;
   
   ControlPanel(String name) {
     this.name = name;
+    this.label = name;
     controls = new ArrayList();
+  }
+  
+  void setLabel(String label) {
+    this.label = label;
   }
   
   void addControl(Control c) {
     controls.add(c);
+  }
+  
+  ButtonControl putButton(String label) {
+    ButtonControl c = new ButtonControl(label);
+    addControl(c);
+    return c;
   }
   
   void putBoolean(String label, Boolean value) {
@@ -86,6 +107,25 @@ class ControlPanel {
 
 class ControlMap extends HashMap {
   
+  ControlMap (ControlPanel[] controlPanels) {
+  
+    for (int i=0; i < controlPanels.length; i++) { 
+      this.putControlPanel(controlPanels[i]);
+    }
+  }
+  
+  void putControlPanel (ControlPanel panel) {
+    
+    this.putControls(panel.controls);
+  }
+  
+  void putControls (java.util.List controls) {
+    for (int i=0; i<controls.size(); i++) {
+      Control c = (Control) controls.get(i);
+      this.putControl(c);
+    }
+  }
+  
   Control getControl(String label) {
     return (Control) this.get(label);
   }
@@ -93,14 +133,7 @@ class ControlMap extends HashMap {
   void putControl(Control c) {
     this.put(c.getLabel(), c);
   }
-  /*
-  void putBooleanControl(BooleanControl) {
-    this.put(BooleanControl.label, BooleanControl);
-  }
-  void putFloatControl(FloatControl) {
-    this.put(FloatControl.label, FloatControl);
-  }
-  */
+  
   BooleanControl getBooleanControl(String label) {
     return (BooleanControl) this.get(label);
   }
@@ -116,7 +149,7 @@ class ControlMap extends HashMap {
   Float getFloat(String label) {
     
     Control fc = (Control) this.get(label);
-    return (Float) (fc).getValue();
+    return (Float) fc.getValue();
   }
   
   String getString(String label) {
@@ -131,3 +164,4 @@ class ControlMap extends HashMap {
     }
   }
 }
+

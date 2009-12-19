@@ -27,6 +27,7 @@ class Kamera {
   
   void updateScreenToKameraMap() {
     
+    distToKameraPlane = 100;
     screenToKameraMap = getScreenToKameraCoordinateMap();
     println("screenToKameraMap: \n" + screenToKameraMap);
   }
@@ -38,10 +39,11 @@ class Kamera {
     Vector3f kamX = new Vector3f();
     Vector3f kamY = new Vector3f();
     
-    float n = prefs.getFloat("kam_units_scale");
+    //float n = prefs.getFloat("kam_units_scale");
+    float n = 1;
     
     kamX.set(this.pos);
-    kamX.scaleAdd(1, this.look, kamX);
+    kamX.scaleAdd(distToKameraPlane, this.look, kamX);
     
     kamY.set(kamX);
     
@@ -66,9 +68,6 @@ class Kamera {
   
   Vector3f screenToModel(float theScreenX, float theScreenY) {
     
-    //screenToKameraMap = getScreenToKameraCoordinateMap();
-    //intervalSay(45, "screenToKameraMap: \n" + screenToKameraMap);
-    
     Vector3f screenVec = new Vector3f(theScreenX - width/2, theScreenY - height/2, 0);
     Vector3f kameraVec = new Vector3f();
     
@@ -79,7 +78,7 @@ class Kamera {
     Vector3f model = new Vector3f();
     
     model.set(this.pos);
-    model.scaleAdd(1,           this.look,  model);
+    model.scaleAdd(distToKameraPlane,           this.look,  model);
     model.scaleAdd(kameraVec.x, this.right, model);
     model.scaleAdd(kameraVec.y, this.up,    model);
     
@@ -89,8 +88,6 @@ class Kamera {
   void mouseWheel(int delta) {
     mouseWheel -= delta;
     radiusVel += mouseWheel;
-    
-    println("mouseWheel: " + mouseWheel);
   }
   
   void update(float dt) {
@@ -194,6 +191,7 @@ class Kamera {
            up.x,      up.y,      up.z);
   }
   
+  float distToKameraPlane;
   Matrix3f screenToKameraMap;
   
   float mouseWheel;

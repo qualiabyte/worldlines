@@ -19,6 +19,10 @@ class Particle implements Frame {
     return headFrame.getVelocity();
   }
   
+  Vector3f getPositionVec() {
+    return headFrame.position;
+  }
+  
   Vector3f getDisplayPositionVec() {
     return headFrame.displayPosition;
   }
@@ -38,7 +42,7 @@ class Particle implements Frame {
   
   {
     colorMode(RGB,1.0);
-    setPathColor(color(0,0.8,0.8,LIGHTING_WORLDLINES));
+    setPathColor(color(0,0.8,0.8,prefs.getFloat("LIGHTING_WORLDLINES")));
   }
   
   Particle( Vector3f pos, Vector3f vel ){
@@ -240,14 +244,17 @@ class Particle implements Frame {
     float r, g, b, a;
     
     //float alphaFactor = 0.5 * pathColorA / ((float)histCount);
-    float alphaFactor = 0.5 * LIGHTING_WORLDLINES / ((float)histCount);
+    float alphaFactor = 0.5 * prefs.getFloat("LIGHTING_WORLDLINES") / ((float)histCount);
     
-    float wavenumberFactor = TWO_PI * HARMONIC_FRINGES / position.z;
+    //float wavenumberFactor = TWO_PI * HARMONIC_FRINGES / position.z;
+    float wavenumberFactor = TWO_PI * prefs.getFloat("HARMONIC_FRINGES") / position.z;
     //float redWavenumberFactor = TWO_PI / 800;
+    float harmContrib = prefs.getFloat("HARMONIC_CONTRIBUTION");
     
     for (int i=0; i <= histCount; i++) {
       
-      float harmonic = HARMONIC_CONTRIBUTION * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
+      //float harmonic = HARMONIC_CONTRIBUTION * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
+      float harmonic = harmContrib * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
       
       r = (pathColorR+properTimeHist[i]%400)/400;
       g = pathColorG - harmonic;
@@ -319,8 +326,8 @@ class Particle implements Frame {
     
     updateEmission();
     
-    float dp_x = impulseX * INPUT_RESPONSIVENESS;
-    float dp_y = impulseY * INPUT_RESPONSIVENESS;
+    float dp_x = impulseX * prefs.getFloat("INPUT_RESPONSIVENESS");
+    float dp_y = impulseY * prefs.getFloat("INPUT_RESPONSIVENESS");
 
     impulseX -= dp_x;
     impulseY -= dp_y;

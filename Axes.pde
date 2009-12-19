@@ -58,7 +58,7 @@ class Axes {
       //basis_inverse[i] = Relativity.inverseTransform(vel, basis[i]);
       //basis_display[i] = Relativity.displayTransform(targetParticle.velocity, basis_prime[i]);
       
-      vel.basis_inverse[i].get(basis_prime[i]);      
+      vel.basis_inverse[i].get(basis_prime[i]);
       basis_prime[i] = Relativity.displayTransform(targetParticle.velocity, basis_prime[i]);
     }
     

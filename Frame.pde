@@ -1,13 +1,11 @@
 interface Frame {
 
-  //Position getPosition();
   Velocity getVelocity();
   
   float[] getPosition();
-  //float[] getVelocity();
-
   float[] getDisplayPosition();
   
+  Vector3f getPositionVec();
   Vector3f getDisplayPositionVec();
   
   Plane getSimultaneityPlane();
@@ -82,6 +80,10 @@ class DefaultFrame implements Frame {
   
   Velocity getVelocity(){
     return velocity;
+  }
+  
+  Vector3f getPositionVec() {
+    return position;
   }
   
   float[] getPosition(){

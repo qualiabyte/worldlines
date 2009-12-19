@@ -28,7 +28,7 @@ class Infobox {
     infolines = new Infoline[maxlines];
   }
   
-  private Font loadFont( byte[] fontBytes ){
+  Font loadFont( byte[] fontBytes ){
 
     Font font = null;
     
@@ -54,7 +54,7 @@ class Infobox {
   Infoline addLine( String text ) {
   
       return infolines[numlines++] = new Infoline(text);
-  };
+  }
   
   void print( String text ) {
     

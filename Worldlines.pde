@@ -7,6 +7,9 @@ import controlP5.*;
 import javax.vecmath.*;
 import geometry.*;
 
+import java.awt.geom.Rectangle2D;
+import org.apache.commons.math.*;
+
 import com.sun.opengl.util.texture.*;
 import com.sun.opengl.util.BufferUtil;
 import java.nio.ByteBuffer;
@@ -40,23 +43,13 @@ float C = 1.0;
 float timeDelta = 0.2;
 
 // GUI Control Vars
-public int MAX_PARTICLES = 500;
-public int PARTICLES = MAX_PARTICLES/10; ///3;
-public int TARGETS = 1;
+//public int MAX_PARTICLES = 500;
+public int PARTICLES = 50;//MAX_PARTICLES/10;
+//public int TARGETS = 1;
+
 public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
 
-public float MAX_START_POS_DISPERSION = 3;
-/*
-public float START_POS_DISPERSION_X = 0;
-public float START_POS_DISPERSION_Y = 0;
-
-public float MAX_START_VEL_DISPERSION = 20;
-public float START_VEL_DISPERSION = 5.4; //4.2; //1.8;
-
-public float MAX_START_VEL_ECCENTRICITY = 15;
-public float START_VEL_ECCENTRICITY = 1.95;
-*/
 public void randomize() {
   
   String[] floatLabels = new String[] {
@@ -73,45 +66,11 @@ public void randomize() {
     float randomValue = random(control.max);
     
     control.setValue(randomValue);
-    //prefs.put(label, Float.valueOf(randomValue));
   }
-  /*
-  START_POS_DISPERSION_X = random(MAX_START_POS_DISPERSION);
-  START_POS_DISPERSION_Y = random(MAX_START_POS_DISPERSION);
-  START_VEL_DISPERSION = random(MAX_START_VEL_DISPERSION);
-  START_VEL_ECCENTRICITY = random(MAX_START_VEL_ECCENTRICITY);
-  */
-  TARGETS = (int)(random(1, PARTICLES/3));
+
+  //TARGETS = (int)(random(1, PARTICLES/3));
   setup();
 }
-
-public float HARMONIC_FRINGES = 3.4;
-public float HARMONIC_FRINGES_MAX = 16;
-
-public float HARMONIC_CONTRIBUTION = 0.5;
-public float HARMONIC_CONTRIBUTION_MIN = 0;
-public float HARMONIC_CONTRIBUTION_MAX = 1;
-
-public boolean TOGGLE_TIMESTEP_SCALING = true;
-public boolean TOGGLE_SPATIAL_TRANSFORM = true;
-public boolean TOGGLE_TEMPORAL_TRANSFORM = true;
-
-public void toggleSpatialTransform () {
-  TOGGLE_SPATIAL_TRANSFORM = Relativity.TOGGLE_SPATIAL_TRANSFORM ^= true;
-}
-public void toggleTemporalTransform () {
-  TOGGLE_TEMPORAL_TRANSFORM = Relativity.TOGGLE_TEMPORAL_TRANSFORM ^= true;
-}
-
-public float PARTICLE_SIZE = 1.3;//0.75;
-public float PARTICLE_SIZE_MAX = 10;
-public float LIGHTING_PARTICLES = 0.75;
-public float LIGHTING_WORLDLINES = 0.8;
-public float STROKE_WIDTH = 2.0;
-public float STROKE_WIDTH_MAX = 8.0;
-
-public float MAX_INPUT_RESPONSIVENESS = 1.0;
-public float INPUT_RESPONSIVENESS = 0.8;
 
 // Input Device Vars
 public boolean MOUSELOOK = true;
@@ -169,88 +128,111 @@ void controlEvent(ControlEvent event) {
   }
 }
 
-ControlMap buildPreferencesControlMap(ControlPanel[] controlPanels) {
-  
-  ControlMap controlMap = new ControlMap();
-  
-  for (int p=0; p<controlPanels.length; p++) { 
-    
-    ArrayList controls = controlPanels[p].controls;
-    
-    for (int i=0; i<controls.size(); i++) {
-      Control c = (Control) controls.get(i);
-      controlMap.putControl(c);
-    }
-  }
-  return controlMap;
-}
-
-Hashtable buildPreferences(ControlPanel[] controlPanels) {
-  
-  Hashtable hash = new Hashtable();
-  
-  for (int p=0; p<controlPanels.length; p++) { 
-    
-    ArrayList controls = controlPanels[p].controls;
-    
-    for (int i=0; i<controls.size(); i++) {
-      Control c = (Control) controls.get(i);
-      hash.put(c.getLabel(), c.getValue());
-    }
-  }
-  return hash;
-}
-
 void setup() {
-  size(900, 530, OPENGL);
-  ////size(900, 540, OPENGL);
+  //size(900, 530, OPENGL);
+  size(900, 540, OPENGL);
   //size(1280, 900, OPENGL);
   
   frameRate(45);
   //hint(DISABLE_DEPTH_SORT);
   
-  initScene();
+  restart();//  initScene();
 }
 
+VTextRenderer myVTextRenderer;
 Infobox myInfobox;
+Labelor myLabelor;
+
 ControlPanel[] controlPanels;
 ControlMap prefs;
-//Hashtable prefs;
 
-void initScene() {
+//void initScene() {
+void restart() {
   
-  ControlPanel dynamicPanel = new ControlPanel("dynamic");
-  dynamicPanel.putBoolean("useEmissions", true);
-  dynamicPanel.putBoolean("useGL", true);
-  dynamicPanel.putBoolean("showAxesGrid", false);
-  //dynamicPanel.putBoolean("useMatrixForPathTransform", true);
-  dynamicPanel.putFloat("backgroundColorHue", 0.65f);
-  dynamicPanel.putFloat("backgroundColorSaturation", 0.65f);
-  dynamicPanel.putFloat("backgroundColorBrightness", 0.17f);
-  dynamicPanel.putFloat("kam_units_scale", 1, 0, 8);
+  Control restart = new ButtonControl("restart");
+  Control randomize = new ButtonControl("randomize");
+  /*
+  // Global Tab
+  ControlPanel globalPanel = new ControlPanel("global");
+  globalPanel.addControl(restart);
+  globalPanel.addControl(randomize);
+  */
+  ControlPanel panel;
   
-  ControlPanel setupPanel = new ControlPanel("setup2");
-  setupPanel.putFloat("START_POS_DISPERSION_X", 2.6, 0, 3);
-  setupPanel.putFloat("START_POS_DISPERSION_Y", 2.6, 0, 3);
-  setupPanel.putFloat("START_VEL_DISPERSION", 5.4, 0, 20);
-  setupPanel.putFloat("START_VEL_ECCENTRICITY", 1.95, 0, 15);
+  // SETUP PANEL
+  ControlPanel setupPanel = new ControlPanel("setup");
+  panel = setupPanel;
+  panel.addControl(restart);
+  panel.addControl(randomize);
+  panel.putFloat("PARTICLES", PARTICLES, 0, PARTICLES*5);
+  panel.putFloat("TARGETS", 3f, 0, PARTICLES);
+  panel.putFloat("START_POS_DISPERSION_X", 2.6, 0, 3);
+  panel.putFloat("START_POS_DISPERSION_Y", 2.6, 0, 3);
+  panel.putFloat("START_VEL_DISPERSION", 5.4, 0, 20);
+  panel.putFloat("START_VEL_ECCENTRICITY", 1.95, 0, 15);
   
-  if (controlPanels == null ) {
-    controlPanels = new ControlPanel[] { setupPanel, dynamicPanel };
+  // MAIN PANEL
+  ControlPanel mainPanel = new ControlPanel("default");
+  panel = mainPanel;
+  panel.addControl(restart);
+  panel.addControl(randomize);
+  panel.setLabel("MAIN");
+  panel.putBoolean("TOGGLE_TIMESTEP_SCALING", true);
+  panel.putBoolean("toggleSpatialTransform", true);
+  panel.putBoolean("toggleTemporalTransform", true);
+  panel.putBoolean("2D_motion", true);
+  panel.putBoolean("useEmissions", true);
+  panel.putBoolean("showAxesGrid", false);
+  
+  // DEBUG PANEL
+  ControlPanel debugPanel = new ControlPanel("debug");
+  panel = debugPanel;
+  panel.putBoolean("useGL", true);
+  panel.putFloat("backgroundColorHue", 0.65f);
+  panel.putFloat("backgroundColorSaturation", 0.65f);
+  panel.putFloat("backgroundColorBrightness", 0.17f);
+  panel.putFloat("momentumNudge", 0.003, 0, 1);
+  panel.putFloat("INPUT_RESPONSIVENESS", 1.0);
+  //panel.putBoolean("useMatrixForPathTransform", true);
+  //panel.putFloat("kam_units_scale", 1, 0, 8);
+  
+  // GRAPHICS PANEL
+  ControlPanel graphicsPanel = new ControlPanel("graphics");
+  panel = graphicsPanel;
+  panel.putFloat("PARTICLE_SIZE", 1.3, 0, 10);
+  panel.putFloat("LIGHTING_WORLDLINES", 0.8);
+  panel.putFloat("STROKE_WIDTH", 2, 0, 8);
+  //panel.putFloat("LIGHTING_PARTICLES", 0.75);
+  panel.putFloat("HARMONIC_FRINGES", 3.4, 0, 16);
+  panel.putFloat("HARMONIC_CONTRIBUTION", 0.5);
+  
+  if (controlPanels == null) {
+    controlPanels = new ControlPanel[] {
+      setupPanel,
+      //globalPanel,
+      mainPanel,
+      debugPanel,
+      graphicsPanel
+    };
   }
   
   // PREFERENCES
-  prefs = buildPreferencesControlMap(controlPanels);
-  
+  prefs = new ControlMap(controlPanels);
+    
   prefs.put("particleImagePath", "particle.png");
   prefs.put("selectedParticleImagePath", "particle_reticle.png");
+  prefs.put("startPosWeight", "cauchy");
   
-  Dbg.say("prefs.getFloat(\"START_POS_DISPERSION_X\"): " + prefs.getFloat("START_POS_DISPERSION_X"));
-  Dbg.say("prefs.getFloat(\"backgroundColorBrightness\"): " + prefs.getFloat("backgroundColorBrightness"));
+  byte[] fontBytes = loadBytes(bundledFont);
+  int fontSize = (int)(0.025 * height);
+  println(fontSize);
   
-  myInfobox = new Infobox(loadBytes(bundledFont), (int)(0.025 * height));
+  myInfobox = new Infobox(fontBytes, fontSize);
   
-  String tabLabel;
+  Font font = myInfobox.loadFont(fontBytes);
+  myVTextRenderer = new VTextRenderer(font.deriveFont((float)40), (int)(1*fontSize));
+  myLabelor = new Labelor();
+  
   int numGlobalControls = 0;
   int numTabControls = 0;
   
@@ -264,7 +246,7 @@ void initScene() {
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
   controlP5.setColorForeground(#093967);
-  
+  /*
   // Global Controls (All Tabs)
   //controlP5.addButton("setup", 0, xOffsetGlobal, ++numGlobalControls*bSpacingY, 2*bWidth, bHeight).moveTo("global");
   //controlP5.controller("setup").setLabel("RESTART");
@@ -272,42 +254,16 @@ void initScene() {
   controlP5.controller("initScene").setLabel("RESTART");
   controlP5.addButton("randomize", 0, (int)3*bWidth, numGlobalControls*bSpacingY, (int)(2.6*bWidth), bHeight).moveTo("global");
   controlP5.addSlider("PARTICLES", 0, MAX_PARTICLES, PARTICLES, 10, ++numGlobalControls*bSpacingY, sliderWidth, bHeight).moveTo("global");
-  
-  int yOffsetGlobal = numGlobalControls*bSpacingY + bHeight;
-  
-  // Main Tab
-  tabLabel = "Main";
-  controlP5.tab("default").setLabel(tabLabel);
-  numTabControls = numGlobalControls;
-  controlP5.addSlider("HARMONIC_FRINGES", 0, HARMONIC_FRINGES_MAX, HARMONIC_FRINGES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("HARMONIC_CONTRIBUTION", HARMONIC_CONTRIBUTION_MIN, HARMONIC_CONTRIBUTION_MAX, HARMONIC_CONTRIBUTION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("INPUT_RESPONSIVENESS", 0f, MAX_INPUT_RESPONSIVENESS, INPUT_RESPONSIVENESS, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("PARTICLE_SIZE", 0f, PARTICLE_SIZE_MAX, PARTICLE_SIZE, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("LIGHTING_PARTICLES", 0f, 1.0f, LIGHTING_PARTICLES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("LIGHTING_WORLDLINES", 0f, 1.0f, LIGHTING_WORLDLINES, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addSlider("STROKE_WIDTH", 0f, STROKE_WIDTH_MAX, STROKE_WIDTH, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight);
-  controlP5.addToggle("TOGGLE_TIMESTEP_SCALING",TOGGLE_TIMESTEP_SCALING,10,++numTabControls*bSpacingY,bWidth,bHeight);
-  controlP5.addToggle("toggleSpatialTransform", TOGGLE_SPATIAL_TRANSFORM, 10, ++numTabControls*bSpacingY,bWidth,bHeight);
-  controlP5.addToggle("toggleTemporalTransform", TOGGLE_TEMPORAL_TRANSFORM, 10, ++numTabControls*bSpacingY,bWidth,bHeight);
-  
-  Relativity.TOGGLE_SPATIAL_TRANSFORM = TOGGLE_SPATIAL_TRANSFORM;
-  Relativity.TOGGLE_TEMPORAL_TRANSFORM = TOGGLE_TEMPORAL_TRANSFORM;
-  /*
-  // Setup Tab
-  tabLabel = "SETUP";
-  controlP5.addTab(tabLabel);
-  numTabControls = numGlobalControls;
-  controlP5.addSlider("START_POS_DISPERSION_X", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_X, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
-  controlP5.addSlider("START_POS_DISPERSION_Y", 0, MAX_START_POS_DISPERSION, START_POS_DISPERSION_Y, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
-  controlP5.addSlider("START_VEL_DISPERSION", 0, MAX_START_VEL_DISPERSION, START_VEL_DISPERSION, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
-  controlP5.addSlider("START_VEL_ECCENTRICITY", 0, MAX_START_VEL_ECCENTRICITY, START_VEL_ECCENTRICITY, 10, ++numTabControls*bSpacingY, sliderWidth, bHeight).moveTo(tabLabel);
   */
-  // Dynamic Tab (TESTING)
+  
+  // BUILD CONTROLP5
   for (int panelIndex=0; panelIndex<controlPanels.length; panelIndex++) {
-    ControlPanel panel = controlPanels[panelIndex];
-    tabLabel = panel.name;
+  
+    ControlPanel thePanel = controlPanels[panelIndex];
+    String tabName = thePanel.name;
+    String tabLabel = thePanel.label;
     
-    controlP5.addTab(tabLabel);
+    controlP5.addTab(tabName).setLabel(tabLabel);
     
     boolean defaultValue = false;
     int xPadding = 10;
@@ -316,11 +272,13 @@ void initScene() {
     int toggleWidth = 20;
     int toggleHeight = 20;
     
+    int yOffsetGlobal = numGlobalControls*bSpacingY + bHeight;
+    
     int xOffset = xOffsetGlobal;
     int yOffset = yPadding + yOffsetGlobal;
     
-    for (int i=0; i<panel.controls.size(); i++) {
-      Control control = (Control) panel.controls.get(i);
+    for (int i=0; i<thePanel.controls.size(); i++) {
+      Control control = (Control) thePanel.controls.get(i);
       
       Object prefValue = control.getValue();
       String label =  control.getLabel();
@@ -331,7 +289,7 @@ void initScene() {
       
       if (prefValue instanceof java.lang.Boolean) {
         
-        controlP5.addToggle(label, (Boolean) prefValue, xOffset, yOffset, toggleWidth, toggleHeight).moveTo(tabLabel);
+        controlP5.addToggle(label, (Boolean) prefValue, xOffset, yOffset, toggleWidth, toggleHeight).moveTo(tabName);
         //Toggle t = (Toggle) controlP5.controller(keyName);
         
         yOffset += toggleHeight + yPadding;
@@ -340,7 +298,11 @@ void initScene() {
         float minValue = ((FloatControl)control).min;
         float maxValue = ((FloatControl)control).max;
         
-        controlP5.addSlider(label, minValue, maxValue, (Float) prefValue, xOffset, yOffset, sliderWidth, bHeight).moveTo(tabLabel);
+        controlP5.addSlider(label, minValue, maxValue, (Float) prefValue, xOffset, yOffset, sliderWidth, bHeight).moveTo(tabName);
+        yOffset += bHeight + yPadding;
+      }
+      else if (control instanceof ButtonControl) {
+        controlP5.addButton(label, 0, xOffset, yOffset, 2*bWidth, bHeight).moveTo(tabName);
         yOffset += bHeight + yPadding;
       }
     }
@@ -360,12 +322,26 @@ void initScene() {
   particles = new ArrayList();
   particles.add(targetParticle);
   
-  for(int i=1; i<PARTICLES; i++){
+  for (int i=1; i<prefs.getFloat("PARTICLES"); i++) {
     
-    float x = pow(10, prefs.getFloat("START_POS_DISPERSION_X"));
-    float y = pow(10, prefs.getFloat("START_POS_DISPERSION_Y"));
+    float xScale = pow(10, prefs.getFloat("START_POS_DISPERSION_X"));
+    float yScale = pow(10, prefs.getFloat("START_POS_DISPERSION_Y"));
     
-    Vector3f pos = new Vector3f(random(-x, +x), random(-y, +y), 0);
+    float x, y;
+    
+    if (prefs.getString("startPosWeight") == "cauchy") {
+      float cauchyGamma = 0.1;
+      float radius = cauchyWeightedRandom(cauchyGamma);
+      float theta = random(0, TWO_PI);
+      x = radius * cos(theta) * xScale;
+      y = radius * sin(theta) * yScale;
+    }
+    else {
+      x = random(-xScale, +xScale);
+      y = random(-yScale, +yScale);
+    }
+    
+    Vector3f pos = new Vector3f(x, y, 0);
     
     // Exponentially weight distribution of velocities towards lightspeed
     float vel_mag = 1-pow(random(1, 2), -prefs.getFloat("START_VEL_DISPERSION"));
@@ -387,8 +363,19 @@ void initScene() {
   println("target gamma:     " + targetParticle.velocity.gamma);
   
   targets = new ArrayList();
-  for (int i=0; i<TARGETS; i++) {
-    addTarget((Particle)particles.get(i));
+  float numTargets = prefs.getFloat("TARGETS");
+  for (int i=0; i < numTargets; i++) {
+    Particle p = (Particle) particles.get(i);
+    addTarget(p);
+    
+    float theta = TWO_PI * ((float)i) / numTargets;
+    float r = 5 * numTargets;
+    Dbg.say("theta/TWO_PI, r: " + theta/TWO_PI + " " + r);
+    //Vector3f pos = new Vector3f(1 + random(-1, 1) * cos(theta), 1 + random(-1, 1) * sin(theta), 0);
+    Vector3f pos = new Vector3f(cos(theta), sin(theta), 0);
+    Dbg.say("pos: " + pos);
+    pos.scaleAdd(r, pos, targetParticle.getPositionVec());
+    p.setPosition(pos);
   }
   
   emissions = new ArrayList();
@@ -414,6 +401,21 @@ void initScene() {
   //particleUpdater.start();
 }
 
+float cauchyWeightedRandom(float gamma) {
+  
+  while (true) {
+    float x = random(0, gamma*20);
+    float probability = cauchyPDF(x, gamma);
+    if (probability > random(0, 1)) {
+      return x;
+    }
+  }
+}
+
+float cauchyPDF(float x, float gamma) {
+  return 1.0f / (PI*(1 + pow(x / gamma, 2.0)));
+}
+
 void addTarget(Particle p){
   targets.add(p);
   p.velocity.set(targetParticle.velocity);
@@ -428,8 +430,6 @@ void addEmission(Particle e){
   }
 }
 
-float[] vel = new float[3];
-
 void draw() {
   pgl = (PGraphicsOpenGL)g;
   gl = pgl.beginGL();
@@ -443,7 +443,7 @@ void draw() {
   gl.glDisable(GL.GL_DEPTH_TEST);
   gl.glDepthMask(false);
   
-  gl.glLineWidth(STROKE_WIDTH);
+  gl.glLineWidth(prefs.getFloat("STROKE_WIDTH"));
   pgl.endGL();
   
   // SCENE PREP
@@ -458,12 +458,13 @@ void draw() {
   colorMode(RGB, 1.0f);
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
-  strokeWeight(STROKE_WIDTH);
+  prefs.getFloat("STROKE_WIDTH");
   
   // UPDATE SCENE
   inputDispatch.update();
+  particleSelector.update(kamera);
   
-  float dilationFactor = TOGGLE_TIMESTEP_SCALING ? targetParticle.velocity.gamma : 1.0;
+  float dilationFactor =  prefs.getBoolean("TOGGLE_TIMESTEP_SCALING") ? targetParticle.velocity.gamma : 1.0;
   float dt = timeDelta * dilationFactor;
   
   particleUpdater.dt = dt;
@@ -472,49 +473,20 @@ void draw() {
   
   //Relativity.loadFrame(targetParticle);
   lorentzMatrix = Relativity.getLorentzTransformMatrix(targetParticle.velocity);
+  Relativity.TOGGLE_SPATIAL_TRANSFORM = prefs.getBoolean("toggleSpatialTransform");
+  Relativity.TOGGLE_TEMPORAL_TRANSFORM = prefs.getBoolean("toggleTemporalTransform");
   
   targetParticle.updateTransformedHist(lorentzMatrix);
   
-  boolean SIMPLE_UPDATES = true;
-  
-  if (SIMPLE_UPDATES){
-    
-    for (int i=0; i<particles.size(); i++) {
-      Particle p = (Particle)particles.get(i);
-      if (p == targetParticle) {
-        continue;
-      }
-      else {
-        p.update(dt);
-        p.updateTransformedHist(lorentzMatrix);
-      }
-    }
-  }/*
-  else {
-    // UPDATE TARGET  
-    targetParticle.update(dt);  
-    targetParticle.updateTransformedHist(lorentzMatrix);
-    
-    // UPDATE NON-TARGETS
-    for (int i=0; i<PARTICLES; i++) {
-      Particle p = (Particle)particles.get(i);
-      
-      if (p == targetParticle)
-      {
-        continue;
-      }
-      else if( p.xyt_prime[2] > targetParticle.prime[2] )
-      {
-        p.updateTransformedHist(lorentzMatrix);
-        continue;
-      } 
-      else {
-        p.update(dt);
-        p.updateTransformedHist(lorentzMatrix);
-      }
+  for (int i=0; i<particles.size(); i++) {
+    Particle p = (Particle) particles.get(i);
+
+    if (p != targetParticle) {
+      p.update(dt);
+      p.updateTransformedHist(lorentzMatrix);
     }
   }
-  */
+  
   // CAMERA PREP
   kamera.updateTarget(targetParticle.getDisplayPosition());
   kamera.update(timeDelta);
@@ -522,25 +494,32 @@ void draw() {
   // RENDER
   particlesLayer.draw(); //particleGrid.draw(targetParticle.xyt);
   
-  // PICKING PROCESS
-  
-  Vector3f model = kamera.screenToModel(mouseX, mouseY);
+  // PICKER
+  Vector3f mouse = kamera.screenToModel(mouseX, mouseY);
   
   pgl = (PGraphicsOpenGL)g;
   gl = pgl.beginGL();
   
-  beginCylindricalBillboardGL(model.x, model.y, model.z);
-  float s = 0.1; //0.03;
-  gl.glScalef(s, s, s);
-  gl.glRotatef(25, 0, 0, 1);
-  gl.glRotatef(20, 1, 0, 0);
-  gl.glRotatef(0.4*millis(), 0, 1, 0);
-  gl.glTranslatef(0, -1, 0);
-  glTriangle(gl);
-  //gl.glTranslatef(0, 0, -0.1);
-  gl.glRotatef(35, 0, 1, 0);
-  glTriangle(gl);
+  beginCylindricalBillboardGL(mouse.x, mouse.y, mouse.z);
+  
+      float s = 5;
+      // MOUSE
+      gl.glPushMatrix();
+        gl.glColor4f(1, 1, 1, 0.5);
+        gl.glScalef(s, s, s);
+        gl.glRotatef(35, 0, 0, 1);
+        gl.glRotatef(-20, 1, 0, 0);
+        gl.glRotatef(0.4*millis(), 0, 1, 0);
+        gl.glTranslatef(0, -1, 0);
+        glTriangle(gl);
+        gl.glRotatef(35, 0, 1, 0);
+        glTriangle(gl);
+      gl.glPopMatrix();
+  
   endBillboardGL();
+  
+  //myLabelor.drawLabelGL(gl, "mouse", mouse);
+  myLabelor.drawLabelGL(gl, "targetParticle", targetParticle.getDisplayPositionVec(), false);
   
   pgl.endGL();
   
@@ -686,7 +665,9 @@ class ParticlesLayer {
     
     restFrame.setPosition(targetParticle.getPosition());
     Frame[] displayFrames = new Frame[] {restFrame, targetParticle};
-        
+    
+    float PARTICLE_SIZE = prefs.getFloat("PARTICLE_SIZE");
+    
     // GL SECTION BEGIN
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
@@ -757,10 +738,8 @@ class ParticlesLayer {
       selectedParticleTexture.bind();
       selectedParticleTexture.enable();
       
-      Vector3f displayPos = new Vector3f();
-      //Vector3f toParticle = new Vector3f();
+      Vector3f displayPos = new Vector3f(); //Vector3f toParticle = new Vector3f();
       
-      gl.glColor4f(1, 1, 1, 0.5);
       for (int i=0; i<selection.size(); i++) {
         Particle p = (Particle) selection.get(i);
         
@@ -771,10 +750,25 @@ class ParticlesLayer {
         float distToParticle = toParticle.length();
         float scale = 0.25*distToParticle;
         
+        gl.glColor4f(1, 1, 1, 0.35);
         beginCylindricalBillboardGL(displayPos.x, displayPos.y, displayPos.z);
           gl.glScalef(scale, scale, scale);
           simpleQuadGL(gl);
         endBillboardGL();
+                
+        String label = ""; 
+        
+        if (targets.contains(p)) {
+          label += "Target: " + targets.indexOf(p);
+        }
+        else {
+          label += "Particle: " + i;
+        }
+        
+        gl.glColor4f(0.1, 0.1, 0.1, 0.5);
+        simpleQuadGL(gl);
+        boolean fullScale = particleSelector.hover.contains(p);
+        myLabelor.drawLabelGL(gl, label, displayPos, fullScale);
       }
       selectedParticleTexture.disable();
       
@@ -813,6 +807,11 @@ class ParticlesLayer {
         noTint();
       }
     }
+    /*
+    for (int i=0; i<intersectionCount; i++) {
+      myLabelor.drawLabelGL(gl, )
+    }
+    */
   }
 }
 
@@ -823,15 +822,26 @@ void simpleQuadGL(GL gl, float x, float y, float z) {
   gl.glPopMatrix();
 }
 
+void simpleQuadGL(GL gl, float w, float h) {
+  gl.glBegin(GL.GL_QUADS);
+  gl.glTexCoord2f(w,h); gl.glVertex2f(w,h);
+  gl.glTexCoord2f(w,0); gl.glVertex2f(w,-h);
+  gl.glTexCoord2f(0,0); gl.glVertex2f(-w,-h);
+  gl.glTexCoord2f(0,h); gl.glVertex2f(-w,h);
+  gl.glEnd();
+}
+
 void simpleQuadGL(GL gl) {
+  simpleQuadGL(gl, 1, 1);
+  /*
   gl.glBegin(GL.GL_QUADS);
   gl.glTexCoord2f(1,1); gl.glVertex2f(1,1);
   gl.glTexCoord2f(1,0); gl.glVertex2f(1,-1);
   gl.glTexCoord2f(0,0); gl.glVertex2f(-1,-1);
   gl.glTexCoord2f(0,1); gl.glVertex2f(-1,1);
   gl.glEnd();
+  */
 }
-
 
 void glTriangle(GL gl) {
   gl.glBegin(GL.GL_TRIANGLES);
@@ -952,7 +962,8 @@ class InputDispatch {
   void nudge(Particle particle, float theta, float amt) {
       
       float momentumScale = 0.05;
-      float momentumNudge = 0.0001 ;
+      //float momentumNudge = 0.0001 ;
+      float momentumNudge = prefs.getFloat("momentumNudge");
       
       float v_mag = particle.velocity.magnitude;
       
@@ -976,7 +987,10 @@ class InputDispatch {
       float dp_x = dp * cos(theta);
       float dp_y = dp * sin(theta);
       
-      //particle.addImpulse(dp_x, dp_y);
+      if (prefs.getBoolean("2D_motion")) {
+        dp_y = 0;
+      }
+      
       particle.propelSelf(dp_x, dp_y);
   }
 }
@@ -993,17 +1007,16 @@ void mousePressed() {
     }
   }
   else if (mouseButton == LEFT) {
-    Vector3f direction = new Vector3f();
     
-    direction.sub(kamera.screenToModel(mouseX, mouseY), kamera.pos);
-    Particle particle = particleSelector.pickPoint(kamera.pos, direction);
+    Particle particle = particleSelector.pickPoint(kamera, mouseX, mouseY);
+    //Particle particle = particleSelector.pickPoint(kamera.pos, direction);
     
     particleSelector.invertSelectionStatus(particle);
   }
 }
 
 void keyPressed() {
-
+  
   switch (key) {
     case 'w' : INPUT_UP = true; break;
     case 'W' : INPUT_UP = true; break;
@@ -1014,21 +1027,23 @@ void keyPressed() {
     case 'd' : INPUT_RIGHT = true; break;
     case 'D' : INPUT_RIGHT = true; break;
   }
-     
+  
   if (key == ' ') {
-    int i = (int)random(PARTICLES);
+    int i = (int) random(prefs.getFloat("PARTICLES"));
     targetParticle = (Particle) particles.get(i);
     targetParticle.setFillColor(color(#F01B5E));
     targets.add(particles.get(i));
   }
-  
-  if (key == 'g' || key == 'G') {
+  else if (key == 'g' || key == 'G') {
     particlesLayer.useGL = !particlesLayer.useGL;
+  }
+  else if (key == '`') {
+    particleSelector.clear();
   }
 }
 
 void keyReleased() {
-
+  
   switch (key) {
     case 'w' : INPUT_UP = false; break;
     case 'W' : INPUT_UP = false; break;
@@ -1088,13 +1103,25 @@ static class Dbg {
   }
 }
 
-class Selector {
+class Selector extends ArrayList {
   ArrayList selectables;
   ArrayList selection;
+  ArrayList hover;
   
-  Selector (ArrayList theSelectables, ArrayList theSelection) {
+  float minHoverAngle = radians(10);
+  float minSelectionAngle = radians(5);
+  float minAngleToPreferClosest = radians(1.5);
+  
+  float millisLastUpdateHover;
+  
+  Object bestPick;
+  float angleToBestPick;
+  
+  Selector (ArrayList theSelectables, ArrayList theStartingSelection) {
+    this.selection = this;
     this.selectables = theSelectables;
-    this.selection = theSelection;
+    this.addAll(theStartingSelection);
+    this.hover = new ArrayList();
   }
   
   Selector (ArrayList theSelectables) {
@@ -1115,23 +1142,34 @@ class Selector {
     }
   }
   
-  Particle pickPoint(Vector3f cameraPos, Vector3f pickingRayDirection) {
+  Vector3f getPickDirection(Kamera kam, int theMouseX, int theMouseY) {
+    Vector3f direction = new Vector3f();
+    direction.sub(kam.screenToModel(theMouseX, theMouseY), kam.pos);
+    return direction;  
+  }
+  
+  void update(Kamera theKamera) {
     
-    Particle bestPick = null;
+    if (millis() - millisLastUpdateHover > 100) {
+      updateHoverAndPick(theKamera.pos, getPickDirection(theKamera, mouseX, mouseY));
+    }
+  }
+  
+  void updateHoverAndPick (Vector3f cameraPos, Vector3f pickingRayDirection) {
+    
+    millisLastUpdateHover = millis();
+    hover.clear();
+    
+    bestPick = null;
+    angleToBestPick = PI;
     
     float distToBestPick = Float.MAX_VALUE;
-    float angleToBestPick = PI;
-    
-    float minSelectionAngle = radians(5);
-    float minAngleToPreferClosest = radians(1.5);
-    
-    Particle p;
-    
+        
     Vector3f cameraToParticle = new Vector3f();
     
     for (int i=0; i<selectables.size(); i++) {
       
-      p = (Particle) selectables.get(i);
+      Particle p = (Particle) selectables.get(i);
       
       cameraToParticle.sub(p.getDisplayPositionVec(), cameraPos);
       
@@ -1147,14 +1185,81 @@ class Selector {
         angleToBestPick = angleRayToParticle;
         bestPick = p;
       }
+      
+      if ( angleRayToParticle < minHoverAngle) {
+        hover.add(p);
+      }
     }
+  }
+  
+  //Particle pickPoint(Vector3f cameraPos, Vector3f pickingRayDirection) {
+  Particle pickPoint(Kamera theKamera, int theMouseX, int theMouseY) {
+    
+    updateHoverAndPick(theKamera.pos, getPickDirection(theKamera, theMouseX, theMouseY));
     
     if (angleToBestPick < minSelectionAngle) {
-      return bestPick;
+      return (Particle) bestPick;
     }
     else {
       return null;
     }
+  }
+}
+/*
+interface Label {
+  getLabelText();
+  drawLabel();
+}
+*/
+class Labelor {
+  VTextRenderer v;
+  
+  Labelor() {
+    v = myVTextRenderer;
+  }
+    
+  void drawLabelGL(GL gl, String msg, Vector3f position, boolean scaleFullsize) {
+    beginCylindricalBillboardGL(position.x, position.y, position.z);
+
+      Rectangle2D labelRect = myVTextRenderer._textRender.getBounds(msg);
+      
+      float lw = (float)labelRect.getWidth();
+      float lh = (float)labelRect.getHeight();
+      
+      float yOffset = -2 * lh;
+      
+      float lx = (float)labelRect.getCenterX();
+      float ly = -(float)labelRect.getCenterY() + yOffset;
+      
+      Vector3f toKamera = new Vector3f(kamera.pos);
+      toKamera.sub(position);
+      float distToKamera = toKamera.length();
+      
+      float s = min(distToKamera*0.001, 0.1);
+      
+      if (scaleFullsize) {
+        s = max(s, distToKamera * 0.0008);
+      }
+      else {
+        s = max(s, distToKamera * 0.0005);
+      }
+      
+      gl.glScalef(s, s, s);
+      gl.glTranslatef(-lx, 0, 0);
+      
+      // LABEL BACKGROUND
+      gl.glPushMatrix();
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
+        gl.glTranslatef(lx, ly, 0);
+        simpleQuadGL(gl);
+        //simpleQuadGL(gl, (0.5*1.2)*lw, lh);
+      gl.glPopMatrix();
+  
+      // LABEL TEXT
+      myVTextRenderer.print(msg, 0, yOffset, 0);
+      gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+    endBillboardGL();
   }
 }
 

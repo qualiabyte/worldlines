@@ -25,6 +25,11 @@ class Kamera {
     updateScreenToKameraMap();
   }
   
+  void setFov(float fov) {
+    perspective(radians(fov), (float)width/(float)height, 1, 150000);
+    updateScreenToKameraMap();
+  }
+  
   void updateScreenToKameraMap() {
     
     distToKameraPlane = 100;
@@ -88,8 +93,6 @@ class Kamera {
   void mouseWheel(int delta) {
     mouseWheel -= delta;
     radiusVel += mouseWheel;
-    
-    println("mouseWheel: " + mouseWheel);
   }
   
   void update(float dt) {
@@ -188,9 +191,12 @@ class Kamera {
   */
   
   void commit() {
-    camera(pos.x,     pos.y,     pos.z,
-           target.x,  target.y,  target.z,
-           up.x,      up.y,      up.z);
+
+    camera(
+      pos.x,     pos.y,     pos.z,
+      target.x,  target.y,  target.z,
+      up.x,      up.y,      up.z
+      );
   }
   
   float distToKameraPlane;

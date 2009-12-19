@@ -9,16 +9,48 @@ static class Relativity {
   }
   
   public static Matrix3f getLorentzMatrix() {
-    
+    /*
+    if (TOGGLE_SPATIAL_TRANSFORM && !TOGGLE_TEMPORAL_TRANSFORM) {
+      Matrix3f M = new Matrix3f(
+        v.gamma,              0,    -v.magnitude*v.gamma, // X
+        0,                    1,    0,                    // Y
+        -v.magnitude*v.gamma, 0,    v.gamma               // T
+      );
+      
+      //Vector3f rowX = new Vector3f();
+      //M.getRow(0, rowX);
+      //rowX.scale(1/v.gamma);
+      //M.setRow(0, rowX);
+      //M.setElement(1, 1, 1);
+      M.mul(1/v.gamma);
+      return M;
+    }
+    */
     return new Matrix3f(
       v.gamma,              0,    -v.magnitude*v.gamma, // X
       0,                    1,    0,                    // Y
       -v.magnitude*v.gamma, 0,    v.gamma               // T
-    );
+    );    
   }
   
   public static Matrix3f getLorentzInverseMatrix() {
-    
+    /*
+    if (TOGGLE_SPATIAL_TRANSFORM && !TOGGLE_TEMPORAL_TRANSFORM) {
+      Matrix3f M = new Matrix3f(
+        v.gamma,              0,    v.magnitude*v.gamma, // X
+        0,                    1,    0,                   // Y
+        v.magnitude*v.gamma,  0,    v.gamma              // T
+      );
+      
+      //Vector3f rowX = new Vector3f();
+      //M.getRow(0, rowX);
+      //rowX.scale(1/v.gamma);
+      //M.setRow(0, rowX);
+      //M.setElement(1, 1, 1);
+      M.mul(1/v.gamma);
+      return M;
+    }
+    */
     return new Matrix3f(
       v.gamma,             0,    v.magnitude*v.gamma, // X
       0,                   1,    0,                   // Y
@@ -90,11 +122,11 @@ static class Relativity {
     return M;
   }
   
-  public static void lorentzTransform(Velocity vel, Vector3f xyt_v3f, Vector3f target){
+  public static void lorentzTransform(Velocity vel, Vector3f source, Vector3f target){
     
     Matrix3f M = getLorentzTransformMatrix(vel);
     
-    M.transform(xyt_v3f, target);
+    M.transform(source, target);
   }
   
   public static Vector3f displayTransform(Velocity vel, Vector3f v) {
@@ -123,15 +155,20 @@ static class Relativity {
   }
   
   public static float[] displayTransform(Velocity vel, float[] xyt) {
-    
-    loadVelocity(vel);
-    
     return selectDisplayComponents(xyt, transform(vel, xyt));
   }
   
   public static void displayTransform(Matrix3f theLorentzMatrix, Vector3f source, Vector3f target) {
+    float sx = source.x;
+    float sy = source.y;
+    float sz = source.z;
+    
     theLorentzMatrix.transform(source, target);
-    selectDisplayComponents(source, target, target);
+
+    target.set(
+      TOGGLE_SPATIAL_TRANSFORM ? target.x : sx,
+      TOGGLE_SPATIAL_TRANSFORM ? target.y : sy,
+      TOGGLE_TEMPORAL_TRANSFORM ? target.z : sz );
   }
   
   public static void selectDisplayComponents(Vector3f v, Vector3f v_prime, Vector3f v_target){
@@ -139,6 +176,15 @@ static class Relativity {
       TOGGLE_SPATIAL_TRANSFORM ? v_prime.x : v.x,
       TOGGLE_SPATIAL_TRANSFORM ? v_prime.y : v.y,
       TOGGLE_TEMPORAL_TRANSFORM ? v_prime.z : v.z
+    );
+  }
+  
+  public static void selectInverseDisplayComponents(Vector3f v, Vector3f v_prime, Vector3f target) {
+  
+    target.set(
+      TOGGLE_SPATIAL_TRANSFORM ? v.x : v_prime.x,
+      TOGGLE_SPATIAL_TRANSFORM ? v.y : v_prime.y,
+      TOGGLE_TEMPORAL_TRANSFORM ? v.z : v_prime.z
     );
   }
   
@@ -173,6 +219,16 @@ static class Relativity {
     lorentzTransformXYT(xyt, xyt_prime);
   }
 */
+
+  public static void applyTransforms(float[] xyt, float[] xyt_prime) {
+
+    lorentzTransformXYT(xyt, xyt_prime);
+
+    xyt_prime[0] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : xyt[0];
+    xyt_prime[1] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[1] : xyt[1];
+    xyt_prime[2] = TOGGLE_TEMPORAL_TRANSFORM ? xyt_prime[2] : xyt[2];
+  }
+
   public static void lorentzTransformXYT(float[] xyt, float[] xyt_prime) {
 
     float rx = xyt[0];// - obs_x;
@@ -215,21 +271,6 @@ static class Relativity {
     xt_prime[0] = v.gamma * (x - v.magnitude * t);
     xt_prime[1] = v.gamma * (t - v.magnitude * x / (C*C));
   }
-/*
-  public static void applyTransforms(float[] xyt, float[] vel, float[] xyt_prime) {
-
-    loadVel(vel[0], vel[1]);
-    applyTransforms(xyt, xyt_prime);
-  }
-*/
-  public static void applyTransforms(float[] xyt, float[] xyt_prime) {
-
-    lorentzTransformXYT(xyt, xyt_prime);
-
-    xyt_prime[0] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : xyt[0];
-    xyt_prime[1] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[1] : xyt[1];
-    xyt_prime[2] = TOGGLE_TEMPORAL_TRANSFORM ? xyt_prime[2] : xyt[2];
-  }
 
   public static void loadVelocity(Velocity velocity) {
     v = velocity;
@@ -242,46 +283,12 @@ static class Relativity {
     
     vx_norm = vx / v_mag;
     vy_norm = vy / v_mag;
-    //loadVel(velocity.vx, velocity.vy);
   }
 
   public static void loadFrame(Frame f) {
-    float[] pos = f.getPosition();
-    
-    Velocity vel = f.getVelocity();
-    loadVelocity(vel);
-    
-    obs_x = xyt_observer[0];
-    obs_y = xyt_observer[1];
-    obs_t = xyt_observer[2];
+    loadVelocity(f.getVelocity());
   }
 
-/*
-  public static void loadVel(float vel_x, float vel_y) {
-    vx = vel_x;
-    vy = vel_y;
-    
-    //v = new Velocity(vel_x, vel_y);
-    
-    float v_mag = Math.max((float)Math.sqrt(vx*vx + vy*vy), 1E-7f);
-    float beta = v_mag;
-    
-    vx_norm = vx / v_mag;
-    vy_norm = vy / v_mag;
-    
-    //float gamma = gamma(v_mag);
-  }
-*/
-/*
-  public static void loadObserver(float[] xyt) {
-    
-    System.arraycopy(xyt, 0, xyt_observer, 0, 3);
-
-    float obs_x = xyt_observer[0];
-    float obs_y = xyt_observer[1];
-    float obs_t = xyt_observer[2];
-  }
-*/
   static float[] xyt_observer = new float[3];
   static float[] XT_prime = new float[2];
 
@@ -300,37 +307,3 @@ static class Relativity {
   public static boolean TOGGLE_TEMPORAL_TRANSFORM;
   public static float seconds;
 }
-
-
-/* Variation on lorentzTransform which tries to transform the x and y components separately
- // Had a bug earlier, may be fixed now
- 
- public static void lorentzTransform(float[] xyt, float[] xyt_prime) {
- //float obs_dot_v = obs_x * vx + obs_y * vy;
- //float obs_cos_theta = obs_dot_v / v_mag;
- 
- float rx = xyt[0];
- float ry = xyt[1];
- float t =  xyt[2];
- 
- float r_dot_v = rx * vx + ry * vy;
- 
- // Projection |r| Cos(angle) gives the component of r parallel to v
- float r_cos_theta = r_dot_v / v_mag;
- 
- // Get components of r parallel and perpendicular to v
- float r_para_x = r_cos_theta * vx_norm;
- float r_para_y = r_cos_theta * vy_norm;
- 
- float r_perp_x = rx - r_para_x;
- float r_perp_y = ry - r_para_y;
- 
- float r_para_x_final = gamma_v * (r_para_x - vx_norm * v_mag * t);
- float r_para_y_final = gamma_v * (r_para_y - vy_norm * v_mag * t);
- 
- xyt_prime[0] = r_perp_x + r_para_x_final;
- xyt_prime[1] = r_perp_y + r_para_y_final;
- xyt_prime[2] = gamma_v * (t - v_mag * r_cos_theta / (C*C));
- }
- */
-

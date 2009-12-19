@@ -5,13 +5,19 @@ public class Velocity {
   float gamma;
   
   Vector3f[] basis = new Vector3f[] {
-    new Vector3f(15, 0, 0),
-    new Vector3f(0, 15, 0),
-    new Vector3f(0, 0, 15)
+    new Vector3f(1, 0, 0),
+    new Vector3f(0, 1, 0),
+    new Vector3f(0, 0, 1)
+  };
+  
+  Vector3f[] displayBasis = new Vector3f[] {
+    new Vector3f(),
+    new Vector3f(),
+    new Vector3f()
   };
   
   // Orthonormal basis after lorentz inverse transform; ie, in frame measuring our vel
-  Vector3f[] basis_inverse = new Vector3f[] {
+  Vector3f[] basisInverse = new Vector3f[] {
     new Vector3f(), new Vector3f(), new Vector3f()
   };
   
@@ -37,10 +43,6 @@ public class Velocity {
     direction = atan2(vy, vx);
     magnitude = (float)Math.sqrt(vx*vx + vy*vy);
     updateGamma();
-    
-    for (int i=0; i<3; i++) {
-      basis_inverse[i] = new Vector3f();
-    }
     updateBasis();
   }
   
@@ -70,11 +72,18 @@ public class Velocity {
   void updateBasis() {
     
     for (int i=0; i<3; i++) {
-      basis_inverse[i].set(Relativity.inverseTransform(this, basis[i]));
+      basisInverse[i].set(Relativity.inverseTransform(this, basis[i]));
     }
-    
-    // n = basis_x cross basis_y :
-    normal.cross(basis_inverse[0], basis_inverse[1]);
+    normal.cross(basisInverse[0], basisInverse[1]);
   }
+  /*
+  Vector3f[] getInverseDisplayBasis() {
+    
+    for (int i=0; i<3; i++) {
+      Relativity.selectInverseDisplayComponents(basis[i], basisInverse[i], displayBasis[i]);
+    }
+    return displayBasis;
+  }
+  */
 }
 

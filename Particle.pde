@@ -345,7 +345,7 @@ class Particle implements Frame {
     // Checked this result from French prob. 1.15; seems to work
     float v_mag_final = 1.0/sqrt(pow((mass/p_mag_final), 2) + C*C);
 
-    v_mag_final = constrain(v_mag_final, 0.0, 1 - 1E-7);
+    v_mag_final = constrain(v_mag_final, 0.0, 1 - 1E-6);//1E-7);
     
     //velocity.setComponents( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
     setVelocity( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final );

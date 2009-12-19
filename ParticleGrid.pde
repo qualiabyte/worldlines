@@ -17,11 +17,6 @@ class ParticleGrid {
     float y_corner = (int) (xyt_obs[1] / spacing) * spacing - distance;
     float z_corner = (int) (xyt_obs[2] / spacing) * spacing;
     
-    //float [][] M_duv
-    //fill(255, 150, 0, 255);
-    //stroke(255, 150, 0, 255);
-    //stroke(255);
-    
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
     
@@ -61,10 +56,5 @@ class ParticleGrid {
     }
     gl.glEnd();
   }
-  
-  //getLinePlaneIntersect(p1x, p1y, p1z, nx, ny, nz, p2x, p2y, p2z, dx, dy, dz)
-  //getLinePlaneIntersect(float[] p1, float[] n, float[] p2, float[] d) {
-  //float[][] M_duv;
-  //}
 }
 

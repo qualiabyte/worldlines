@@ -10,20 +10,23 @@ static class Relativity {
   
   public static Matrix3f getLorentzMatrix() {
     /*
-    if (TOGGLE_SPATIAL_TRANSFORM && !TOGGLE_TEMPORAL_TRANSFORM) {
-      Matrix3f M = new Matrix3f(
-        v.gamma,              0,    -v.magnitude*v.gamma, // X
-        0,                    1,    0,                    // Y
-        -v.magnitude*v.gamma, 0,    v.gamma               // T
-      );
-      
-      //Vector3f rowX = new Vector3f();
-      //M.getRow(0, rowX);
-      //rowX.scale(1/v.gamma);
-      //M.setRow(0, rowX);
-      //M.setElement(1, 1, 1);
-      M.mul(1/v.gamma);
-      return M;
+    if (prefs.getBoolean("brehmeDiagramCorrection")) {
+    
+      if (TOGGLE_SPATIAL_TRANSFORM != TOGGLE_TEMPORAL_TRANSFORM) {
+        Matrix3f M = new Matrix3f(
+          v.gamma,              0,    -v.magnitude*v.gamma, // X
+          0,                    1,    0,                    // Y
+          -v.magnitude*v.gamma, 0,    v.gamma               // T
+        );
+        
+        //Vector3f rowX = new Vector3f();
+        //M.getRow(0, rowX);
+        //rowX.scale(1/v.gamma);
+        //M.setRow(0, rowX);
+        M.mul(1/v.gamma);
+        M.setElement(1, 1, 1);
+        return M;
+      }
     }
     */
     return new Matrix3f(
@@ -35,20 +38,24 @@ static class Relativity {
   
   public static Matrix3f getLorentzInverseMatrix() {
     /*
-    if (TOGGLE_SPATIAL_TRANSFORM && !TOGGLE_TEMPORAL_TRANSFORM) {
-      Matrix3f M = new Matrix3f(
-        v.gamma,              0,    v.magnitude*v.gamma, // X
-        0,                    1,    0,                   // Y
-        v.magnitude*v.gamma,  0,    v.gamma              // T
-      );
-      
-      //Vector3f rowX = new Vector3f();
-      //M.getRow(0, rowX);
-      //rowX.scale(1/v.gamma);
-      //M.setRow(0, rowX);
-      //M.setElement(1, 1, 1);
-      M.mul(1/v.gamma);
-      return M;
+    if (prefs.getBoolean("brehmeDiagramCorrection")) {
+        
+      if (TOGGLE_SPATIAL_TRANSFORM != TOGGLE_TEMPORAL_TRANSFORM) {
+        Matrix3f M = new Matrix3f(
+          v.gamma,              0,    v.magnitude*v.gamma, // X
+          0,                    1,    0,                   // Y
+          v.magnitude*v.gamma,  0,    v.gamma              // T
+        );
+        
+        //Vector3f rowX = new Vector3f();
+        //M.getRow(0, rowX);
+        //rowX.scale(1/v.gamma);
+        //M.setRow(0, rowX);
+        
+        M.mul(1/v.gamma);
+        M.setElement(1, 1, 1);
+        return M;
+      }
     }
     */
     return new Matrix3f(
@@ -72,6 +79,36 @@ static class Relativity {
     return M;
   }
   
+  public static Matrix3f getInverseLorentzTransformMatrix(Velocity vel) {
+    loadVelocity(vel);
+    
+    Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
+    Matrix3f inverseLorentz = getLorentzInverseMatrix();
+    Matrix3f rotHeading = getRotationMatrix(v.direction, 0, 0, 1);
+    
+    Matrix3f M = new Matrix3f();
+    M.set(rotHeading);
+    M.mul(inverseLorentz);
+    M.mul(rotHeadingInverse);
+    
+    return M;
+  }
+  
+  public static Matrix3f getLorentzTransformMatrix(Velocity vel) {
+    loadVelocity(vel);
+    
+    Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
+    Matrix3f lorentz = getLorentzMatrix();
+    Matrix3f rotHeading = getRotationMatrix(v.direction, 0, 0, 1);
+    
+    Matrix3f M = new Matrix3f();
+    M.set(rotHeading);
+    M.mul(lorentz);
+    M.mul(rotHeadingInverse);
+    
+    return M;
+  }
+
   public static Vector3f inverseTransform(Velocity vel, Vector3f xyt_v3f) {
 
     loadVelocity(vel);
@@ -105,21 +142,6 @@ static class Relativity {
   public static float[] inverseDisplayTransform(Velocity vel, float[] xyt) {
     
     return selectInverseDisplayComponents(xyt, inverseTransform(vel, xyt));
-  }
-  
-  public static Matrix3f getLorentzTransformMatrix(Velocity vel) {
-    loadVelocity(vel);
-    
-    Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
-    Matrix3f lorentz = getLorentzMatrix();
-    Matrix3f rotHeading = getRotationMatrix(v.direction, 0, 0, 1);
-    
-    Matrix3f M = new Matrix3f();
-    M.set(rotHeading);
-    M.mul(lorentz);
-    M.mul(rotHeadingInverse);
-    
-    return M;
   }
   
   public static void lorentzTransform(Velocity vel, Vector3f source, Vector3f target){
@@ -212,13 +234,13 @@ static class Relativity {
     xyt_target[2] = TOGGLE_TEMPORAL_TRANSFORM ? xyt[2] : xyt_prime[2];
   }
   
-/*
+  /*
   public static void lorentzTransform(float[] xyt, float[] vel, float[] xyt_prime) {
 
     loadVel(vel[0], vel[1]);
     lorentzTransformXYT(xyt, xyt_prime);
   }
-*/
+  */
 
   public static void applyTransforms(float[] xyt, float[] xyt_prime) {
 
@@ -271,7 +293,8 @@ static class Relativity {
     xt_prime[0] = v.gamma * (x - v.magnitude * t);
     xt_prime[1] = v.gamma * (t - v.magnitude * x / (C*C));
   }
-
+  
+  
   public static void loadVelocity(Velocity velocity) {
     v = velocity;
     

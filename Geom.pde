@@ -1,7 +1,5 @@
-/*
-package Geometry;
-
-import javax.vecmath.*;
+// Geom
+// tflorez
 
 public class Line {
   Vector3f p = new Vector3f();
@@ -19,6 +17,10 @@ public class Line {
   
   public void setPoint(float[] point){
     p.set(point);
+  }
+
+  public void setPoint(Vector3f v){
+    p.set(v);
   }
   
   public void setDirection(float dx, float dy, float dz){
@@ -50,7 +52,7 @@ public class Plane {
     p.set(0,0,0);
     n.set(1,1,1);
   }
-  
+ 
   public Plane(float[] point, float[] normal){
     
     p = new Vector3f(point);
@@ -59,7 +61,12 @@ public class Plane {
     updateABCD();
   }
   
-  public void setPoint(float[] point){
+  public void setPoint(Vector3f point){
+    p.set(point);
+    updateABCD();
+  }
+
+   public void setPoint(float[] point){
     p.set(point);
     updateABCD();
   }
@@ -74,6 +81,14 @@ public class Plane {
     B = n.y;
     C = n.z;
     D = -(A * p.x + B * p.y + C * p.z);
+  }
+  
+  public boolean liesBelow(Vector3f thePoint) {
+    //Vector3f up = new Vector3f(0, 0, 1);
+    Vector3f toThePoint = new Vector3f();
+    toThePoint.sub(thePoint, this.p);
+    
+    return (this.normal.dot(toThePoint) > 0);
   }
   
   public void getIntersection(Line l, Vector3f target) {
@@ -95,4 +110,4 @@ public class Plane {
     );
   }
 }
-*/
+

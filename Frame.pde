@@ -1,4 +1,6 @@
-interface Frame {
+// tflorez
+
+interface Frame extends Selectable {
 
   Velocity getVelocity();
   
@@ -9,9 +11,9 @@ interface Frame {
   Vector3f getDisplayPositionVec();
   
   Plane getSimultaneityPlane();
+  
+  AxesSettings getAxesSettings();
 }
-
-import geometry.*;
 
 class DefaultFrame implements Frame {
   
@@ -21,6 +23,11 @@ class DefaultFrame implements Frame {
   Velocity velocity = new Velocity();
   Plane simultaneityPlane = new Plane();
   Line velocityLine = new Line();
+
+  AxesSettings axesSettings = new AxesSettings();
+//  boolean axesVisible = true;
+//  boolean axesGridVisible = false;
+//  boolean simultaneityPlaneVisible = true;
   
   DefaultFrame(Vector3f position, Vector3f vel){
     setPosition(position);
@@ -28,12 +35,13 @@ class DefaultFrame implements Frame {
   }
   
   DefaultFrame(Vector3f position, Velocity vel) {
+    this();    //this(position, vel.velocity);
     setPosition(position);
     setVelocity(vel);
   }
   
   DefaultFrame() {
-    
+    this(new Vector3f(), new Vector3f());
   }
   
   void setPosition(float x, float y, float z) {
@@ -109,6 +117,11 @@ class DefaultFrame implements Frame {
   Line getVelocityLine() {
     return velocityLine;
   }
+  
+  AxesSettings getAxesSettings() {
+    return this.axesSettings;
+  }
+  
   /*
   Vector3f getPosition(){
     return position;

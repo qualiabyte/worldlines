@@ -1,12 +1,59 @@
+// tflorez
+
+class AxesSettings {
+    
+  boolean axesVisible = true;
+  boolean axesLabelsVisible = false;
+  boolean axesGridVisible = false;
+  boolean simultaneityPlaneVisible = true;
+  
+  boolean axesVisible(){
+    return this.axesVisible;
+  }
+  
+  void setAxesVisible(boolean axesVisible) {
+    this.axesVisible = axesVisible;
+  }
+  
+  boolean axesLabelsVisible(){
+    return this.axesLabelsVisible;
+  }
+  
+  void setAxesLabelsVisible(boolean axesLabelsVisible) {
+    this.axesLabelsVisible = axesLabelsVisible;
+  }
+  
+  boolean axesGridVisible(){
+    return this.axesGridVisible;
+  }
+  
+  void setAxesGridVisible(boolean axesGridVisible) {
+    this.axesGridVisible = axesGridVisible;
+  }
+  
+  boolean simultaneityPlaneVisible() {
+    return this.simultaneityPlaneVisible;
+  }
+  
+  void setSimultaneityPlaneVisible(boolean simultVisible) {
+    this.simultaneityPlaneVisible = simultVisible;
+  }
+}
 
 class Axes {
 
   Frame frame;
 
-  float basisScale = 10;
+  float numGridLines = 10;
+  float gridLineSpacing = 10;
+  float gridBoundary = 100;
+  float axisBoundary = 10;
+  float basisLabelBoundary = 10;
+
+  String gridUnits = "ls";
   
-  String[] restFrameBasisLabels = new String[] { "x", "y", "t" };
-  String[] axesFrameBasisLabels = new String[] { "x'", "y'", "t'" };
+  String[] restFrameBasisLabels = new String[] { "x", "y", "ct" };
+  String[] axesFrameBasisLabels = new String[] { "x'", "y'", "ct'" };
 
   Vector3f[] restFrameBasis = new Vector3f[] { new Vector3f(1,0,0), new Vector3f(0,1,0), new Vector3f(0,0,1) };
   Vector3f[] restFrameDisplayBasis = new Vector3f[] { new Vector3f(), new Vector3f(), new Vector3f() };
@@ -18,6 +65,20 @@ class Axes {
     {0.5, 0.5, 1.0, alpha+0.2},
     {0.15, 0.9, 1.0, alpha+0.2}, // {0.5, 1.0, 0.5, alpha+0.2},
   };
+  
+  void setGridLineSpacing(float spacing) {
+    this.gridLineSpacing = spacing;
+    this.numGridLines = gridBoundary / gridLineSpacing;
+  }
+  
+  void setGridBoundary(float boundary) {
+    this.gridBoundary = boundary;
+    this.gridLineSpacing = gridBoundary / numGridLines;
+  }
+  
+  void setAxisBoundary(float boundary) {
+    this.axisBoundary = boundary;
+  }
   
   Axes(Frame f) {
     this.frame = f;
@@ -34,71 +95,77 @@ class Axes {
   
   void drawAxesGLVec(GL gl, Frame f) {
     
+    AxesSettings frameSettings = f.getAxesSettings();
+    
+    if (!frameSettings.axesVisible()) {
+      return;
+    }
+    
     Vector3f pos = f.getDisplayPositionVec();
     Velocity vel = f.getVelocity();
     
+    // MAP AXES FRAME'S INVERSE TRANSFORMED BASIS TO VIEW TARGET'S DISPLAY FRAME
     for (int i=0; i<3; i++) {
       Relativity.displayTransform(lorentzMatrix, vel.basisInverse[i], axesFrameDisplayBasis[i]);
-      axesFrameDisplayBasis[i].scale(basisScale);
     }
     
-    // XY PLANE
-    drawPlane(pos, axesFrameDisplayBasis[0], axesFrameDisplayBasis[1]); //, axisColors[0], axisColors[1]);
+    // DRAW AXES FRAME BASIS
+    drawBasis(pos, axesFrameDisplayBasis, axisColors, frameSettings.axesLabelsVisible, axesFrameBasisLabels);
     
-    // AXES GRID LINES
-    if ( prefs.getBoolean("showAllAxesGrid") ||
-         ( prefs.getBoolean("showTargetAxesGrid") && f == targetParticle ) ) {
-      //drawGrid(pos, axesFrameDisplayBasis, 0, 2);
-      drawGrid(pos, axesFrameDisplayBasis[0], axesFrameDisplayBasis[2], axisColors[0], axisColors[2]);
-      drawGridLabels(pos, axesFrameDisplayBasis);
+    // AXES FRAME XY (SIMULTANEITY) PLANE
+    if (frameSettings.simultaneityPlaneVisible()) {
+      drawPlane(pos, axesFrameDisplayBasis[0], axesFrameDisplayBasis[1]); //, axisColors[0], axisColors[1]);
     }
     
-    // AXES FRAME BASIS
-    drawBasis(pos, axesFrameDisplayBasis, axisColors);
+    // AXES FRAME GRID LINES
+    if (frameSettings.axesGridVisible && !( !prefs.getBoolean("show_Target_Axes_Grid") && f == targetParticle )) {
+      Vector3f kamToAxes = new Vector3f();
+      kamToAxes.sub(f.getDisplayPositionVec(), kamera.pos);
+      float powerOfTenExponent = (int) (log(0.5*kamToAxes.length()) / log(10));
+      powerOfTenExponent = powerOfTenExponent < 1 ? 1 : powerOfTenExponent;
+
+      float gridBoundary = kamToAxes.length() < 100 ? 100 : kamToAxes.length();
+      
+      setGridBoundary(gridBoundary);
+      setGridLineSpacing(pow(10, powerOfTenExponent));
+      
+      drawGrid(pos, axesFrameDisplayBasis[0], axesFrameDisplayBasis[2], axisColors[0], axisColors[2], true);
+    }
     
     // REST FRAME BASIS   
     for (int i=0; i<3; i++) {
       Relativity.displayTransform(lorentzMatrix, restFrameBasis[i], restFrameDisplayBasis[i]);
-      restFrameDisplayBasis[i].scale(basisScale);
     }
-    drawBasis(pos, restFrameDisplayBasis, axisColors);
+    drawBasis(pos, restFrameDisplayBasis, axisColors, frameSettings.axesLabelsVisible, restFrameBasisLabels);
 
-    if (prefs.getBoolean("showAllAxesLabels") || (prefs.getBoolean("showTargetAxesLabels") && f == targetParticle) ) {
-      
-      // LABELS
-      drawBasisLabels(pos, axesFrameDisplayBasis, axesFrameBasisLabels);
-      drawBasisLabels(pos, restFrameDisplayBasis, restFrameBasisLabels);
-    }
+    //if (prefs.getBoolean("showAllAxesLabels") || (prefs.getBoolean("showTargetAxesLabels") && f == targetParticle) ) {}
   }
 
-  void drawBasisLabels(Vector3f pos, Vector3f[] theBasis, String[] theBasisLabels) {
+  void drawBasisLabels(Vector3f pos, Vector3f[] theBasis, float[][] theBasisColors, String[] theBasisLabels) {
     Vector3f labelPos = new Vector3f();
     
     for (int i=0; i<3; i++) {
-      labelPos.add(pos, theBasis[i]);
+      labelPos.scaleAdd(1.5*axisBoundary, theBasis[i], pos);
+      myLabelor.v.setColor(theBasisColors[i][0], theBasisColors[i][1], theBasisColors[i][2], theBasisColors[i][3] + 0.3);
       myLabelor.drawLabelGL(gl, theBasisLabels[i], labelPos, 0.5);
     }
   }
   
-  void drawGridLabels(Vector3f pos, Vector3f[] theBasis) {
-    Vector3f labelPos = new Vector3f();
+  void drawBasis(Vector3f pos, Vector3f[] theBasis, float[][] theBasisColors, boolean drawLabels, String[] theBasisLabels) {
     
-    for (int i=0; i<3; i++) {
-      
-      float basisLabelScale = 0.5 * 10;
-      labelPos.scaleAdd(basisLabelScale, theBasis[i], pos);
-      myLabelor.drawLabelGL(gl, "" + 10 * basisLabelScale, labelPos, 0.05);
+    if (drawLabels) {
+      drawBasisLabels(pos, theBasis, theBasisColors, theBasisLabels);
     }
-  }
-  
-  void drawBasis(Vector3f pos, Vector3f[] theBasis, float[][] theBasisColors) {
     
     gl.glLineWidth(2);
     gl.glBegin(GL.GL_LINES);
     for (int i=0; i<3; i++) {
       gl.glColor4fv(theBasisColors[i], 0);
       gl.glVertex3f(pos.x, pos.y, pos.z);
-      gl.glVertex3f(pos.x + theBasis[i].x, pos.y + theBasis[i].y, pos.z + theBasis[i].z);
+      gl.glVertex3f(
+        pos.x + axisBoundary * theBasis[i].x,
+        pos.y + axisBoundary * theBasis[i].y,
+        pos.z + axisBoundary * theBasis[i].z);
     }
     gl.glEnd();
   }
@@ -108,16 +175,34 @@ class Axes {
     
     gl.glBegin(GL.GL_QUADS);
       tmp.set(pos); gl.glVertex3f(pos.x, pos.y, pos.z);
-      tmp.add(v1); gl.glColor4f(1.0, 0.5, 0.5, 0.3); gl.glVertex3f(tmp.x, tmp.y, tmp.z);
-      tmp.add(v2); gl.glColor4f(0.1, 0.1, 0.1, 0.1); gl.glVertex3f(tmp.x, tmp.y, tmp.z);
-      tmp.sub(v1); gl.glColor4f(0.5, 0.5, 1.0, 0.3); gl.glVertex3f(tmp.x, tmp.y, tmp.z);
+      tmp.scaleAdd( axisBoundary, v1, tmp); gl.glColor4f(1.0, 0.5, 0.5, 0.3); gl.glVertex3f(tmp.x, tmp.y, tmp.z);
+      tmp.scaleAdd( axisBoundary, v2, tmp); gl.glColor4f(0.1, 0.1, 0.1, 0.1); gl.glVertex3f(tmp.x, tmp.y, tmp.z);
+      tmp.scaleAdd(-axisBoundary, v1, tmp); gl.glColor4f(0.5, 0.5, 1.0, 0.3); gl.glVertex3f(tmp.x, tmp.y, tmp.z);
     gl.glEnd();
   }
-  
-  void drawGrid(Vector3f pos, Vector3f v1, Vector3f v2, float[] color1, float[] color2) {
-    
-    int numlines = 10;
 
+  void drawGridLabel(Vector3f theGridOrigin, Vector3f theGridDisplayBasis, float theGridCoordinate, float[] labelColor) {
+    
+    Vector3f labelPos = new Vector3f();
+    labelPos.scaleAdd(theGridCoordinate, theGridDisplayBasis, theGridOrigin);
+    myLabelor.v.setColor(labelColor[0] + 0.3, labelColor[1] + 0.3, labelColor[2] + 0.3, labelColor[3] + 0.3);
+    myLabelor.drawLabelGL(gl, "" + nf(theGridCoordinate, 0, 0) + this.gridUnits, labelPos, 0.5);
+  }
+  
+  void drawGrid(Vector3f pos, Vector3f v1, Vector3f v2, float[] color1, float[] color2, Boolean drawLabels) {
+    
+    if (drawLabels) {
+      
+      for (int i=1; pow(10, i) < this.gridBoundary; i++) {
+        for (int j=1; j<=2; j++) {
+          drawGridLabel(pos, v1, 5*j*pow(10, i), color1 );
+        }
+      }
+      
+      drawGridLabel(pos, v1, numGridLines * gridLineSpacing, color1);
+      drawGridLabel(pos, v2, numGridLines * gridLineSpacing, color2);
+    }
+    
     Vector3f[] gridBasis = new Vector3f[] { v1, v2 };
     float[][] gridColors = new float[][] { color1, color2 };
     
@@ -129,23 +214,42 @@ class Axes {
     
       Vector3f lineBasis = gridBasis[i];
       Vector3f spacingBasis = gridBasis[ (i==0) ? 1 : 0 ];
+      //Vector3f quadBasis = new Vector3f(lineBasis);
+      //quadBasis.scale(numGridLines*gridLineSpacing);
       
       gl.glColor4fv(gridColors[i], 0);
       
-      for (int j=0; j<numlines; j++) {
+      for (int j=0; j<numGridLines; j++) {
         
-        lineStart.scaleAdd(j, spacingBasis, pos);
+        lineStart.scaleAdd(j * gridLineSpacing, spacingBasis, pos);
+//        if (i==0) {
+//          lineStart.sub(quadBasis);
+//          lineEnd.scaleAdd(2 * numGridLines * gridLineSpacing, lineBasis, lineStart);
+//        }
+        
+        lineEnd.scaleAdd(1 * numGridLines * gridLineSpacing, lineBasis, lineStart);
+                
         gl.glVertex3f(lineStart.x, lineStart.y, lineStart.z);
 
         gl.glColor4fv(gridColors[i], 0);
-        lineEnd.scaleAdd(numlines, lineBasis, lineStart);
         gl.glVertex3f(lineEnd.x, lineEnd.y, lineEnd.z);
       }
     }
     gl.glEnd();
   }
 }
-
+/*
+void drawGridLabels(Vector3f pos, Vector3f[] theBasis) {
+  Vector3f labelPos = new Vector3f();
+  
+  for (int i=0; i<3; i++) {
+    
+    float basisLabelScale = 0.5 * 10;
+    labelPos.scaleAdd(basisLabelScale, theBasis[i], pos);
+    myLabelor.drawLabelGL(gl, "" + 10 * basisLabelScale, labelPos, 0.05);
+  }
+}
+*/
 /*
   void drawGrid(float[] pos, float[] v1, float[] v2) {
     int numlines = 10;

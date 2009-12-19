@@ -74,6 +74,11 @@ class VTextRenderer
   {
     _textRender.setColor( r, g, b, a );
   }
+  
+  void setColor( float[] rgba ) 
+  {
+    _textRender.setColor(rgba[0], rgba[1], rgba[2], rgba[3]);
+  }
 
   void setSmoothing( boolean flag )
   {

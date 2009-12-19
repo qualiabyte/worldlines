@@ -4,9 +4,9 @@
 class Kamera {
   
   Kamera() {
-    radius = 100;
-    azimuth = PI;
-    zenith = PI/6.0;
+    radius = 101;
+    azimuth = PI/2.1;//PI;
+    zenith = PI/2.1;
     
     target = new Vector3f();
     pos = new Vector3f();
@@ -95,7 +95,7 @@ class Kamera {
     radiusVel += mouseWheel;
   }
   
-  void update(float dt) {
+  void update() {
     
     if (MOUSELOOK) {
       zenithVel -= (mouseY - pmouseY)/10.0;

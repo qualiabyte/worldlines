@@ -232,7 +232,7 @@ class Particle implements Frame, Selectable {
 //    }
     
     Line line = this.headFrame.getVelocityLine();
-        
+    
     plane.getIntersection(line, intersection);
     
     Vector3f intersection_target = new Vector3f();

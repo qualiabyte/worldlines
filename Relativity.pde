@@ -120,13 +120,36 @@ static class Relativity {
     return v_prime;
   }
   
-  public static Vector3f inverseDisplayTransform(Velocity vel, Vector3f v) {
+  public static Vector3f inverseDisplayTransform(Velocity vel, Vector3f v_display) {
     
-    Vector3f v_prime = new Vector3f();
-    Vector3f v_inverse = inverseTransform(vel, v);
-
-    selectInverseDisplayComponents(v, v_inverse, v_inverse);
+    Vector3f v_inverse = inverseTransform(vel, v_display);
+    
+//    if ( TOGGLE_SPATIAL_TRANSFORM == TOGGLE_TEMPORAL_TRANSFORM ) {
+//    
+//      selectInverseDisplayComponents(v_inverse, v_display, v_inverse);
+//    }
+//    else {
+//      v_inverse.set(
+//        TOGGLE_SPATIAL_TRANSFORM ? v_display.x : v_inverse.x,
+//        TOGGLE_SPATIAL_TRANSFORM ? v_display.y : v_inverse.y,
+//        TOGGLE_TEMPORAL_TRANSFORM ? v_display.z : v_inverse.z
+//      );
+//    }
+      v_inverse.set(
+        TOGGLE_SPATIAL_TRANSFORM ? v_inverse.x : v_display.x,
+        TOGGLE_SPATIAL_TRANSFORM ? v_inverse.y : v_display.y,
+        TOGGLE_TEMPORAL_TRANSFORM ? v_inverse.z : v_display.z
+      );
     return v_inverse;
+  }
+  
+  public static void selectInverseDisplayComponents(Vector3f v_inverse, Vector3f v_display, Vector3f target) {
+  
+    target.set(
+      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.x : v_display.x,
+      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.y : v_display.y,
+      TOGGLE_TEMPORAL_TRANSFORM ? v_inverse.z : v_display.z
+    );
   }
   
   /*
@@ -195,20 +218,11 @@ static class Relativity {
       TOGGLE_TEMPORAL_TRANSFORM ? target.z : sz );
   }
   
-  public static void selectDisplayComponents(Vector3f v, Vector3f v_prime, Vector3f v_target){
+  public static void selectDisplayComponents(Vector3f v, Vector3f v_display, Vector3f v_target){
     v_target.set(
-      TOGGLE_SPATIAL_TRANSFORM ? v_prime.x : v.x,
-      TOGGLE_SPATIAL_TRANSFORM ? v_prime.y : v.y,
-      TOGGLE_TEMPORAL_TRANSFORM ? v_prime.z : v.z
-    );
-  }
-  
-  public static void selectInverseDisplayComponents(Vector3f v, Vector3f v_prime, Vector3f target) {
-  
-    target.set(
-      TOGGLE_SPATIAL_TRANSFORM ? v.x : v_prime.x,
-      TOGGLE_SPATIAL_TRANSFORM ? v.y : v_prime.y,
-      TOGGLE_TEMPORAL_TRANSFORM ? v.z : v_prime.z
+      TOGGLE_SPATIAL_TRANSFORM ? v_display.x : v.x,
+      TOGGLE_SPATIAL_TRANSFORM ? v_display.y : v.y,
+      TOGGLE_TEMPORAL_TRANSFORM ? v_display.z : v.z
     );
   }
   

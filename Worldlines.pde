@@ -104,8 +104,8 @@ float fpsMovingAvg;
 ControlP5 controlP5;
 
 void setup() {
-  //size(900, 540, OPENGL);
-  size(1280, 900, OPENGL);
+  size(900, 540, OPENGL);
+  //size(1280, 900, OPENGL);
   //size(1100, 700, OPENGL);
   
   frameRate(45);
@@ -653,21 +653,20 @@ class InputDispatch {
       
       Vector3f kameraPos = Relativity.inverseDisplayTransform(targetParticle.velocity, kamera.pos);
       
-//      Vector3f dragRayDirectionDisplay = new Vector3f();
-//      dragRayDirectionDisplay.sub(dragPointerDisplayPos, kamera.pos);
-//      Vector3f dragRayDirectionDisplayInverse = Relativity.inverseDisplayTransform(targetParticle.velocity, dragRayDirectionDisplay);
-      
       Vector3f dragRayDirection = new Vector3f();
       dragRayDirection.sub(dragPointerPos, kameraPos);
       
-//      intervalSay(10, "kameraPos:                      " + nfVec(kameraPos, 1));
-//      intervalSay(10, "dragRayDirectionDisplayInverse: " + nfVec(dragRayDirectionDisplayInverse, 1));
-//      intervalSay(10, "dragRayDirection:               " + nfVec(dragRayDirection, 1));
+      println("dragRayDirection: " + nfVec(dragRayDirection, 1));
       
       Line dragLine = new Line();
-      dragLine.defineBySegment(kamera.pos, dragPointerPos);
-//      Line dragLine = new Line(dragPointerPos, dragRayDirection);
+      dragLine.defineBySegment(kameraPos, dragPointerPos);
+      
+      println("kamera.pos: " + kamera.pos);
+      println("kameraPos:  " + kameraPos);
+      println("dragLine:   " + dragLine);
+      
       Plane clickedPlane = clickedParticle.getSimultaneityPlane();
+      println("clickedPlane: " + clickedPlane);
       
       Vector3f intersect = new Vector3f();
       clickedPlane.getIntersection(dragLine, intersect);
@@ -675,7 +674,7 @@ class InputDispatch {
       Vector3f intersectDisplayPos = new Vector3f();
       Relativity.displayTransform(lorentzMatrix, intersect, intersectDisplayPos);
       
-      intervalSay(10, "intersect: " + nfVec(intersect, 1));
+//      intervalSay(10, "intersect: " + nfVec(intersect, 1));
       
       pgl = (PGraphicsOpenGL)g;
       gl = pgl.beginGL();
@@ -686,8 +685,8 @@ class InputDispatch {
         ((DefaultFrame)draggedFrame).setPosition(intersect);
         
         myAxes.drawGL(gl, draggedFrame);
-        intervalSay(45, "drawingClickedParticle: " + nfVec(intersectDisplayPos, 1));
-        intervalSay(45, "clickedParticle: " + clickedParticle);
+//        intervalSay(45, "drawingClickedParticle: " + nfVec(intersectDisplayPos, 1));
+//        intervalSay(45, "clickedParticle: " + clickedParticle);
         
       pgl.endGL();
       
@@ -718,17 +717,37 @@ class InputDispatch {
       
       noStroke();
       
+      HashMap debugMarkersMap = new HashMap();
+      debugMarkersMap.put("intersect", intersect);
+      debugMarkersMap.put("intersectDisplayPos", intersectDisplayPos);
+      debugMarkersMap.put("dragPointerDisplayPos", dragPointerDisplayPos);
+      
+      pgl = (PGraphicsOpenGL)g;
+      gl = pgl.beginGL();
+      
+      for (Iterator keyIter = debugMarkersMap.keySet().iterator(); keyIter.hasNext(); ) {
+        String label = (String) keyIter.next();
+        Vector3f labelPos = (Vector3f) debugMarkersMap.get(label);
+        myLabelor.drawLabelGL(gl, label, labelPos, 0.5);
+      }
+      
+      pgl.endGL();
+      
       // DRAW DEBUG MARKERS
       Vector3f[] debugMarkers = new Vector3f[] {
-        testIntersect,
-//        kamera.pos,
-//        dragPointerDisplayPos,
+//        testIntersect,
+        
+//        kamera.pos,              // CORRECT
+//        dragPointerDisplayPos,   // CORRECT
+        intersect,
         intersectDisplayPos,
-        dragDirMarkerDisplay,
+//        dragDirMarkerDisplay,
       };
       
-      for (int i=0; i<debugMarkers.length; i++) {
-        drawSphere(debugMarkers[i], 1f);
+      for (Iterator valsIter = debugMarkersMap.values().iterator(); valsIter.hasNext(); ) {
+        Vector3f drawPos = (Vector3f) valsIter.next();
+        drawSphere(drawPos, 1f);
+//        drawSphere(debugMarkers[i], 1f);
       }
     }
   }

@@ -118,7 +118,9 @@ class Axes {
     }
     
     // AXES FRAME GRID LINES
-    if (frameSettings.axesGridVisible && !( !prefs.getBoolean("show_Target_Axes_Grid") && f == targetParticle )) {
+//    if (frameSettings.axesGridVisible && !( !prefs.getBoolean("show_Target_Axes_Grid") && f == targetParticle )) {
+    if ( (    (f != targetParticle) && frameSettings.axesGridVisible )
+         || ( (f == targetParticle) && prefs.getBoolean("show_Target_Axes_Grid") )) {
       Vector3f kamToAxes = new Vector3f();
       kamToAxes.sub(f.getDisplayPositionVec(), kamera.pos);
       float powerOfTenExponent = (int) (log(0.5*kamToAxes.length()) / log(10));

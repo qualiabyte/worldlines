@@ -246,8 +246,7 @@ class Selector extends HashSet {
   Selectable pickPoint(Kamera theKamera, int theMouseX, int theMouseY) {
     
     updateHoverAndPick(this.selectables, theKamera.pos, getPickDirection(theKamera, theMouseX, theMouseY));
-    println(this + "pickPoint(): bestPick: " + bestPick + " , angle: " + angleToBestPick);
-    
+    //println(this + "pickPoint(): bestPick: " + bestPick + " , angle: " + angleToBestPick);
     
     if (angleToBestPick < minSelectionAngle) {
       return (Selectable) bestPick;
@@ -281,20 +280,8 @@ class Labelor {
       float nearClampRatio = 0.001;
       float farClampRatio = 0.00085*scale * 1280f / width;
       
-      //float nearClampRatio = 0.001;
-      
       beginDistanceScaleGL(position, kamera.pos, unclampedScale, nearClampRatio, farClampRatio);
-      /*
-      Vector3f toKamera = new Vector3f(kamera.pos);
-      toKamera.sub(position);
-      float distToKamera = toKamera.length();
       
-      float s = min(distToKamera*0.001, 0.1);
-      s = max(s, distToKamera * 0.00085 * scale);
-      //s = max(s, distToKamera * 0.0008 * scale);
-      
-      gl.glScalef(s, s, s);
-      */
       // LABEL TEXT
       String[] msgLines = msg.split("\n");
       
@@ -334,6 +321,15 @@ class Labelor {
   }
 }
 
+void beginTextureGL(Texture tex) {
+  tex.bind();
+  tex.enable();
+}
+
+void endTextureGL(Texture tex) {
+  tex.disable();
+}
+
 void beginDistanceScaleGL(Vector3f objectPos, Vector3f kameraPos, float scale) {
 
   float s = scale * getDistance(objectPos, kameraPos);
@@ -343,10 +339,6 @@ void beginDistanceScaleGL(Vector3f objectPos, Vector3f kameraPos, float scale) {
 
 void beginDistanceScaleGL(Vector3f objectPos, Vector3f kameraPos, float scale, float nearClampRatio, float farClampRatio) {
   
-//  Vector3f toKamera = new Vector3f(kamera.pos);
-//  toKamera.sub(objectPos);
-//  float distToKamera = toKamera.length();
-
   float distToKamera = getDistance(objectPos, kameraPos);
   float s = min(distToKamera * nearClampRatio, scale);
   s = max(s, distToKamera * farClampRatio);
@@ -380,14 +372,24 @@ Vector3f[] genPolygonVertices(int n) {
     
     float theta = TWO_PI * ((float)i) / (float)n;
     float r = 5 * n;
-    Dbg.say("theta/TWO_PI, r: " + theta/TWO_PI + " " + r);
-    //Vector3f pos = new Vector3f(1 + random(-1, 1) * cos(theta), 1 + random(-1, 1) * sin(theta), 0);
+    
     Vector3f pos = new Vector3f(cos(theta)-1, sin(theta), 0);
-    Dbg.say("target[" + i + "].pos: " + pos);
     pos.scaleAdd(r, pos, targetParticle.getPositionVec());
     vecs[i] = pos;
+    
+    //Dbg.say("theta/TWO_PI, r: " + theta/TWO_PI + " " + r);
+    //Dbg.say("target[" + i + "].pos: " + pos);
   }
   return vecs;
+}
+
+// MATH
+float logBase10(float value) {
+  return (log(value) / log(10));
+}
+
+float nearestPowerOf10Below(float value) {
+  return pow(10, (int)logBase10(value));
 }
 
 // STRING FORMATTING
@@ -406,6 +408,69 @@ float screenX (Vector3f v) {
 
 float screenY (Vector3f v) {
   return screenY(v.x, v.y, v.z);
+}
+
+// LOAD UTILS - FONTS
+Font loadFont( byte[] fontBytes, int fontSize ){
+
+  Font font = null;
+  
+  try {
+    ByteArrayInputStream fontStream = new ByteArrayInputStream(fontBytes);
+    font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
+    font = font.deriveFont((float)fontSize);
+  }
+  catch (FontFormatException e) {
+    println(e.getMessage());
+  }
+  catch (IOException e) {
+    println(e.getMessage());
+  }
+  finally {
+    if (font==null) {
+      font = new Font("Sans-Serif", Font.PLAIN, fontSize);
+    }
+  }
+  return font;
+}
+
+class FpsTimer {
+  
+  import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
+  DescriptiveStatistics secondsPerFrameStats;
+  
+  float seconds, secondsLastDraw, secondsLastFpsAvg, deltaSeconds;
+  float fpsRecent, prevFrameCount;
+  
+  FpsTimer() {
+    // INIT FPS TIMING
+    secondsPerFrameStats = new DescriptiveStatistics();
+    secondsPerFrameStats.setWindowSize(90);
+    for (int i=0; i<90; i++) { secondsPerFrameStats.addValue(1.0 / 30.0); }
+    secondsLastDraw = seconds = 0.001 * millis();
+  }
+  
+  void update() {
+    secondsLastDraw = seconds;
+    seconds = 0.001 * millis();
+    
+    secondsPerFrameStats.addValue(seconds - secondsLastDraw);
+    
+    deltaSeconds = seconds - secondsLastFpsAvg;
+    
+    if (deltaSeconds > 1) {
+      fpsRecent = (frameCount - prevFrameCount) / deltaSeconds;
+      secondsLastFpsAvg = seconds;
+      prevFrameCount = frameCount;
+    }
+  }
+  
+  float getSecondsPerFrame() {
+    return (float)secondsPerFrameStats.getMean();
+  }
+  float getFramesPerSecond() {
+    return 1.0f / getSecondsPerFrame();
+  }
 }
 
 void intervalSay(int frameInterval, String msg) {
@@ -454,3 +519,4 @@ static class Dbg {
     }
   }
 }
+

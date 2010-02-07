@@ -1,3 +1,4 @@
+// Frame
 // tflorez
 
 interface Frame extends Selectable {
@@ -32,9 +33,6 @@ class DefaultFrame implements Frame {
   float ancestorsAge;
   
   AxesSettings axesSettings = new AxesSettings();
-//  boolean axesVisible = true;
-//  boolean axesGridVisible = false;
-//  boolean simultaneityPlaneVisible = true;
   
   DefaultFrame(Vector3f position, Vector3f vel){
     setPosition(position);

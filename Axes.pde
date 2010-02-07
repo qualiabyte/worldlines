@@ -1,7 +1,8 @@
+// Axes
 // tflorez
 
 class AxesSettings {
-    
+  
   boolean axesVisible = true;
   boolean axesLabelsVisible = false;
   boolean axesGridVisible = false;
@@ -89,11 +90,11 @@ class Axes {
   }
   
   void drawGL(GL gl, Frame f) {
-    //drawAxesGL(gl, f);
-    drawAxesGLVec(gl, f);
+    
+    drawAxesGL(gl, f);
   }
   
-  void drawAxesGLVec(GL gl, Frame f) {
+  void drawAxesGL(GL gl, Frame f) {
     
     AxesSettings frameSettings = f.getAxesSettings();
     
@@ -104,13 +105,13 @@ class Axes {
     Vector3f pos = f.getDisplayPositionVec();
     Velocity vel = f.getVelocity();
     
-    // MAP AXES FRAME'S INVERSE TRANSFORMED BASIS TO VIEW TARGET'S DISPLAY FRAME
-    for (int i=0; i<3; i++) {
-      Relativity.displayTransform(lorentzMatrix, vel.basisInverse[i], axesFrameDisplayBasis[i]);
-    }
-    
     // DRAW AXES FRAME BASIS
+    Relativity.displayTransformBundle(lorentzMatrix, vel.basisInverse, axesFrameDisplayBasis);
     drawBasis(pos, axesFrameDisplayBasis, axisColors, frameSettings.axesLabelsVisible, axesFrameBasisLabels);
+    
+    // REST FRAME BASIS    
+    Relativity.displayTransformBundle(lorentzMatrix, restFrameBasis, restFrameDisplayBasis);
+    drawBasis(pos, restFrameDisplayBasis, axisColors, frameSettings.axesLabelsVisible, restFrameBasisLabels);
     
     // AXES FRAME XY (SIMULTANEITY) PLANE
     if (frameSettings.simultaneityPlaneVisible()) {
@@ -118,29 +119,15 @@ class Axes {
     }
     
     // AXES FRAME GRID LINES
-//    if (frameSettings.axesGridVisible && !( !prefs.getBoolean("show_Target_Axes_Grid") && f == targetParticle )) {
-    if ( (    (f != targetParticle) && frameSettings.axesGridVisible )
-         || ( (f == targetParticle) && prefs.getBoolean("show_Target_Axes_Grid") )) {
-      Vector3f kamToAxes = new Vector3f();
-      kamToAxes.sub(f.getDisplayPositionVec(), kamera.pos);
-      float powerOfTenExponent = (int) (log(0.5*kamToAxes.length()) / log(10));
-      powerOfTenExponent = powerOfTenExponent < 1 ? 1 : powerOfTenExponent;
-
-      float gridBoundary = kamToAxes.length() < 100 ? 100 : kamToAxes.length();
+    if (frameSettings.axesGridVisible) {
       
-      setGridBoundary(gridBoundary);
-      setGridLineSpacing(pow(10, powerOfTenExponent));
+      float kamToAxesDist = getDistance(kamera.pos, f.getDisplayPositionVec());
+      
+      setGridBoundary( max(100, kamToAxesDist) );
+      setGridLineSpacing( max(10, nearestPowerOf10Below(kamToAxesDist * 0.5)) );
       
       drawGrid(pos, axesFrameDisplayBasis[0], axesFrameDisplayBasis[2], axisColors[0], axisColors[2], true);
     }
-    
-    // REST FRAME BASIS   
-    for (int i=0; i<3; i++) {
-      Relativity.displayTransform(lorentzMatrix, restFrameBasis[i], restFrameDisplayBasis[i]);
-    }
-    drawBasis(pos, restFrameDisplayBasis, axisColors, frameSettings.axesLabelsVisible, restFrameBasisLabels);
-
-    //if (prefs.getBoolean("showAllAxesLabels") || (prefs.getBoolean("showTargetAxesLabels") && f == targetParticle) ) {}
   }
 
   void drawBasisLabels(Vector3f pos, Vector3f[] theBasis, float[][] theBasisColors, String[] theBasisLabels) {
@@ -240,6 +227,7 @@ class Axes {
     gl.glEnd();
   }
 }
+
 /*
 void drawGridLabels(Vector3f pos, Vector3f[] theBasis) {
   Vector3f labelPos = new Vector3f();

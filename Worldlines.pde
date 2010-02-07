@@ -4,10 +4,10 @@
 import processing.opengl.*;
 import javax.media.opengl.GL;
 import controlP5.*;
-import javax.vecmath.*;
 
+import javax.vecmath.*;
+import java.util.List;
 import java.awt.geom.Rectangle2D;
-import org.apache.commons.math.*;
 
 import com.sun.opengl.util.texture.*;
 import com.sun.opengl.util.BufferUtil;
@@ -22,7 +22,10 @@ Kamera kamera;
 Matrix3f lorentzMatrix;
 Matrix3f inverseLorentzMatrix;
 
-ArrayList particles;
+List scenes;
+List particles;
+
+Scene myTwinParticleScene;
 
 Particle targetParticle;
 ArrayList targets;
@@ -45,49 +48,17 @@ InputDispatch inputDispatch;
 Axes myAxes;
 
 float C = 1.0;
-//float timeDelta = 0.2;
-DescriptiveStatistics secondsPerFrameStats;
+
+FpsTimer myFpsTimer;
 
 // GUI Control Vars
-public int PARTICLES = 50;
+public int PARTICLES = 1;//50;
 
 public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
 
-public void playStatus() {
-  StateControl c = (StateControl) prefs.getControl("playStatus");
-  c.setState( (c.getState() == "paused") ? "playing" : "paused" );
-  
-  Dbg.say("playStatus(): state -> " + c.getState());
-  Dbg.say("playStatus(): label -> " + c.getLabel());
-}
-
-public void randomize() {
-  
-  String[] floatLabels = new String[] {
-    "START_POS_DISPERSION",
-    //"START_POS_XY_RATIO",
-    //"START_POS_X_SCALE",
-    "START_POS_Y_SCALE",
-    "START_VEL_DISPERSION", 
-    "START_VEL_ECCENTRICITY"
-  };
-  
-  for (int i=0; i<floatLabels.length; i++) {
-    String label = floatLabels[i];
-    FloatControl control = prefs.getFloatControl(label);
-    
-    float randomValue = random(control.max);
-    
-    control.setValue(randomValue);
-  }
-
-  //TARGETS = (int)(random(1, PARTICLES/3));
-  setup();
-}
-
 // Input Device Vars
-public boolean MOUSELOOK = true;
+public boolean MOUSELOOK = false;
 public boolean INPUT_RIGHT;
 public boolean INPUT_LEFT;
 public boolean INPUT_UP;
@@ -96,10 +67,6 @@ public boolean INPUT_DOWN;
 // Data Files
 String PARTICLE_IMAGE = "particle.png";//_reticle.png";
 String bundledFont = "VeraMono.ttf";
-
-float fpsRecent, prevFrameCount;
-float seconds, secondsLastDraw, secondsLastFpsAvg, deltaSeconds;
-float fpsMovingAvg;
 
 ControlP5 controlP5;
 
@@ -118,15 +85,43 @@ VTextRenderer myVTextRenderer;
 Infobox myInfobox;
 Labelor myLabelor;
 
-ControlPanel[] controlPanels;
 static ControlMap prefs;
 
 void controlEvent(controlP5.ControlEvent event) {
   prefs.handleControlEvent(event);
 }
 
-//void initScene() {
-void restart() {
+// CONTROLP5 CALLBACK
+public void playStatus() {
+  StateControl c = (StateControl) prefs.getControl("playStatus");
+  c.setState( (c.getState() == "paused") ? "playing" : "paused" );
+  
+  Dbg.say("playStatus(): state -> " + c.getState());
+  Dbg.say("playStatus(): label -> " + c.getLabel());
+}
+// CONTROLP5 CALLBACK
+public void randomize() {
+  
+  String[] floatLabels = new String[] {
+    "START_POS_DISPERSION",
+    //"START_POS_X_SCALE",
+    "START_POS_Y_SCALE",
+    "START_VEL_DISPERSION", 
+    "START_VEL_ECCENTRICITY"
+  };
+  
+  for (int i=0; i<floatLabels.length; i++) {
+    String label = floatLabels[i];
+    FloatControl control = prefs.getFloatControl(label);
+    
+    float randomValue = random(control.max);
+    control.setValue(randomValue);
+  }
+  setup();
+}
+
+ControlPanel[] buildControlPanels() {
+  
   Control restart = new ButtonControl("restart");
   Control randomize = new ButtonControl("randomize");
   StateControl pause = new StateControl("playStatus", "playing", "PAUSE");
@@ -139,11 +134,10 @@ void restart() {
   panel.addControl(restart);
   panel.addControl(randomize);
   panel.putInteger("PARTICLES", PARTICLES, 0, PARTICLES*5);
-  panel.putInteger("TARGETS", 3, 1, PARTICLES);
+  panel.putInteger("TARGETS", 1, 1, PARTICLES); //3
   panel.putFloat("START_POS_DISPERSION", 2.6, 0, 4);
   panel.putFloat("START_POS_X_SCALE", 2.6, 0, 3);
   panel.putFloat("START_POS_Y_SCALE", 2.6, 0, 3);
-  //panel.putFloat("START_POS_XY_RATIO", 1, 0.5, 2);
   panel.putFloat("START_VEL_DISPERSION", 5.4, 0, 20);
   panel.putFloat("START_VEL_ECCENTRICITY", 1.95, 0, 15);
   panel.putFloat("START_VEL_X_SCALE", 1);
@@ -165,8 +159,16 @@ void restart() {
   panel.putBoolean("energy_Conservation", false);
   panel.putBoolean("show_Rigid_Bodies", true);
   //panel.putBoolean("showAxesGrid", false);
-  panel.putBoolean("show_Target_Axes_Grid", true);
-  panel.putBoolean("show_Origin_Axes_Grid", false);
+  
+  AxesSettings targetAxesSettings = new AxesSettings();
+  AxesSettings originAxesSettings = new AxesSettings();
+  
+  panel.putBoolean("show_Target_Axes_Grid", true).addUpdater(
+    new AxesSettingsVisibilityUpdater(targetAxesSettings));
+  panel.putBoolean("show_Origin_Axes_Grid", false).addUpdater(
+    new AxesSettingsVisibilityUpdater(originAxesSettings));
+  panel.putBoolean("show_Particle_Clock_Ticks", true);
+  panel.putBoolean("show_Particle_Clock_Tick_Labels", true);
   //panel.putBoolean("show_All_Axes_Grid", false);
   //panel.putBoolean("showAllAxesLabels", false);
   
@@ -196,68 +198,93 @@ void restart() {
   panel.putFloat("HARMONIC_FRINGES", 3.4, 0, 16);
   panel.putFloat("HARMONIC_CONTRIBUTION", 0.5);
   
-  if (controlPanels == null) {
-    controlPanels = new ControlPanel[] {
-      setupPanel,
-      mainPanel,
-      debugPanel,
-      graphicsPanel
-    };
-  }
+  ControlPanel[] controlPanels = new ControlPanel[] {
+    setupPanel,
+    mainPanel,
+    debugPanel,
+    graphicsPanel
+  };
   
-  // PREFERENCES
-  prefs = new ControlMap(controlPanels);
+  return controlPanels;
+}
+
+ControlMap buildPrefs(ControlPanel[] controlPanels) {
+  ControlMap oldPrefs = prefs;
+  ControlMap newPrefs = new ControlMap(controlPanels);
+  
+  if (oldPrefs != null) {
+    copyControlValues(oldPrefs, newPrefs);
+  }
+  return newPrefs;
+}
+
+ControlP5 buildControlP5(ControlMap thePrefs) {
+  
+  controlP5 = new ControlP5(this);
+  controlP5.setAutoDraw(false);
+  controlP5.setColorForeground(#093967);
+
+  thePrefs.buildControlP5(controlP5);
+  
+  return controlP5;
+}
+
+//void initScene() {
+void restart() {
+  
+  // BUILD CONTROL PANELS
+  ControlPanel[] controlPanels = buildControlPanels();
+  
+  // BUILD PREFERENCES
+  prefs = buildPrefs(controlPanels);
   
   prefs.put("particleImagePath", "particle_hard.png");//"particle_cushioned_core.png");
   prefs.put("selectedParticleImagePath", "particle_reticle.png");
   prefs.put("startPosWeight", "cauchy");
   
   // CONTROLP5
-  controlP5 = new ControlP5(this);
-  prefs.buildControlP5(controlP5);
-  controlP5.setAutoDraw(false);
-  controlP5.setColorForeground(#093967);
+  controlP5 = buildControlP5(prefs);
   
+  // FONT
   byte[] fontBytes = loadBytes(bundledFont);
   int fontSize = (int)(0.025 * height);
-  println(fontSize);
+  Font font = loadFont(fontBytes, fontSize);
   
-  myInfobox = new Infobox(fontBytes, fontSize);
-  
-  Font font = myInfobox.loadFont(fontBytes);
+  myInfobox = new Infobox(font, fontSize);
   myVTextRenderer = new VTextRenderer(font.deriveFont((float)40), (int)(1*fontSize));
   myLabelor = new Labelor();
   
-  secondsPerFrameStats = new DescriptiveStatistics();//DescriptiveStatistics.newInstance();
-  secondsPerFrameStats.setWindowSize(90);
-  for (int i=0; i<90; i++) { secondsPerFrameStats.addValue(1.0/180.0); }
-    
   // SCENE OBJECTS
   targets = new ArrayList();
   particles = new ArrayList();
   emissions = new ArrayList();
   rigidBodies = new ArrayList();
   
+  // SCENES
+  scenes = new ArrayList();
+  
+  // SELECTABLES
+  myFanSelection = null;
+  labelSelector = new Selector();
+  particleSelector = new Selector(particles);
+  
   // INIT LORENTZ FOR PARTICLE CREATION
-  Velocity targetVelocity = new Velocity(1E-7f,0f);
+  Velocity targetVelocity = new Velocity(0f, 0f); //1E-7f,0f);
   lorentzMatrix = Relativity.getLorentzTransformMatrix(targetVelocity);
   inverseLorentzMatrix = Relativity.getInverseLorentzTransformMatrix(targetVelocity);
   
   // TARGET PARTICLES
   //targetParticle = new Particle(targetPos, targetVel);
-  //addTarget(targetParticle);
   targetParticle = new Particle();
   targetParticle.setVelocity(targetVelocity.vx, targetVelocity.vy);
   targetParticle.setPosition(0, 0, 0);
-  targetParticle.setFillColor(color(#F01B5E));
   
-  particles.add(targetParticle);
   addTarget(targetParticle);
   
-  println("target pos: " + targetParticle.position.x + ", " + targetParticle.position.y);
-  println("target direction: " + targetParticle.velocity.direction);
-  println("target magnitude: " + targetParticle.velocity.magnitude);
-  println("target gamma:     " + targetParticle.velocity.gamma);
+  //Dbg.say("target pos: " + targetParticle.position.x + ", " + targetParticle.position.y);
+  //Dbg.say("target direction: " + targetParticle.velocity.direction);
+  //Dbg.say("target magnitude: " + targetParticle.velocity.magnitude);
+  //Dbg.say("target gamma:     " + targetParticle.velocity.gamma);
   
   int numTargets = prefs.getInteger("TARGETS");
   
@@ -334,11 +361,15 @@ void restart() {
   //kamera.setFov(prefs.getFloat("fov"));
   
   // FRAMES
+  AxesSettings targetAxesSettings = (AxesSettings)((AxesSettingsVisibilityUpdater)prefs.getControl("show_Target_Axes_Grid").getUpdater()).toUpdate;
+  AxesSettings originAxesSettings = (AxesSettings)((AxesSettingsVisibilityUpdater)prefs.getControl("show_Origin_Axes_Grid").getUpdater()).toUpdate;
+  (targetParticle.headFrame).axesSettings = targetAxesSettings;
   targetParticle.getAxesSettings().setAxesGridVisible(true);
   targetParticle.getAxesSettings().setAxesLabelsVisible(true);
   targetParticle.getAxesSettings().setAxesVisible(true);
   
   originFrame = new DefaultFrame();
+  originFrame.axesSettings = originAxesSettings;
   originFrame.getAxesSettings().setAxesVisible(true);
   originFrame.getAxesSettings().setSimultaneityPlaneVisible(false);
   originFrame.getAxesSettings().setAxesGridVisible(true);
@@ -348,21 +379,104 @@ void restart() {
   //restFrame.setAxesVisible(true);
   //restFrame.getAxesSettings().setSimultaneityPlaneVisible(false);
   
-  // SELECTABLES
-  myFanSelection = null;
-  labelSelector = new Selector();
-  particleSelector = new Selector(particles);
   particlesLayer = new ParticlesLayer(particles, prefs.getString("particleImagePath"), kamera, particleSelector.selection);
   
   inputDispatch = new InputDispatch(targets);
   
   myAxes = new Axes((Frame)targetParticle);
+  myFpsTimer = new FpsTimer();
   
-  Velocity restFrameVel = new Velocity(0, 0);
+  Dbg.say("controlP5.controller(\"show_Target_Axes_Grid\"): " + controlP5.controller("show_Target_Axes_Grid"));
+  Dbg.say("  listenerSize():" + controlP5.controller("show_Target_Axes_Grid").listenerSize());
   
+  myTwinParticleScene = new TwinParticleScene();
+  addScene(myTwinParticleScene);
+  
+  prefs.notifyAllUpdaters();
   // THREADING
   //particleUpdater = new ParticleUpdater(targetParticle, particles);
   //particleUpdater.start();
+}
+
+abstract class Scene {
+  void update() {};
+}
+class TwinParticleScene extends Scene {
+  
+  TwinParticlePair twinParticlePair;
+  
+  TwinParticleScene() {
+    
+    float relativeSpeed = 0.9;
+    float turnaroundTime = 100;
+    this.twinParticlePair = new TwinParticlePair(relativeSpeed, turnaroundTime);
+    
+    //addTarget(twinParticlePair.twinA);
+    addParticle(twinParticlePair.twinA);
+    addParticle(twinParticlePair.twinB);
+    
+    println(twinParticlePair.twinA);
+    println(twinParticlePair.twinB);
+  }
+  
+  void update() {
+    this.twinParticlePair.update();
+    
+    if (twinParticlePair.isTripComplete()) {
+      prefs.getStateControl("playStatus").setState("paused");
+    }
+  }
+}
+
+class TwinParticlePair {
+  Particle twinA, twinB;
+  float relativeSpeed;
+  float turnaroundTime;
+  float initialAgeTwinB;
+  float elapsedTime;
+  
+  boolean returnHasBegun;
+  
+  /** Returns a list containing a new pair of "twin" Particles
+    * @param relativeSpeed
+    *    The relative speed between the frames of twins A and B,
+    *    as a fraction of C
+    * @param turnaroundTime
+    *    Elapsed time before twinB decelerates and begins to return,
+    *    in seconds as measured by twinB
+    */
+  TwinParticlePair(float relativeSpeed, float turnaroundTime) {
+    
+    this.relativeSpeed = relativeSpeed;
+    this.turnaroundTime = turnaroundTime;
+    //Velocity theDepartVelocity = new Velocity(relativeSpeed, 0.0f);
+    
+    twinA = new Particle();
+    twinB = new Particle();
+    twinB.setVelocity(relativeSpeed, 0);
+    
+    println("twinA position: " + nfVec(twinA.position, 3) + 
+      "\ntwinB.getDisplayPosition(): " + twinB.getDisplayPosition() +
+      "\ntwinA velocity: " + twinA.velocity.vx + ", " + twinA.velocity.vy);
+    
+    initialAgeTwinB = twinB.properTime;
+  }
+  
+  void update() {
+
+    if (!returnHasBegun) {
+      elapsedTime = twinB.properTime - initialAgeTwinB;
+      
+      if (elapsedTime > turnaroundTime) {
+        twinB.setVelocity(-twinB.velocity.vx, -twinB.velocity.vy);
+        returnHasBegun = true;
+      }
+    }
+  }
+  
+  boolean isTripComplete() {
+    return (elapsedTime >= 2 * turnaroundTime);
+  }
 }
 
 float cauchyWeightedRandom(float gamma) {
@@ -380,8 +494,31 @@ float cauchyPDF(float x, float gamma) {
   return 1.0f / (PI*(1 + pow(x / gamma, 2.0)));
 }
 
+void addScene(Scene s) {
+  if (!scenes.contains(s)) {
+    scenes.add(s);
+  }
+}
+
+void addParticle(Particle p) {
+  if (!particles.contains(p)) {
+    particles.add(p);
+  }
+  addSelectable(p);
+}
+
+void addSelectable(Particle p) {  
+  if (!particleSelector.selectables.contains(p)) {
+    particleSelector.addToSelectables(p);
+  }
+}
+
 void addTarget(Particle p){
-  targets.add(p);
+  
+  addParticle(p);
+  if ( ! targets.contains(p) ) {
+    targets.add(p);
+  }
   p.velocity.set(targetParticle.velocity);
   p.setFillColor(TARGET_COLOR);
 }
@@ -389,8 +526,8 @@ void addTarget(Particle p){
 void addEmission(Particle e){
   if ( prefs.getBoolean("use_Emissions") ) {
     
+    addParticle(e);
     emissions.add(e);
-    particles.add(e);
     particleSelector.addToSelectables(e);
     e.setFillColor(color(0, 1, 0));
     
@@ -440,16 +577,20 @@ void draw() {
   
   // UPDATE SCENE
 //  inputDispatch.update();
+  myTwinParticleScene.update();
   
   // UPDATE TARGET
-  float dilationFactor = prefs.getBoolean("PROPERTIME_SCALING") ? targetParticle.velocity.gamma : 1.0;
-  //float dt = timeDelta * dilationFactor;
-  float dt = ((float)secondsPerFrameStats.getMean()) * dilationFactor * prefs.getFloat("timestep");
-  
-  if (prefs.getState("playStatus") == "paused") {
+  float dt;  
+  if (prefs.getState("playStatus") != "paused") {
+    
+    float secondsPerFrame = myFpsTimer.getSecondsPerFrame();
+    float dilationFactor = prefs.getBoolean("PROPERTIME_SCALING") ? targetParticle.velocity.gamma : 1.0;
+    
+    dt = secondsPerFrame * dilationFactor * prefs.getFloat("timestep");
+  }
+  else {
     dt = 0;
   }
-  
   //particleUpdater.dt = dt;
   
   // UPDATE TARGET
@@ -510,29 +651,19 @@ void draw() {
   pgl.endGL();
   
   // UPDATE FPS
-  secondsLastDraw = seconds;
-  seconds = 0.001 * millis();
-  secondsPerFrameStats.addValue(seconds - secondsLastDraw);
-  deltaSeconds = seconds - secondsLastFpsAvg;
-  
-  if (deltaSeconds > 1) {
-    fpsRecent = (frameCount - prevFrameCount) / deltaSeconds;
-    secondsLastFpsAvg = seconds;
-    prevFrameCount = frameCount;
-  }
+  myFpsTimer.update();
   
   // INFO LAYER
   myInfobox.print(
-  + (int) seconds + " seconds\n"
-  + (int) fpsRecent +  "fps (" + (int)(frameCount / seconds) + "avg)\n"
+  + (int) myFpsTimer.seconds + " seconds\n"
+  + (int) myFpsTimer.fpsRecent +  "fps (" + (int)(frameCount / myFpsTimer.seconds) + "avg)\n"
   + "particles: " + particles.size() + "\n"
-  /*
-  + "target age:        " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
-  + "target speed:      " + nf(targetParticle.velocity.magnitude, 1, 8) + " c\n"
-  + "target gamma:      " + nf(targetParticle.velocity.gamma, 1, 8) + "\n"
-  + "target position:   " + nfVec(targetParticle.position, 5) + "\n"
-  + "target displayPos: " + nfVec(targetParticle.getDisplayPositionVec(), 5)
-  */
+//  + "target age:        " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
+//  + "target speed:      " + nf(targetParticle.velocity.magnitude, 1, 8) + " c\n"
+//  + "target gamma:      " + nf(targetParticle.velocity.gamma, 1, 8) + "\n"
+//  + "target position:   " + nfVec(targetParticle.position, 5) + "\n"
+//  + "target displayPos: " + nfVec(targetParticle.getDisplayPositionVec(), 5)  
+//  + "mouseX: " + mouseX + ", mouseY: " + mouseY + "\n"
   + "Controls: Arrows or W,A,S,D to Move; Right mouse button toggles camera rotation"
   );
   
@@ -646,7 +777,8 @@ class InputDispatch {
   
   void updateParticleDragging() {
     
-    if ( dragInProgress && mouseButton == LEFT && !particleSelector.isEmpty() && clickedParticle != null) {
+    if ( dragInProgress && mouseButton == LEFT
+         && !particleSelector.isEmpty() && clickedParticle != null ) {
       
       Vector3f dragPointerDisplayPos = kamera.screenToModel(mouseX, mouseY);
       Vector3f dragPointerPos = Relativity.inverseDisplayTransform(targetParticle.velocity, dragPointerDisplayPos);
@@ -772,78 +904,77 @@ class ParticleDragger {
 */
 Particle clickedParticle;
 
-void mousePressed() {
+boolean isFanSelectionOpen() {
+  return labelSelector.selection.contains(myFanSelection);
+}
+
+void openFanSelection(Particle pickedParticle) {
+  SelectableLabel[] labels = new SelectableLabel[] {
+    new SelectableLabel("menuDummy1", pickedParticle.getDisplayPositionVec()),
+    new SelectableLabel("menuDummy2", pickedParticle.getDisplayPositionVec()),
+    new SelectableLabel("menuDummy3", pickedParticle.getDisplayPositionVec()),
+    new SelectableLabel("menuDummy4", pickedParticle.getDisplayPositionVec()),
+    new SelectableLabel("menuDummy5", pickedParticle.getDisplayPositionVec()),
+  };
+  
+  myFanSelection = new FanSelection( pickedParticle, labels);
+  labelSelector.addToSelectables(myFanSelection.getSelectableLabels());
+  labelSelector.selection.add(myFanSelection);
+}
+
+void mousePickedParticle(Particle pick) {
+  if (mouseButton == RIGHT) {
+    openFanSelection(pick);
+  }
+  else if (mouseButton == LEFT) {
+    particleSelector.invertSelectionStatus(pick);
+  }
+}
+
+void mousePressedOnBackground() {
+  if (mouseButton == LEFT) {
+    particleSelector.clear();
+  }
+  else if (mouseButton == RIGHT) {
+    MOUSELOOK = !MOUSELOOK;
+    
+    if (MOUSELOOK) {
+      cursor(MOVE);
+    }
+    else {
+      cursor(ARROW);//noCursor();
+    }
+  }
+}
+
+void mousePressedOnScene() {
   
   Selectable pickedParticle = (Particle) particleSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pickedLabel = labelSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pick = (pickedLabel != null) ? pickedLabel : pickedParticle;
+    
+  if (pickedParticle == null && pickedLabel == null) {
+    mousePressedOnBackground();
+  }
+  else if (isFanSelectionOpen() && mouseButton == RIGHT) {
+    labelSelector.drop(myFanSelection.getSelectableLabels());
+  }
+  else if (pickedLabel != null) {
+    //mousePickedLabel(pickedLabel);
+  }
+  else if (pickedParticle != null) {
+    mousePickedParticle((Particle)pickedParticle);
+  }
+}
+
+void mousePressed() {
   
-  if (pick instanceof Particle) {
-    clickedParticle = (Particle) pick;
+  if (controlP5.window(this).isMouseOver()) {
+    return;
   }
   else {
-    clickedParticle = null;
+    mousePressedOnScene();
   }
-  
-  Dbg.say("labelSelector.selectables: " + labelSelector.selectables);
-  Dbg.say("pickedLabel: " + pickedLabel);
-  Dbg.say("pick: " + pick);
-  
-  if (mouseButton == RIGHT) {
-    
-    if (pick == null) {
-      MOUSELOOK = !MOUSELOOK;
-      if (MOUSELOOK)
-      { cursor(MOVE);
-      }
-      else
-      { cursor(ARROW);//noCursor();
-      }
-    }
-    else if (myFanSelection != null && myFanSelection.selectableLabels.contains(pick)) {
-      labelSelector.drop(myFanSelection.getSelectableLabels());
-    }
-    else if (pick instanceof Particle) { 
-      //Dbg.say("myFanSelection: " + myFanSelection);
-      
-      if (labelSelector.contains(myFanSelection)) {
-        labelSelector.drop(myFanSelection.getSelectableLabels());
-      }
-      else
-      {
-        SelectableLabel[] labels = new SelectableLabel[] {
-          new SelectableLabel("menuDummy1", pickedParticle.getDisplayPositionVec()),
-          new SelectableLabel("menuDummy2", pickedParticle.getDisplayPositionVec()),
-          new SelectableLabel("menuDummy3", pickedParticle.getDisplayPositionVec()),
-          new SelectableLabel("menuDummy4", pickedParticle.getDisplayPositionVec()),
-          new SelectableLabel("menuDummy5", pickedParticle.getDisplayPositionVec()),
-        };
-      
-        myFanSelection = new FanSelection( (Particle) pick, labels);
-        labelSelector.addToSelectables(myFanSelection.getSelectableLabels());
-        labelSelector.selection.add(myFanSelection);
-      } 
-    }
-    else if (pick instanceof FanSelection) {
-      if (labelSelector.selectables.contains(myFanSelection)) {
-        labelSelector.selectables.remove(myFanSelection.getSelectableLabels());
-        labelSelector.invertSelectionStatus((Selectable)myFanSelection);
-      }
-    }    
-  }
-  else if (mouseButton == LEFT && ( mouseX > 50 )) {
-    
-    if (pick == null) {
-      particleSelector.clear();
-    }
-    else if (pick instanceof Particle) {
-      particleSelector.invertSelectionStatus(pick);
-    }
-    else if (pick instanceof FanSelection) {
-      labelSelector.invertSelectionStatus(pick);
-    }
-  }
-  
 }
 
 void mouseReleased() {
@@ -882,8 +1013,7 @@ void keyPressed() {
   if (key == ' ') {
     int i = (int) random(prefs.getInteger("PARTICLES"));
     targetParticle = (Particle) particles.get(i);
-    targetParticle.setFillColor(color(#F01B5E));
-    targets.add(particles.get(i));
+    addTarget((Particle)particles.get(i));
   }
   else if (key == '`') {
     particleSelector.clear();

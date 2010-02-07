@@ -34,7 +34,7 @@ class Kamera {
     
     distToKameraPlane = 100;
     screenToKameraMap = getScreenToKameraCoordinateMap();
-    println("screenToKameraMap: \n" + screenToKameraMap);
+    //Dbg.say("screenToKameraMap: \n" + screenToKameraMap);
   }
   
   Matrix3f getScreenToKameraCoordinateMap()

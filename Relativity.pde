@@ -2,31 +2,38 @@
 // tflorez
 
 static class Relativity {
+  
+  static Velocity v;
+  
+  // TRANSFORM MODE
+  public static boolean TOGGLE_SPATIAL_TRANSFORM;
+  public static boolean TOGGLE_TEMPORAL_TRANSFORM;
+  
   static float C = 1.0f;
 
   public static float gamma(float v) {
     return 1.0f / (float) Math.sqrt(1 - v*v);
   }
   
+  public static void loadVelocity(Velocity velocity) {
+    v = velocity;
+  }
+
+  public static void loadFrame(Frame f) {
+    loadVelocity(f.getVelocity());
+  }
+  
+  
   public static Matrix3f getLorentzMatrix() {
     /*
-    if (prefs.getBoolean("brehmeDiagramCorrection")) {
-    
-      if (TOGGLE_SPATIAL_TRANSFORM != TOGGLE_TEMPORAL_TRANSFORM) {
-        Matrix3f M = new Matrix3f(
-          v.gamma,              0,    -v.magnitude*v.gamma, // X
-          0,                    1,    0,                    // Y
-          -v.magnitude*v.gamma, 0,    v.gamma               // T
-        );
-        
-        //Vector3f rowX = new Vector3f();
-        //M.getRow(0, rowX);
-        //rowX.scale(1/v.gamma);
-        //M.setRow(0, rowX);
-        M.mul(1/v.gamma);
-        M.setElement(1, 1, 1);
-        return M;
-      }
+    if (prefs.getBoolean("brehmeDiagramCorrection")
+        && (TOGGLE_SPATIAL_TRANSFORM != TOGGLE_TEMPORAL_TRANSFORM)) {
+          
+      Matrix3f M = new Matrix3f(
+        v.gamma,              0,    -v.magnitude*v.gamma, // X
+        0,                    1,    0,                    // Y
+        -v.magnitude*v.gamma, 0,    v.gamma               // T
+      );
     }
     */
     return new Matrix3f(
@@ -38,24 +45,14 @@ static class Relativity {
   
   public static Matrix3f getLorentzInverseMatrix() {
     /*
-    if (prefs.getBoolean("brehmeDiagramCorrection")) {
-        
-      if (TOGGLE_SPATIAL_TRANSFORM != TOGGLE_TEMPORAL_TRANSFORM) {
-        Matrix3f M = new Matrix3f(
-          v.gamma,              0,    v.magnitude*v.gamma, // X
-          0,                    1,    0,                   // Y
-          v.magnitude*v.gamma,  0,    v.gamma              // T
-        );
-        
-        //Vector3f rowX = new Vector3f();
-        //M.getRow(0, rowX);
-        //rowX.scale(1/v.gamma);
-        //M.setRow(0, rowX);
-        
-        M.mul(1/v.gamma);
-        M.setElement(1, 1, 1);
-        return M;
-      }
+    if (prefs.getBoolean("brehmeDiagramCorrection")
+        && TOGGLE_SPATIAL_TRANSFORM != TOGGLE_TEMPORAL_TRANSFORM) {
+      
+      Matrix3f M = new Matrix3f(
+        v.gamma,              0,    v.magnitude*v.gamma, // X
+        0,                    1,    0,                   // Y
+        v.magnitude*v.gamma,  0,    v.gamma              // T
+      );
     }
     */
     return new Matrix3f(
@@ -124,22 +121,11 @@ static class Relativity {
     
     Vector3f v_inverse = inverseTransform(vel, v_display);
     
-//    if ( TOGGLE_SPATIAL_TRANSFORM == TOGGLE_TEMPORAL_TRANSFORM ) {
-//    
-//      selectInverseDisplayComponents(v_inverse, v_display, v_inverse);
-//    }
-//    else {
-//      v_inverse.set(
-//        TOGGLE_SPATIAL_TRANSFORM ? v_display.x : v_inverse.x,
-//        TOGGLE_SPATIAL_TRANSFORM ? v_display.y : v_inverse.y,
-//        TOGGLE_TEMPORAL_TRANSFORM ? v_display.z : v_inverse.z
-//      );
-//    }
-      v_inverse.set(
-        TOGGLE_SPATIAL_TRANSFORM ? v_inverse.x : v_display.x,
-        TOGGLE_SPATIAL_TRANSFORM ? v_inverse.y : v_display.y,
-        TOGGLE_TEMPORAL_TRANSFORM ? v_inverse.z : v_display.z
-      );
+    v_inverse.set(
+      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.x : v_display.x,
+      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.y : v_display.y,
+      TOGGLE_TEMPORAL_TRANSFORM ? v_inverse.z : v_display.z
+    );
     return v_inverse;
   }
   
@@ -152,23 +138,6 @@ static class Relativity {
     );
   }
   
-  /*
-  public static float[] inverseTransform(Velocity vel, float[] xyt) {
-    
-    float[] xyt_prime = new float[3];
-    
-    Vector3f xyt_v3f = new Vector3f(xyt);    
-    
-    inverseTransform(vel, xyt_v3f).get(xyt_prime);
-    
-    return xyt_prime;
-  }
-  
-  public static float[] inverseDisplayTransform(Velocity vel, float[] xyt) {
-    
-    return selectInverseDisplayComponents(xyt, inverseTransform(vel, xyt));
-  }
-  */
   public static void lorentzTransform(Velocity vel, Vector3f source, Vector3f target){
     
     Matrix3f M = getLorentzTransformMatrix(vel);
@@ -184,27 +153,7 @@ static class Relativity {
     
     return v_prime;
   }
-  
-  public static float[] transform(Velocity vel, float[] xyt) {
-    
-    loadVelocity(vel);
-    
-    Vector3f v = new Vector3f(xyt);
-    Vector3f v_prime = new Vector3f();
-    
-    lorentzTransform(vel, v, v_prime);
-    
-    float[] xyt_prime = new float[3];
-    
-    v_prime.get(xyt_prime);
-    
-    return xyt_prime;
-  }
-  
-  public static float[] displayTransform(Velocity vel, float[] xyt) {
-    return selectDisplayComponents(xyt, transform(vel, xyt));
-  }
-  
+
   public static void displayTransform(Matrix3f theLorentzMatrix, Vector3f source, Vector3f target) {
     float sx = source.x;
     float sy = source.y;
@@ -226,6 +175,50 @@ static class Relativity {
     );
   }
   
+  public static void displayTransformBundle(Matrix3f m, Vector3f[] src, Vector3f[] dst) {
+    for (int i=0; i<src.length; i++) {
+      Relativity.displayTransform(m, src[i], dst[i]);
+    }
+  }
+
+/*
+  public static float[] inverseTransform(Velocity vel, float[] xyt) {
+    
+    float[] xyt_prime = new float[3];
+    
+    Vector3f xyt_v3f = new Vector3f(xyt);    
+    
+    inverseTransform(vel, xyt_v3f).get(xyt_prime);
+    
+    return xyt_prime;
+  }
+  
+  public static float[] inverseDisplayTransform(Velocity vel, float[] xyt) {
+    
+    return selectInverseDisplayComponents(xyt, inverseTransform(vel, xyt));
+  }
+*/
+/*
+  public static float[] transform(Velocity vel, float[] xyt) {
+    
+    loadVelocity(vel);
+    
+    Vector3f v = new Vector3f(xyt);
+    Vector3f v_prime = new Vector3f();
+    
+    lorentzTransform(vel, v, v_prime);
+    
+    float[] xyt_prime = new float[3];
+    
+    v_prime.get(xyt_prime);
+    
+    return xyt_prime;
+  }
+  
+  public static float[] displayTransform(Velocity vel, float[] xyt) {
+    return selectDisplayComponents(xyt, transform(vel, xyt));
+  }
+
   public static float[] selectDisplayComponents(float[] xyt, float[] xyt_prime){
     float[] xyt_target = new float[3];
     selectDisplayComponents(xyt, xyt_prime, xyt_target);
@@ -249,24 +242,24 @@ static class Relativity {
     xyt_target[1] = TOGGLE_SPATIAL_TRANSFORM ? xyt[1] : xyt_prime[1];
     xyt_target[2] = TOGGLE_TEMPORAL_TRANSFORM ? xyt[2] : xyt_prime[2];
   }
-  
-  /*
-  public static void lorentzTransform(float[] xyt, float[] vel, float[] xyt_prime) {
+*/
 
-    loadVel(vel[0], vel[1]);
-    lorentzTransformXYT(xyt, xyt_prime);
-  }
-  */
+//  public static void lorentzTransform(float[] xyt, float[] vel, float[] xyt_prime) {
+//
+//    loadVel(vel[0], vel[1]);
+//    lorentzTransformXYT(xyt, xyt_prime);
+//  }
 
-  public static void applyTransforms(float[] xyt, float[] xyt_prime) {
+//  public static void applyTransforms(float[] xyt, float[] xyt_prime) {
+//
+//    lorentzTransformXYT(xyt, xyt_prime);
+//
+//    xyt_prime[0] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : xyt[0];
+//    xyt_prime[1] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[1] : xyt[1];
+//    xyt_prime[2] = TOGGLE_TEMPORAL_TRANSFORM ? xyt_prime[2] : xyt[2];
+//  }
 
-    lorentzTransformXYT(xyt, xyt_prime);
-
-    xyt_prime[0] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[0] : xyt[0];
-    xyt_prime[1] = TOGGLE_SPATIAL_TRANSFORM ? xyt_prime[1] : xyt[1];
-    xyt_prime[2] = TOGGLE_TEMPORAL_TRANSFORM ? xyt_prime[2] : xyt[2];
-  }
-
+/*
   public static void lorentzTransformXYT(float[] xyt, float[] xyt_prime) {
 
     float rx = xyt[0];// - obs_x;
@@ -291,6 +284,7 @@ static class Relativity {
     float r_para_mag = (float) Math.sqrt(r_para_x * r_para_x + r_para_y * r_para_y);
 
     // 1D Transform on part of r parallel to velocity, store in XT_prime
+    float[] XT_prime = new float[2];
     lorentzTransformXT(r_cos_theta, t, XT_prime);
 
     float X = XT_prime[0];
@@ -309,40 +303,5 @@ static class Relativity {
     xt_prime[0] = v.gamma * (x - v.magnitude * t);
     xt_prime[1] = v.gamma * (t - v.magnitude * x / (C*C));
   }
-  
-  
-  public static void loadVelocity(Velocity velocity) {
-    v = velocity;
-    
-    float vx = v.vx;
-    float vy = v.vy;
-    
-    float v_mag = Math.max((float)Math.sqrt(vx*vx + vy*vy), 1E-7f);
-    float beta = v_mag;
-    
-    vx_norm = vx / v_mag;
-    vy_norm = vy / v_mag;
-  }
-
-  public static void loadFrame(Frame f) {
-    loadVelocity(f.getVelocity());
-  }
-
-  static float[] xyt_observer = new float[3];
-  static float[] XT_prime = new float[2];
-
-  static Velocity v;
-  
-  // PRELOAD VARS
-  static float vx_norm;
-  static float vy_norm;
-  
-  static float obs_x;
-  static float obs_y;
-  static float obs_t;
-
-  // TRANSFORM MODE
-  public static boolean TOGGLE_SPATIAL_TRANSFORM;
-  public static boolean TOGGLE_TEMPORAL_TRANSFORM;
-  public static float seconds;
+*/
 }

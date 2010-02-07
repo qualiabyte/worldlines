@@ -15,10 +15,10 @@ class Infobox {
     textRenderer = new VTextRenderer( loadFont(fontFile), fontSize );
   }
 */
-  Infobox( byte[] fontBytes, int fontSize ){
+  Infobox( Font font, int fontSize) {//byte[] fontBytes, int fontSize ){
 
     init( fontSize );
-    textRenderer = new VTextRenderer( loadFont(fontBytes), fontSize );
+    textRenderer = new VTextRenderer( font, fontSize );
   }
   
   private void init( int fontSize ){
@@ -26,29 +26,6 @@ class Infobox {
     this.fontSize = fontSize;    
     xOffset = yOffset = (int)(0.5 * fontSize);
     infolines = new Infoline[maxlines];
-  }
-  
-  Font loadFont( byte[] fontBytes ){
-
-    Font font = null;
-    
-    try {
-      ByteArrayInputStream fontStream = new ByteArrayInputStream(fontBytes);
-      font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
-      font = font.deriveFont((float)fontSize);
-    }
-    catch (FontFormatException e) {
-      println(e.getMessage());
-    }
-    catch (IOException e) {
-      println(e.getMessage());
-    }
-    finally {
-      if (font==null) {
-        font = new Font("Sans-Serif", Font.PLAIN, fontSize);
-      }
-    }
-    return font;
   }
   
   Infoline addLine( String text ) {

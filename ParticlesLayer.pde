@@ -2,8 +2,8 @@
 // tflorez
 
 class ParticlesLayer {
-  ArrayList particles;
-  Collection selection;
+  //List particles;
+  Collection selectedParticles;
   
   PImage particleImage;
   Kamera kamera;
@@ -11,20 +11,23 @@ class ParticlesLayer {
   Texture particleTexture;
   Texture selectedParticleTexture;
   
+  float PARTICLE_SIZE;
+  
   int[] textures = new int[3];
     
-  ParticlesLayer (ArrayList particles, String particleImagePath, Kamera kamera, Collection selection) {
-    this.particles = particles;
-    this.selection = selection;
+  ParticlesLayer (List particles, String particleImagePath, Kamera kamera, Collection theSelectedParticles) {
+    //this.particles = particles;
+    this.selectedParticles = theSelectedParticles;
     
     this.kamera = kamera;
     this.particleImage = loadImage(particleImagePath);
-    //this.particleTexture = loadTexture(particleImagePath);
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
-    this.particleTexture = loadTextureFromStream(openStream(particleImagePath));
-    this.selectedParticleTexture = loadTextureFromStream(openStream(prefs.getString("selectedParticleImagePath")));
-    //loadTextureGL(openStream(particleImagePath));
+      this.particleTexture = loadTextureFromStream(openStream(particleImagePath));
+      this.selectedParticleTexture = loadTextureFromStream(openStream(prefs.getString("selectedParticleImagePath")));
+      
+      //this.particleTexture = loadTexture(particleImagePath);
+      //loadTextureGL(openStream(particleImagePath));
     pgl.endGL();
   }
   
@@ -100,24 +103,99 @@ class ParticlesLayer {
   
   void draw() {
     
-    //inputDispatch.updateParticleDragging();
-    
-    restFrame.setPosition(targetParticle.getPosition());
-    Frame[] displayFrames = new Frame[] {restFrame, targetParticle};
+    this.PARTICLE_SIZE = prefs.getFloat("PARTICLE_SIZE");
     
     // GL SECTION BEGIN
     pgl = (PGraphicsOpenGL)g;
     gl = pgl.beginGL();
     
-    originFrame.getAxesSettings().setAxesGridVisible(prefs.getBoolean("show_Origin_Axes_Grid"));
+    // DRAW PATHS + REST & ORIGIN FRAME AXES
+    this.drawPathsAndAxesGL(gl, particles);
+    
+    // INTERSECTION CALCULATION
+    Frame[] displayFrames = new Frame[] {restFrame, targetParticle};
+    
+    HashMap frameIntersectionsMap = this.buildFrameIntersectionsMap(displayFrames, particles);
+
+    // DRAW HEADS
+    this.drawHeadsGL(gl, frameIntersectionsMap);    
+    
+    // PARTICLE CLOCK TICKS
+    if (prefs.getBoolean("show_Particle_Clock_Ticks")) {
+      this.drawParticleClockTicksGL(gl, particles, particleTexture);
+    }
+    
+    // PARTICLES (TEXTURED BILLBOARDS)
+    this.drawParticleClockPulsesGL(gl, particles, displayFrames, frameIntersectionsMap);
+    
+    // SELECTION RETICLES (TEXTURED BILLBOARDS)
+    this.drawSelectionReticlesGL(gl, selectedParticleTexture, selectedParticles);
+    
+    // SELECTION LABELS
+    this.drawSelectedParticleLabelsGL(gl);
+    
+    // FAN SELECTION LABELS (MENU FROM RIGHT CLICK ON SELECTABLE)
+    if (labelSelector.selection.contains(myFanSelection)) {
+      this.drawFanSelectionLabelsGL(gl, myFanSelection);
+    }
+    
+    // TARGETS (LINK INTERSECTIONS WITH HORIZONTAL PLANE)
+    gl.glColor4f(0.4, 0.4, 0.4, 0.5);
+    gl.glBegin(GL.GL_LINE_LOOP);
+    for (int i=0; i < targets.size(); i++) {
+      Particle p = (Particle) targets.get(i);
+      Vector3f linkPos = p.getDisplayPositionVec();
+      
+      gl.glVertex3f(linkPos.x, linkPos.y, linkPos.z);
+    }
+    gl.glEnd();
+    
+    // RIGID BODIES
+    if (prefs.getBoolean("show_Rigid_Bodies") == true) {
+      
+      for (Iterator iter=rigidBodies.iterator(); iter.hasNext(); ) {
+        RigidBody rb = (RigidBody) iter.next();
+        rb.drawGL(gl);
+      }
+    }
+    
+    pgl.endGL();
+  }
+  
+  HashMap buildFrameIntersectionsMap(Frame[] theDisplayFrames, List theParticles) {
+    
+    HashMap theFrameIntersectionsMap = new HashMap();
+    
+    for (int i=0; i < theDisplayFrames.length; i++) {
+      Frame currentFrame = theDisplayFrames[i];
+      Vector3f[] theIntersections = new Vector3f[theParticles.size()];
+      Vector3f theIntersection;
+      
+      for (int j=0; j < theParticles.size(); j++) {
+        Particle p = (Particle) particles.get(j);
+        theIntersection = p.getIntersection(currentFrame);
+        
+        if (theIntersection != null) {
+          Relativity.displayTransform(lorentzMatrix, theIntersection, theIntersection);
+        }
+        theIntersections[j] = theIntersection;
+      }
+      theFrameIntersectionsMap.put(currentFrame, theIntersections);
+    }
+    return theFrameIntersectionsMap;
+  }
+  
+  void drawPathsAndAxesGL(GL gl, List theParticles) {
+    
+    //restFrame.setPosition(targetParticle.getPosition());
+    //originFrame.getAxesSettings().setAxesGridVisible(prefs.getBoolean("show_Origin_Axes_Grid"));
     
     myAxes.drawGL(gl, restFrame);
     myAxes.drawGL(gl, originFrame);
-    //targetParticle.drawHeadGL(gl);
     
-    for (int i=0; i < particles.size(); i++) {
-      Particle p = (Particle)particles.get(i);
-        
+    for (int i=0; i < theParticles.size(); i++) {
+      Particle p = (Particle)theParticles.get(i);
+      
       // WORLDLINE PATH
       p.drawPathGL(gl);
       
@@ -126,70 +204,90 @@ class ParticlesLayer {
         myAxes.drawGL(gl, (Frame)p);
       }
     }
+  }
+  
+  void drawHeadsGL(GL gl, HashMap theFrameIntersectionsMap) {
     
-    // INTERSECTION CALCULATION
-    HashMap frameIntersections = new HashMap();
-    for (int i=0; i<displayFrames.length; i++) {
-      frameIntersections.put(displayFrames[i], new Vector3f[particles.size()]);
-    }
-    
-    for (int k=0; k < displayFrames.length; k++) {
-      Frame theFrame = displayFrames[k];
+    Collection intersectionArrays = theFrameIntersectionsMap.values();
+    for (Iterator iter = intersectionArrays.iterator(); iter.hasNext(); ) {
+      Vector3f[] intersections = (Vector3f[]) iter.next();
       
-      Vector3f[] intersections = (Vector3f[]) frameIntersections.get(theFrame);
-      Vector3f theIntersection = new Vector3f();
+      //intervalSay(30, "intersections.length: " + intersections.length);
+      //intervalSay(30, "particles.size():     " + particles.size());
       
-      for (int i=0; i < particles.size(); i++) {
-        Particle p = (Particle)particles.get(i);
+      for (int i=0; i<intersections.length; i++) {
+        Particle p = (Particle) particles.get(i);
+        Vector3f displayTmp = new Vector3f();
         
-        // FIND SIMULT. PLANE INTERSECTIONS
-        theIntersection = p.getIntersection(theFrame);
-        
-        if (theIntersection != null) {
-          Relativity.displayTransform(lorentzMatrix, theIntersection, theIntersection);
-          
-          // DRAW INTERSECTION
-          p.drawHeadGL(gl, theIntersection);
+        if (intersections[i] != null) {
+          p.drawHeadGL(gl, intersections[i]);
         }
-        intersections[i] = theIntersection;
       }
     }
+  }
+  
+  void drawSelectionReticlesGL(GL gl, Texture theSelectionReticleTexture, Collection selection) {
     
-    // PARTICLE CLOCK PULSES
-    particleTexture.enable();
-    particleTexture.bind();
+    beginTextureGL(selectedParticleTexture);
     
-    for (int i=0; i < particles.size(); i++) {
-      Particle p = (Particle)particles.get(i);
+      for (Iterator iter = selection.iterator(); iter.hasNext(); ) {
+        Particle p = (Particle) iter.next();
+        Vector3f displayPos = p.getDisplayPositionVec();
+        
+        float scale = 0.25;
+        beginCylindricalBillboardGL(displayPos.x, displayPos.y, displayPos.z);
+        beginDistanceScaleGL(displayPos, kamera.pos, scale);
+          
+          gl.glColor4f(1, 1, 1, 0.35);
+          simpleQuadGL(gl);
+        
+        endDistanceScaleGL();
+        endBillboardGL();
+      }
+    endTextureGL(theSelectionReticleTexture);
+  }
+  
+  void drawParticleClockTicksGL(GL gl, List theParticles, Texture theTexture) {
+    
+    theTexture.enable();
+    theTexture.bind();
+    
+    for (int i=0; i < theParticles.size(); i++) {
+      Particle p = (Particle)theParticles.get(i);
       Vector3f tickPos = new Vector3f();
       Vector3f tickDisplayPos = new Vector3f();
-      
-//      if (emissions.indexOf(p) == 0) {
-//        intervalSay(45, "Emission0, p.histCount: " + p.histCount);
-//      }
       
       float tickSpacing = 10;
       
       float tickSpacingExponent = (int) ( log(p.getAge() + p.getAncestorsAge()) / log(10) );
       tickSpacing = pow(10, tickSpacingExponent);
       
-//      if (p == targetParticle) {
-//        intervalSay(45, "p.getAge(): " + p.getAge() + ", p.getAncestorsAge(): " + p.getAncestorsAge());
-//        intervalSay(45, "tickSpacingExponent: " + tickSpacingExponent + ", tickSpacing: " + tickSpacing);
-//        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length); 
-//        intervalSay(45, "p.histCount: " + p.histCount + ",\t p.frameHist.length: " + p.frameHist.length);
-//        intervalSay(45, "p.frameHist[" + p.histCount + "]:" +  p.frameHist[p.histCount]);
-//        intervalSay(45, "p.frameHist[" + (p.histCount + 1) + "]: " + p.frameHist[(p.histCount + 1)]);
-//      }
+      int[] tickColors = new int[] {
+        //A R G B
+        0xFFFF0044, // 0 red
+        0XFFFF7700, // 1 yellow
+        0XFFFFFF00, // 2 orange
+        0XFF00FF44, // 3 green
+        0XFF0077FF, // 4 blue
+        0XFF9900FF, // 5 violet
+      };
+      
+      int colorIndex = max(0, (int)tickSpacingExponent);
+      int c = tickColors[colorIndex];
+      
+      gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
+      
+      /*
+      if (p == targetParticle) {
+        intervalSay(45, "tickSpacingExponent: " + tickSpacingExponent);
+        intervalSay(45, "colorIndex: " + colorIndex);
+        Dbg.dumphex("c", c);
+      }
+      */
       
       for (int j=0; j<p.histCount; j++) {
         Frame f = p.frameHist[j];
         Frame fNext = p.frameHist[j+1];
-        
-//        if (p == targetParticle) {
-//          intervalSay(45, "p.frameHist[" + i + "]: " + p.frameHist[i]);
-//          intervalSay(45, "p.frameHist[" + (i+1) + "]: " + p.frameHist[i+1]);
-//        }
         
         Vector3f threeVelocity = fNext.getVelocity().getThreeVelocity();
         
@@ -200,8 +298,10 @@ class ParticlesLayer {
         while ( tickPos.z < fNext.getPositionVec().z ) {
           Relativity.displayTransform(lorentzMatrix, tickPos, tickDisplayPos);
           
+          float farClampRatio = 0.05; //0.01;
+          
           beginCylindricalBillboardGL(tickDisplayPos.x, tickDisplayPos.y, tickDisplayPos.z);
-          beginDistanceScaleGL(tickDisplayPos, kamera.pos, 1, 1, 0.01);
+          beginDistanceScaleGL(tickDisplayPos, kamera.pos, 1, 1, farClampRatio);
             
             simpleQuadGL(gl);
             
@@ -212,18 +312,22 @@ class ParticlesLayer {
         }
       }
     }
-    particleTexture.disable();
-    
-    float PARTICLE_SIZE = prefs.getFloat("PARTICLE_SIZE");
-    
-    // PARTICLES (TEXTURED BILLBOARDS)
+    theTexture.disable();
+  }
+  
+  void drawParticleClockPulsesGL(
+    GL gl,
+    List theParticles,
+    Frame[] theDisplayFrames,
+    HashMap frameIntersections) {
+
     particleTexture.enable(); //gl.glEnable(GL.GL_TEXTURE_2D); //gl.glEnable(particleTexture.getTarget());
     particleTexture.bind(); //gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]); //gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
     
     Vector3f toParticle = new Vector3f();
     
-    for (int k=0; k < displayFrames.length; k++) {
-      Frame theFrame = displayFrames[k];
+    for (int k=0; k < theDisplayFrames.length; k++) {
+      Frame theFrame = theDisplayFrames[k];
       Vector3f[] intersections = (Vector3f[]) frameIntersections.get(theFrame);
       
       for (int i=0; i<intersections.length; i++) {
@@ -243,7 +347,7 @@ class ParticlesLayer {
         float distToParticle = toParticle.length();
         float pulseFactor = 1.0 - 0.5*sin(p.properTime);
         
-        float scale = distToParticle * 0.05* PARTICLE_SIZE * pulseFactor;
+        float scale = distToParticle * 0.05 * PARTICLE_SIZE * pulseFactor;
         
         color c = lerpColor(#FFFFFF, p.fillColor, 0.5*pulseFactor);
         
@@ -258,31 +362,12 @@ class ParticlesLayer {
       }
     }
     particleTexture.disable(); //particleTexture.dispose(); //gl.glDisable(GL.GL_TEXTURE_2D);
+  }
+  
+  void drawSelectedParticleLabelsGL(GL gl) {
     
-    // SELECTION (TEXTURED BILLBOARDS)
-    selectedParticleTexture.bind();
-    selectedParticleTexture.enable();
-    
-    for (Iterator iter = selection.iterator(); iter.hasNext(); ) {
-      Particle p = (Particle) iter.next();
-
-      Vector3f displayPos = p.getDisplayPositionVec();
+    for (Iterator iter = selectedParticles.iterator(); iter.hasNext(); ) {
       
-      toParticle.sub(displayPos, kamera.pos);
-      
-      float distToParticle = toParticle.length();
-      float scale = 0.25*distToParticle;
-      
-      gl.glColor4f(1, 1, 1, 0.35);
-      beginCylindricalBillboardGL(displayPos.x, displayPos.y, displayPos.z);
-        gl.glScalef(scale, scale, scale);
-        simpleQuadGL(gl);
-      endBillboardGL();
-    }
-    selectedParticleTexture.disable();
-    
-    // SELECTION LABELS
-    for (Iterator iter = selection.iterator(); iter.hasNext(); ) {
       Particle p = (Particle) iter.next();
       
       Vector3f displayPos = p.getDisplayPositionVec();
@@ -294,42 +379,15 @@ class ParticlesLayer {
       
       myLabelor.drawLabelGL(gl, label, displayPos, labelScale);
     }
+  }
+  
+  void drawFanSelectionLabelsGL(GL gl, FanSelection theFanSelection) {
     
-    // FAN SELECTION (MENU FROM RIGHT CLICK ON SELECTABLE)
-    if (labelSelector.selection.contains(myFanSelection)) {
-      
-      ArrayList labels = myFanSelection.getSelectableLabels();
-      for (int i=0; i<labels.size(); i++) {
-        myLabelor.drawLabelGL(gl, (SelectableLabel) labels.get(i), 0.5);
-      }
-      myLabelor.drawLabelGL(gl, (SelectableLabel) myFanSelection, 0.5);
+    ArrayList labels = theFanSelection.getSelectableLabels();
+    for (int i=0; i<labels.size(); i++) {
+      myLabelor.drawLabelGL(gl, (SelectableLabel) labels.get(i), 0.5);
     }
-    
-    // TARGETS (LINK INTERSECTIONS WITH HORIZONTAL PLANE)
-    gl.glColor4f(0.4, 0.4, 0.4, 0.5);
-    gl.glBegin(GL.GL_LINE_LOOP);
-    for (int i=0; i < targets.size(); i++) {
-      Particle p = (Particle) targets.get(i);
-      Vector3f linkPos = p.getDisplayPositionVec();
-      
-      gl.glVertex3f(linkPos.x, linkPos.y, linkPos.z);
-    }
-    gl.glEnd();
-    
-    //Vector3f[] restIntersections = (Vector3f[])frameIntersections.get(restFrame);
-    // RIGID BODIES
-    if (prefs.getBoolean("show_Rigid_Bodies") == true) {
-      
-      for (Iterator iter=rigidBodies.iterator(); iter.hasNext(); ) {
-        RigidBody rb = (RigidBody) iter.next();
-        rb.drawGL(gl);
-        
-        //int intersectIndex = particles.indexOf(rb.parentParticle);
-        //rb.drawBodyIntersectGL(restIntersections[intersectIndex]);
-      }
-    }
-    
-    pgl.endGL();
+    myLabelor.drawLabelGL(gl, (SelectableLabel) myFanSelection, 0.5);
   }
   
   String buildParticleLabel(Particle p) {

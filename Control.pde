@@ -1,9 +1,15 @@
+// Control
 // tflorez
 
 interface Control {
+  void addUpdater(Updater theUpdater);
+  
   String getName();
   String getLabel();
   Object getValue();
+  Updater getUpdater();
+  
+  void notifyUpdater();
   void setValue(Object theValue);
 }
 
@@ -11,6 +17,7 @@ class DefaultControl implements Control {
   String name;
   String label;
   Object value;
+  Updater updater;
   
   DefaultControl(String label, Object value) {
     this.name = label;
@@ -23,9 +30,20 @@ class DefaultControl implements Control {
   String getName() { return name; }
   String getLabel() { return label; }
   Object getValue() { return value; }
+  Updater getUpdater() { return this.updater; }
+  
+  void addUpdater(Updater updater) { this.updater = updater; }
 
   void setLabel(String label) { this.label = label; }  
-  void setValue(Object value) { this.value = value; }
+  void setValue(Object value) {
+    this.value = value;
+    notifyUpdater();
+  }
+  void notifyUpdater() {
+    if (updater != null) {
+      updater.update(this.value);
+    }
+  }
 }
 
 class BooleanControl extends DefaultControl {
@@ -43,6 +61,7 @@ class BooleanControl extends DefaultControl {
 
 class ButtonControl extends DefaultControl {
   ButtonControl(String label) {
+    this.name = label;
     this.label = label;
     this.value = label;
   }
@@ -62,14 +81,14 @@ class StateControl extends DefaultControl {
   
   void addState(String state, String label) {
     stateLabels.put(state, label);
-    println("addState(" + state + ", " + label + ")");
+    //println("addState(" + state + ", " + label + ")");
     //println("  stateLabels.get(" + state + "): " + stateLabels.get(state));
   }
   
   void setState(String state) {
     this.state = state;
     this.label = (String) stateLabels.get(state);
-    println("setState(" + state + "): label: " +  (String)label);
+    //println("setState(" + state + "): label: " +  (String)label);
   }
   
   String getState() {
@@ -77,7 +96,7 @@ class StateControl extends DefaultControl {
   }
   
   String getValue() {
-    return this.getState();
+    return (String) this.getState();
   }
 }
 
@@ -139,40 +158,40 @@ class ControlPanel {
     this.label = label;
   }
   
-  void addControl(Control c) {
+  Control addControl(Control c) {
     controls.add(c);
-  }
-  
-  ButtonControl putButton(String label) {
-    ButtonControl c = new ButtonControl(label);
-    addControl(c);
     return c;
   }
   
-  void putBoolean(String label, Boolean value) {
+  Control putButton(String label) {
+    ButtonControl c = new ButtonControl(label);
+    return addControl(c);
+  }
+  
+  Control putBoolean(String label, Boolean value) {
     Control c = new BooleanControl(label, value);
-    addControl(c);
+    return addControl(c);
   }
   
-  void putFloat(String label, float value) {
+  Control putFloat(String label, float value) {
     Control c = new FloatControl(label, value);
-    addControl(c);
+    return addControl(c);
   }
   
-  void putFloat(String label, float value, float min, float max) {
+  Control putFloat(String label, float value, float min, float max) {
     Control c = new FloatControl(label, value, min, max);    
-    addControl(c);
+    return addControl(c);
   }
   
-  void putInteger(String label, int value) {
+  Control putInteger(String label, int value) {
     Control c = new IntegerControl(label, value);
-    addControl(c);
+    return addControl(c);
   }
   
-  void putInteger(String label, int value, int min, int max) {
-    println("putInteger: " + " " + value + " " + min + " " + max);
+  Control putInteger(String label, int value, int min, int max) {
+    //println("putInteger: " + " " + value + " " + min + " " + max);
     Control c = new IntegerControl(label, value, min, max);
-    addControl(c);
+    return addControl(c);
   }
 }
 
@@ -196,84 +215,85 @@ class ControlMap extends HashMap {
     this.putControls(panel.controls);
   }
   
-  void putControls (java.util.List controls) {
+  void putControls (List controls) {
     for (int i=0; i<controls.size(); i++) {
       Control c = (Control) controls.get(i);
       this.putControl(c);
     }
   }
   
-  Control getControl(String label) {
-    return (Control) this.get(label);
+  List getControls() {
+    List theControlList = new ArrayList();
+    
+    for (Iterator iter=this.values().iterator(); iter.hasNext(); ) {
+      Object value = iter.next();
+      if (value instanceof Control) {
+        theControlList.add(value);
+      }
+    }
+    return theControlList;
+  }
+  
+  Control getControl(String name) {
+    Object c = this.get(name);
+    return (c instanceof Control) ? (Control) c : null;
   }
   
   void putControl(Control c) {
     this.put(c.getName(), c);
   }
   
-  BooleanControl getBooleanControl(String label) {
-    return (BooleanControl) this.get(label);
+  BooleanControl getBooleanControl(String name) {
+    return (BooleanControl) this.get(name);
   }
   
-  FloatControl getFloatControl(String label) {
-    return (FloatControl) this.get(label);
+  FloatControl getFloatControl(String name) {
+    return (FloatControl) this.get(name);
   }
   
-  IntegerControl getIntegerControl(String label) {
-    return (IntegerControl) this.get(label);
+  IntegerControl getIntegerControl(String name) {
+    return (IntegerControl) this.get(name);
   }
   
-  Boolean getBoolean(String label) {
-    return (Boolean)((BooleanControl) this.get(label)).getValue();
+  StateControl getStateControl(String name) {
+    return (StateControl) this.get(name);
   }
   
-  Float getFloat(String label) {
-    
-    Control c = (Control) this.get(label);
-    return (Float) c.getValue();
+  Boolean getBoolean(String name) {
+    return (Boolean) getControl(name).getValue();
   }
   
-  Integer getInteger(String label) {
-    
-    Control c = (Control) this.get(label);
-    return (Integer) c.getValue();
+  Float getFloat(String name) {
+    return (Float) getControl(name).getValue();
+  }
+  
+  Integer getInteger(String name) {
+    return (Integer) getControl(name).getValue();
   }
   
   String getState(String stateName) {
-    
-    StateControl c = (StateControl) this.get(stateName);
-    return (String) c.getState(); //println("getState(" + stateName + "): " + c.getState()); 
+    return (String) getControl(stateName).getValue();
   }
   
-  String getString(String label) {
+  String getString(String name) {
     
-    Object stringObj = this.get(label);
-    
-    if (stringObj instanceof String) {
-      return (String) stringObj;
-    }
-    else {
-      return null;
-    }
+    Object s = this.get(name);
+    return (s instanceof String) ? (String) s : null;
   }
   
-   void buildControlP5(ControlP5 theControlP5) {
   //void buildControlP5(ControlP5 theControlP5, ControlPanel[] theControlPanels) {
+  void buildControlP5(ControlP5 theControlP5) {
     
-    //ControlP5 controlP5 = new ControlP5(theParentPApplet);
-    
-    // BUILD CONTROLP5
     for (int panelIndex=0; panelIndex<controlPanels.size(); panelIndex++) {
-    //for (int panelIndex=0; panelIndex<theControlPanels.length; panelIndex++) {
       
-      ControlPanel thePanel = (ControlPanel) this.controlPanels.get(panelIndex);
-      println ("controlsPanels.get("+panelIndex+"):"+ thePanel.name);
-      //ControlPanel thePanel = (ControlPanel) theControlPanels[panelIndex];
+      ControlPanel thePanel = (ControlPanel) controlPanels.get(panelIndex);
+      println ("controlPanels.get("+panelIndex+"):"+ thePanel.name);
+      
       String tabName = thePanel.name;
       String tabLabel = thePanel.label;
       
       theControlP5.addTab(tabName).setLabel(tabLabel);
-         
+      
       int bWidth = 25;
       int bHeight = 20;
       int bSpacingY = bHeight + 15;
@@ -288,7 +308,7 @@ class ControlMap extends HashMap {
       int toggleHeight = 20;
       
       int yOffsetGlobal = bHeight; //numGlobalControls*bSpacingY + bHeight;
-    
+      
       int xOffset = xOffsetGlobal;
       int yOffset = yPadding + yOffsetGlobal;
       
@@ -300,7 +320,7 @@ class ControlMap extends HashMap {
         String label = control.getLabel();
         
         String className = prefValue.getClass().getName();
-        println("Controller for control('" + label + "' : " + prefValue + ") (" + className +")");
+        //println("Controller for control('" + label + "' : " + prefValue + ") (" + className +")");
         
         if (prefValue instanceof java.lang.Boolean) {
           
@@ -335,6 +355,18 @@ class ControlMap extends HashMap {
           b.setLabel(label);
           yOffset += bHeight + yPadding;
         }
+        
+        //Dbg.say("Control:       " + control);
+        //Dbg.say("Control label: " + label);
+        //Dbg.say("Control name:  " + name);
+        
+        Controller addedController = theControlP5.controller(name);
+        //Dbg.say("addedController: " + addedController);
+        
+        Updater updaterToAdd = control.getUpdater();
+        if (updaterToAdd != null) {          
+          addedController.addListener(new UpdaterControlListener(updaterToAdd));
+        }
       }
     }
   }
@@ -359,26 +391,26 @@ class ControlMap extends HashMap {
 //    }
     
     if (mappedControl == null) {
-      Dbg.warn("Controller '" + label + "' failed assignment to null preference '" + label + "'");
+      Dbg.warn("ControlEvent for controller '" + name + "', but mapped control is null");
     }
-    else if (p5controller instanceof controlP5.Toggle) {
+    else if (mappedControl instanceof BooleanControl 
+          && p5controller instanceof controlP5.Toggle) {
       
-      boolean newPrefValue = (controllerValue == 0) ? false : true;
+      boolean newPrefValue = parseControlP5ToggleValue(controllerValue);
       mappedControl.setValue(newPrefValue);
-      
-      //Dbg.say("this.get('" + label + "') now: " + this.get(label));
     }
-    else if (p5controller instanceof controlP5.Slider 
-          && mappedControl instanceof IntegerControl) {
+    else if (mappedControl instanceof IntegerControl
+          && p5controller instanceof controlP5.Slider) {
       
       int newPrefValue = (int) controllerValue;
-      ((IntegerControl) mappedControl).setValue(newPrefValue);//this.getIntegerControl(label).setValue(newPrefValue);
+      mappedControl.setValue(newPrefValue);//this.getIntegerControl(label).setValue(newPrefValue);
       p5controller.setValueLabel(""+newPrefValue);
     }
-    else if (p5controller instanceof controlP5.Slider 
-          && mappedControl instanceof FloatControl){
+    else if (mappedControl instanceof FloatControl
+          && p5controller instanceof controlP5.Slider){
       
-      this.getFloatControl(label).setValue(controllerValue);
+      //this.getFloatControl(label).setValue(controllerValue);
+      mappedControl.setValue(controllerValue);
     }
     else if (mappedControl instanceof StateControl) {
       
@@ -386,5 +418,114 @@ class ControlMap extends HashMap {
       p5controller.setLabel(sc.getLabel());
     }
   }
+  
+  void notifyAllUpdaters() {
+    List controlList = this.getControls();
+    for (Iterator iter=controlList.iterator(); iter.hasNext(); ) {
+      Control c = (Control)iter.next();
+      c.notifyUpdater();
+    }
+  }
 }
 
+// UPDATER AND CONTROL LISTENER
+interface Updater {
+  void update(Object updateValue);
+  void addListenSource(ControlListener toAdd);
+  List getListenSources();
+}
+class DefaultUpdater implements Updater {
+  Object toUpdate;
+  List listenSources = new ArrayList();
+  
+  DefaultUpdater(Object toUpdate) {
+    this.toUpdate = toUpdate;
+  }
+  void update(Object updateValue) {}
+  
+  void addListenSource(ControlListener listenerSource) {
+    listenSources.add(listenerSource);
+  }
+  List getListenSources() {
+    return listenSources;
+  }
+}
+class AxesSettingsVisibilityUpdater extends DefaultUpdater {
+  
+  AxesSettingsVisibilityUpdater(Object toUpdate) {
+    super(toUpdate);
+  }
+  void update(Object updateValue) {
+    ((AxesSettings)toUpdate).setAxesGridVisible((Boolean)updateValue);
+//    Dbg.say("Updater: " + this);
+//    Dbg.say("AxesSettings to update: " + this.toUpdate);
+//    Dbg.say("AxesSettings of target: " + targetParticle.getAxesSettings());
+  }
+}
+class UpdaterControlListener implements controlP5.ControlListener {
+  /*
+  Object objectToUpdate;
+  Command updateCommand;
+  
+  SceneControlListener(Object theObjectToUpdate, Command theUpdateCommand) {
+    toUpdate = theObjectToUpdate;
+    updateCommand = theUpdateCommand;
+  }
+  */
+  Updater updater;
+  
+  UpdaterControlListener(Updater theUpdater) {
+    updater = theUpdater;
+    theUpdater.addListenSource((controlP5.ControlListener)this);
+  }
+  public void controlEvent(ControlEvent theEvent) {
+    
+    Controller controller = theEvent.controller();
+    Updater controllersUpdater = prefs.getControl(controller.name()).getUpdater();
+    Dbg.say("controller: " + controller + "\n controller.name(): " + controller.name());
+    
+    if ( controllersUpdater != null) {
+      if (controller instanceof controlP5.Toggle) {
+        updater.update(parseControlP5Toggle((Toggle) controller));
+      }
+    }
+  }
+}
+
+// COPY UTIL FOR CONTROLMAP
+void copyControlValues(ControlMap source, ControlMap target) {
+  for (Iterator iter=source.keySet().iterator(); iter.hasNext(); ) {
+    String name = (String)iter.next();
+    
+    Control sourceControl = source.getControl(name);
+    Control targetControl = target.getControl(name);
+    
+    if (sourceControl != null) {
+      Object sourceValue = sourceControl.getValue();
+      Object targetValue = targetControl.getValue();
+        
+      if (targetControl != null && sourceValue != null) {
+        targetControl.setValue(sourceValue);
+        
+        if (!targetValue.equals(sourceValue)) {
+          println("copying new value for control: " + name +
+          ";\t(" + targetValue + "->" + sourceValue +")");
+        }
+      }
+      else {
+        Dbg.warn("  not copying value for control: " + name);
+      }
+    }
+  }
+}
+
+// UTILITIES FOR CONTROLP5
+Boolean float2Boolean(Float theFloat) {
+  return (theFloat == 0) ? Boolean.FALSE : Boolean.TRUE;
+}
+Boolean parseControlP5ToggleValue(Float controllerValue) {
+  return float2Boolean(controllerValue);
+}
+Boolean parseControlP5Toggle(Toggle t) {
+  return parseControlP5ToggleValue(t.value());
+}

@@ -30,6 +30,9 @@ class RigidBody {
   Vector3f tmp1 = new Vector3f();
   Vector3f tmp2 = new Vector3f();
   
+  /** Draw vertices of this rigid body as seen in rest coords of a frame.
+   *  @param frame the rest frame to draw vertices of this rigidBody
+   */
   void drawBodyGL(GL gl, Frame frame) {
     Vector3f drawVertex = tmp1;
     Vector3f toBpPrime = tmp2;
@@ -52,7 +55,7 @@ class RigidBody {
         Relativity.displayTransform(lorentzMatrix, toBpPrime, drawVertex);
         gl.glVertex3f(drawVertex.x, drawVertex.y, drawVertex.z);
       }
-      gl.glEnd();
+    gl.glEnd();
   }
   
   /*
@@ -89,12 +92,4 @@ class RigidBodyParticle extends Particle {
     Vector3f fromParentCopy = new Vector3f(theFromParent);
     fromParentHist.add(fromParentCopy);
   }
-  
-//  update(Matrix3f frameLorentzMatrix){
-//  
-//  }
-  
-//  Vector3f getDisplayPositionVec() {
-//    
-//  }
 }

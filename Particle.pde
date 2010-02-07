@@ -185,7 +185,7 @@ class Particle implements Frame, Selectable {
   }
   
   void drawHeadGL(GL gl, float[] pos){
-    drawHeadGL(gl, pos[0], pos[1], pos[2]); 
+    drawHeadGL(gl, pos[0], pos[1], pos[2]);
   }
   
   void drawHeadGL(GL gl){
@@ -336,7 +336,7 @@ class Particle implements Frame, Selectable {
       
       //emission.setPosition(this.position);
       emission.mass = 0.001 * this.mass;
-      //emission.mass = this.emissionMomentumTotal * C;ddddddddd
+      //emission.mass = this.emissionMomentumTotal * C;
       
       emission.addImpulse(-emissionMomentumX / emission.mass, -emissionMomentumY / emission.mass);
       //println("emission.velocity.magnitude: " + emission.velocity.magnitude);
@@ -433,87 +433,32 @@ class Particle implements Frame, Selectable {
   
   float properTime;
   float mass = 1.0;
-  //float mass = 10E8;
   
+  // HISTORY
   int histCount = 0;
   int histCountMax = 1000;
   int frameCountLastHistUpdate = 0;
+  
+  float[] properTimeHist = new float[histCountMax];
+  DefaultFrame[] frameHist = new DefaultFrame[histCountMax];
+  
+  // EMISSION ACCOUNTING
   int millisLastEmission = 0;
   
   float emissionMomentumX, emissionMomentumY, emissionMomentumTotal;
   float emissionMassTotal;
   
-  float[] properTimeHist = new float[histCountMax];
-  /*
-  float[] xyt = new float[3];
-  float[] xyt_prime = new float[3];
-  
-  float[][] xyt_hist = new float[histCountMax][3];
-  float[][] xyt_prime_hist = new float[histCountMax][3];
-  */
-  DefaultFrame[] frameHist = new DefaultFrame[histCountMax];
-  
   // Accumulated impulse (add to momentum smoothly)
   float impulseX, impulseY, impulseTotal;
-  Particle impulseParticle;
   
-  color fillColor;
+  // PARTICLE COLOR
+  color fillColor = #1B83F0;
   float[] fillColor4fv;
+  {
+    setFillColor(fillColor);
+  }
 
   float pathColorR, pathColorG, pathColorB, pathColorA;
   color pathColor;
 }
-
-/* Original drawPath(), replaced by drawPathGL()
- 
- void drawPath(){
- float[] from, to;
- 
- for(int i=0; i<histCount-1; i++){
- from = posHist[i];
- to = posHist[i+1];
- stroke(pathColor, 255*i/histCount);
- 
- line(from[0], from[1], from[2], to[0], to[1], to[2]);
- }
- 
- line( posHist[histCount-1][0], posHist[histCount-1][1], posHist[histCount-1][2],
- pos.x, pos.y, pos.z );
- }
- */
-
-/* A variation on drawPath() which pulses
- 
- void drawPath(){
- float[] from, to;
- 
- int alpha = abs((3*frameCount + (this.hashCode() >> 19)) % 510 - 255);
- 
- for(int i=0; i<histCount-1; i++){
- from = posHist[i];
- to = posHist[i+1];
- stroke(pathColor, 255*i/histCount - alpha);
- 
- line(from[0], from[1], from[2], to[0], to[1], to[2]);
- }
- 
- line( posHist[histCount-1][0], posHist[histCount-1][1], posHist[histCount-1][2],
- pos.x, pos.y, pos.z );
- }
- */
-
-
-/* A variation on drawPath using beginShape() and vertex()
- 
- void drawPath(){
- 
- beginShape();
- for(int i=0; i<histCount-1; i++){
- //stroke(pathColor, 255*i/histCount - alpha);
- vertex(posHist[i+1][0], posHist[i+1][1], posHist[i+1][2]);
- }
- vertex(pos.x,pos.y,pos.z);
- endShape();
- }
- */
 

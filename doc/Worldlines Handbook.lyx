@@ -1,0 +1,211 @@
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Table of Contents / Appendix
+\end_layout
+
+\begin_layout Subsection
+Phenomena
+\end_layout
+
+\begin_layout Enumerate
+Time Dilation (Objects moving relative to a frame of measurement age more
+ slowly in that frame than in their own)
+\end_layout
+
+\begin_layout Enumerate
+Relativity of Simultaneity
+\end_layout
+
+\begin_layout Enumerate
+Length Contraction
+\end_layout
+
+\begin_layout Subsection
+Scenarios
+\end_layout
+
+\begin_layout Enumerate
+Twin Paradox
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The Scenario: In the Twin Paradox, a pair of identical twins (A and B) depart
+ from a common starting location (putting them in relative motion of increasing
+ distance), whereafter one reverses course and returns (now once again in
+ relative motion, nearing each other).
+\end_layout
+
+\begin_layout Enumerate
+The Effect: The startling effect in this case, more noticeable at very high
+ (i.e.
+ relativistic) speeds, is the difference in elapsed time affecting observers
+ who begin at the same location, departing in relative motion, before returning
+ to meet again.
+\end_layout
+
+\begin_layout Enumerate
+The Paradox: The 
+\begin_inset Quotes eld
+\end_inset
+
+paradox
+\begin_inset Quotes erd
+\end_inset
+
+ in this scenario stems from the seeming discrepancy between the symmetry
+ of relative motion between the twins, and the asymmetry between the effect
+ on their rate of temporal experience (and thus, age).
+\end_layout
+
+\begin_layout Enumerate
+Phenomena: Time Dilation
+\end_layout
+
+\begin_layout Enumerate
+Observables
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Elapsed time should be longer for the non-inertial travelor, Twin B
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+Bell's Spaceship Paradox
+\end_layout
+
+\begin_layout Enumerate
+Mass-Energy Equivalence
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Situation: Particle emits photons to accelerate
+\end_layout
+
+\begin_layout Enumerate
+Phenomena:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Energy-momentum conservation
+\end_layout
+
+\begin_layout Enumerate
+Asymptotic approach to lightspeed
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Subsection
+Descriptions
+\end_layout
+
+\begin_layout Enumerate
+Minkowski Diagrams
+\end_layout
+
+\begin_layout Enumerate
+Brehme Diagrams
+\end_layout
+
+\begin_layout Enumerate
+Lorentz Formulas
+\end_layout
+
+\begin_layout Subsection
+Program Features
+\end_layout
+
+\begin_layout Enumerate
+Graphical elements
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Worldlines
+\end_layout
+
+\begin_layout Enumerate
+Pulsing particle clocks
+\end_layout
+
+\begin_layout Enumerate
+Clock Ticks
+\end_layout
+
+\begin_layout Enumerate
+Particle frame plane of simultaneity
+\end_layout
+
+\begin_layout Enumerate
+Worldline intersections with target plane of simultaneity
+\end_layout
+
+\begin_layout Enumerate
+Particle frame axes basis
+\end_layout
+
+\begin_layout Enumerate
+Particle frame axes coordinate grid
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Gui Controls
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Transform Display Toggles
+\end_layout
+
+\end_deeper
+\end_body
+\end_document

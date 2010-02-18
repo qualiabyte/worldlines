@@ -10,7 +10,11 @@ interface Control {
   Updater getUpdater();
   
   void notifyUpdater();
+  
+  void setController(controlP5.Controller theController);
   void setValue(Object theValue);
+  
+  void syncController();
 }
 
 class DefaultControl implements Control {
@@ -18,6 +22,7 @@ class DefaultControl implements Control {
   String label;
   Object value;
   Updater updater;
+  controlP5.Controller controller;
   
   DefaultControl(String label, Object value) {
     this.name = label;
@@ -27,22 +32,43 @@ class DefaultControl implements Control {
   
   DefaultControl() { }
   
+  void addUpdater(Updater updater) { this.updater = updater; }
+  
   String getName() { return name; }
   String getLabel() { return label; }
   Object getValue() { return value; }
   Updater getUpdater() { return this.updater; }
   
-  void addUpdater(Updater updater) { this.updater = updater; }
-
-  void setLabel(String label) { this.label = label; }  
-  void setValue(Object value) {
-    this.value = value;
-    notifyUpdater();
-  }
   void notifyUpdater() {
     if (updater != null) {
       updater.update(this.value);
     }
+  }
+  
+  void setLabel(String label) {
+    this.label = label;
+  }
+  void setValue(Object value) {
+    this.value = value;
+    notifyUpdater();
+    syncController();
+  }
+  void setController(controlP5.Controller theController) {
+    this.controller = theController;
+  }
+  
+  void syncController() {
+    if (value instanceof Float && controller != null) {
+      Dbg.say("syncController: " + name + ", controller: " + controller);
+      
+      this.controller.setValue((Float)this.value);
+      Dbg.say("  sync done.");
+    }
+  }
+  
+  String toString() {
+    return "Control: " + name + 
+      (name != label ? ", label: " + label : "") + ", value: "+ value;
   }
 }
 
@@ -60,10 +86,9 @@ class BooleanControl extends DefaultControl {
 }
 
 class ButtonControl extends DefaultControl {
-  ButtonControl(String label) {
-    this.name = label;
-    this.label = label;
-    this.value = label;
+  ButtonControl(String name) {
+    this.name = name;
+    this.label = name;
   }
 }
 
@@ -100,8 +125,18 @@ class StateControl extends DefaultControl {
   }
 }
 
-class FloatControl extends DefaultControl {
+abstract class NumberControl extends DefaultControl {
+  String unitsLabel = "";
   
+  void setUnitsLabel(String l) {
+    this.unitsLabel = l;
+  }
+  String getUnitsLabel() {
+    return this.unitsLabel;
+  }
+}
+
+class FloatControl extends NumberControl {
   float min;
   float max;
   
@@ -116,9 +151,22 @@ class FloatControl extends DefaultControl {
   FloatControl(String label, float value) {
     this(label, value, 0, 1);
   }
-
+  
+  FloatControl() {
+    this("", 0);
+  }
+  
+  Float getValue() {
+    return (Float) this.value;
+  }
+  
   void setValue(float theValue) {
     this.value = Float.valueOf(theValue);
+  }
+  
+  void updateBounds() {
+    this.min = min((Float)value, this.min);
+    this.max = max((Float)value, this.max);
   }
 }
 
@@ -315,19 +363,19 @@ class ControlMap extends HashMap {
       for (int i=0; i<thePanel.controls.size(); i++) {
         Control control = (Control) thePanel.controls.get(i);
         
-        Object prefValue = control.getValue();
         String name = control.getName();
-        String label = control.getLabel();
+        String label = control.getLabel();        
+        Object prefValue = control.getValue();
         
-        String className = prefValue.getClass().getName();
+        //String className = (prefValue != null) ? prefValue.getClass().getName() : "";
         //println("Controller for control('" + label + "' : " + prefValue + ") (" + className +")");
         
-        if (prefValue instanceof java.lang.Boolean) {
+        if (control instanceof BooleanControl) { //prefValue instanceof java.lang.Boolean) {
           
           theControlP5.addToggle(label, (Boolean) prefValue, xOffset, yOffset, toggleWidth, toggleHeight).moveTo(tabName);
           yOffset += toggleHeight + yPadding;
         }
-        else if (prefValue instanceof java.lang.Float) {
+        else if (control instanceof FloatControl) { //prefValue instanceof java.lang.Float) {
           
           float minValue = ((FloatControl)control).min;
           float maxValue = ((FloatControl)control).max;
@@ -335,7 +383,7 @@ class ControlMap extends HashMap {
           theControlP5.addSlider(label, minValue, maxValue, (Float) prefValue, xOffset, yOffset, sliderWidth, bHeight).moveTo(tabName);
           yOffset += bHeight + yPadding;
         }
-        else if (prefValue instanceof java.lang.Integer) {
+        else if (control instanceof IntegerControl) {// prefValue instanceof java.lang.Integer) {
           
           float minValue = ((IntegerControl)control).min;
           float maxValue = ((IntegerControl)control).max;

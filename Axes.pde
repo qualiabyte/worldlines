@@ -135,7 +135,7 @@ class Axes {
     
     for (int i=0; i<3; i++) {
       labelPos.scaleAdd(1.5*axisBoundary, theBasis[i], pos);
-      myLabelor.v.setColor(theBasisColors[i][0], theBasisColors[i][1], theBasisColors[i][2], theBasisColors[i][3] + 0.3);
+      myLabelor.vtext.setColor(theBasisColors[i][0], theBasisColors[i][1], theBasisColors[i][2], theBasisColors[i][3] + 0.3);
       myLabelor.drawLabelGL(gl, theBasisLabels[i], labelPos, 0.5);
     }
   }
@@ -174,7 +174,7 @@ class Axes {
     
     Vector3f labelPos = new Vector3f();
     labelPos.scaleAdd(theGridCoordinate, theGridDisplayBasis, theGridOrigin);
-    myLabelor.v.setColor(labelColor[0] + 0.3, labelColor[1] + 0.3, labelColor[2] + 0.3, labelColor[3] + 0.3);
+    myLabelor.vtext.setColor(labelColor[0] + 0.3, labelColor[1] + 0.3, labelColor[2] + 0.3, labelColor[3] + 0.3);
     myLabelor.drawLabelGL(gl, "" + nf(theGridCoordinate, 0, 0) + this.gridUnits, labelPos, 0.5);
   }
   

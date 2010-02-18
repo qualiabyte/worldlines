@@ -80,6 +80,11 @@ class SelectableLabel implements Selectable, Label {
     setLabel(theLabel);
   }
   
+  SelectableLabel(String theLabel, Selectable theParentSelectable) {
+    this(theLabel, theParentSelectable.getDisplayPositionVec());
+    this.parentSelectable = theParentSelectable;
+  }
+  
   SelectableLabel() {
     this("", 0, 0);
   }
@@ -115,6 +120,14 @@ class SelectableLabel implements Selectable, Label {
   
   String getLabel() {
     return label;
+  }
+  
+  Selectable getParentSelectable() {
+    return this.parentSelectable;
+  }
+  
+  String toString() {
+    return super.toString() + ", displayPosition: " + nfVec(this.displayPosition, 1);
   }
 }
 
@@ -246,7 +259,8 @@ class Selector extends HashSet {
   Selectable pickPoint(Kamera theKamera, int theMouseX, int theMouseY) {
     
     updateHoverAndPick(this.selectables, theKamera.pos, getPickDirection(theKamera, theMouseX, theMouseY));
-    //println(this + "pickPoint(): bestPick: " + bestPick + " , angle: " + angleToBestPick);
+    println(this + "pickPoint(): bestPick: " + bestPick + " , angle: " + angleToBestPick);
+    println("minSelectionAngle: " + minSelectionAngle);
     
     if (angleToBestPick < minSelectionAngle) {
       return (Selectable) bestPick;
@@ -258,21 +272,28 @@ class Selector extends HashSet {
 }
 
 class Labelor {
-  VTextRenderer v;
-  float lh;
+  VTextRenderer vtext;
+  float lineHeight;
   
   Labelor() {
-    v = myVTextRenderer;
+    vtext = myVTextRenderer;
     
     // Use the highest lineHeight expected, rather than the sporadic bounds textRender gives for each string
-    lh = (float) v._textRender.getBounds("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ|()123456789!@#$%^&*").getHeight();
+    lineHeight = (float) vtext._textRender.getBounds("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ|()123456789!@#$%^&*").getHeight();
   }
     
   void drawLabelGL(GL gl, SelectableLabel sl, float scale) {
-    drawLabelGL(gl, sl.getLabel(), sl.getDisplayPositionVec(), scale);
+    drawLabelGL(gl, sl.getLabel(), sl.getDisplayPositionVec(), scale, 0f);
   }
   
   void drawLabelGL(GL gl, String msg, Vector3f position, float scale) {
+    drawLabelGL(gl, msg, position, scale, -2.0f);
+  }
+  /*
+   *  @param verticalOffset    vertical offset from the label's position on screen
+   *                           (as a multiple of text lineheight)
+   */
+  void drawLabelGL(GL gl, String msg, Vector3f position, float scale, float verticalOffset) {
     beginCylindricalBillboardGL(position.x, position.y, position.z);
       
       //SCALE
@@ -288,39 +309,57 @@ class Labelor {
       for (int i=0; i<msgLines.length; i++) {
         String msgLine = msgLines[i];
         
-        Rectangle2D labelRect = myVTextRenderer._textRender.getBounds(msgLines[i]);
+        Rectangle2D labelRect = vtext._textRender.getBounds(msgLines[i]);
         
-        float lw = (float)labelRect.getWidth();
-        //float lh = (float)labelRect.getHeight();
+        //float lw = (float)labelRect.getWidth();
         
-        float yOffset = -lh * ((float)i + 2);
+        float lineOffsetY = -lineHeight * i;
+        float groupOffsetY = lineHeight * verticalOffset;
         
-        float lx = (float)labelRect.getCenterX();
-        float ly = -(float)labelRect.getCenterY() + yOffset;
+        float lx = -(float)labelRect.getCenterX();
+        float ly = -(float)labelRect.getCenterY() + lineOffsetY + groupOffsetY;
         
-        /*
-        // LABEL BACKGROUND
-        gl.glPushMatrix();
+        //drawLabelBackgroundGL(gl, lx, ly, lw, lineHeight);
         
-          gl.glTranslatef(-lx, 0, 0);
-          gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-          gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
-          gl.glTranslatef(lx, ly, 0);
-          //simpleQuadGL(gl);
-          simpleQuadGL(gl, (0.5*1.2)*lw, lh);
-        gl.glPopMatrix();
-        */
         // RENDER LABEL
-        myVTextRenderer.print(msgLines[i], -lx, yOffset, 0);
+        vtext.print(msgLines[i], lx, ly, 0);
       }
-      
-      gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
       
       endDistanceScaleGL();
     endBillboardGL();
   }
+  
+  void drawLabelBackgroundGL(GL gl, float lx, float ly, float lw, float lh) {
+    gl.glPushMatrix();
+      gl.glTranslatef(-lx, 0, 0);
+      //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+      gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
+      gl.glTranslatef(lx, ly, 0);
+      //simpleQuadGL(gl);
+      simpleQuadGL(gl, (0.5*1.2)*lw, lh);
+      
+      //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+    gl.glPopMatrix();
+  }
 }
 
+// GL CONVENIENCE UTILS - COLOR
+void glColorGL(GL gl, color c) {
+  gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
+}
+
+float[] getColor4fv(color c) {
+  colorMode(RGB, 1.0f);
+  
+  return new float[] {
+    red(c),
+    green(c),
+    blue(c),
+    alpha(c)
+  };
+}
+
+// GL CONVENIENCE UTILS - TEXTURE
 void beginTextureGL(Texture tex) {
   tex.bind();
   tex.enable();
@@ -330,6 +369,7 @@ void endTextureGL(Texture tex) {
   tex.disable();
 }
 
+// GL CONVENIENCE UTILS - SCALING
 void beginDistanceScaleGL(Vector3f objectPos, Vector3f kameraPos, float scale) {
 
   float s = scale * getDistance(objectPos, kameraPos);
@@ -400,6 +440,13 @@ String nfVec(Vector3f v, int digits) {
   nfs(v.z, digits, 1) + ")";
   
   return s;
+}
+String nfVec(Vector2f v, int digits) {
+  String s = "(" +
+    nfs(v.x, digits, 1) + ", " + 
+    nfs(v.y, digits, 1) + ")";
+  
+  return s; 
 }
 
 float screenX (Vector3f v) {

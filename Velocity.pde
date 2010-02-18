@@ -93,6 +93,10 @@ public class Velocity {
   Vector3f getThreeVelocity() {
     return threeVelocity;
   }
+  
+  String toString() {
+    return super.toString() + " vx: " + vx + ", vy: " + vy;
+  }
   /*
   Vector3f[] getInverseDisplayBasis() {
     

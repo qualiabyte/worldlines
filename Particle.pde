@@ -1,12 +1,42 @@
 // Particle
 // tflorez
 
-//import geometry.*;
-
 class Particle implements Frame, Selectable {
   
-  // FRAME INTERFACE BEGIN
+  // PHYSICAL STATE
+  Vector3f position = new Vector3f();
   Velocity velocity = new Velocity();
+  
+  float properTime;
+  float mass = 1.0;
+  
+  // HISTORY
+  int histCount = 0;
+  int histCountMax = 1000;
+  int frameCountLastHistUpdate = 0;
+  
+  float[] properTimeHist = new float[histCountMax];
+  DefaultFrame[] frameHist = new DefaultFrame[histCountMax];
+  
+  // EMISSION ACCOUNTING
+  int millisLastEmission = 0;
+  
+  float emissionMomentumX, emissionMomentumY, emissionMomentumTotal;
+  float emissionMassTotal;
+  
+  // Accumulated impulse (add to momentum smoothly)
+  float impulseX, impulseY, impulseTotal;
+  
+  // DISPLAY + APPEARANCE
+  String name = "";
+  String label = "";
+  
+  color fillColor = #1B83F0;
+
+  float pathColorR, pathColorG, pathColorB, pathColorA;
+  color pathColor;
+  
+  // FRAME INTERFACE BEGIN
   DefaultFrame headFrame = new DefaultFrame();
   
   float[] getPosition(){
@@ -27,7 +57,7 @@ class Particle implements Frame, Selectable {
     return headFrame.displayPosition;
   }
   
-  float[] getDisplayPosition(){
+  float[] getDisplayPosition() {
     //return xyt_prime;
     //return Relativity.displayTransform(targetParticle.velocity, xyt);
     //return Relativity.selectDisplayComponents(xyt, xyt_prime);
@@ -40,7 +70,8 @@ class Particle implements Frame, Selectable {
   }
   
   float getAge() {
-    return headFrame.getAge();
+    return headFrame.getAge() + headFrame.getAncestorsAge();
+    //return headFrame.getAge();
   }
   
   float getAncestorsAge() {
@@ -200,7 +231,7 @@ class Particle implements Frame, Selectable {
   void drawHeadGL(GL gl, float x, float y, float z) {
     gl.glPushMatrix();
     
-    gl.glColor4fv(fillColor4fv, 0);
+    glColorGL(gl, fillColor);
     
     gl.glTranslatef(x, y, z);
     gl.glRotatef(degrees(velocity.direction-PI/2), 0, 0, 1);
@@ -403,21 +434,9 @@ class Particle implements Frame, Selectable {
     //velocity.setComponents( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final);
     setVelocity( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final );
   }
-
-  float[] getColor4fv(color c) {
-    colorMode(RGB, 1.0f);
-    
-    return new float[] {
-      red(c),
-      green(c),
-      blue(c),
-      alpha(c)
-    };
-  }
   
   void setFillColor(color c) {
     this.fillColor = c;
-    fillColor4fv = getColor4fv(c);
   }
 
   void setPathColor(color c) {
@@ -428,37 +447,5 @@ class Particle implements Frame, Selectable {
     pathColorB = blue(c);
     pathColorA = alpha(c);
   }
-  
-  Vector3f position = new Vector3f();
-  
-  float properTime;
-  float mass = 1.0;
-  
-  // HISTORY
-  int histCount = 0;
-  int histCountMax = 1000;
-  int frameCountLastHistUpdate = 0;
-  
-  float[] properTimeHist = new float[histCountMax];
-  DefaultFrame[] frameHist = new DefaultFrame[histCountMax];
-  
-  // EMISSION ACCOUNTING
-  int millisLastEmission = 0;
-  
-  float emissionMomentumX, emissionMomentumY, emissionMomentumTotal;
-  float emissionMassTotal;
-  
-  // Accumulated impulse (add to momentum smoothly)
-  float impulseX, impulseY, impulseTotal;
-  
-  // PARTICLE COLOR
-  color fillColor = #1B83F0;
-  float[] fillColor4fv;
-  {
-    setFillColor(fillColor);
-  }
-
-  float pathColorR, pathColorG, pathColorB, pathColorA;
-  color pathColor;
 }
 

@@ -52,7 +52,7 @@ float C = 1.0;
 FpsTimer myFpsTimer;
 
 // GUI Control Vars
-public int PARTICLES = 1;//50;
+public int PARTICLES = 50;//1;//50;
 
 public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
@@ -81,7 +81,7 @@ void setup() {
   restart(); //initScene();
 }
 
-VTextRenderer myVTextRenderer;
+VTextRenderer myVTextRenderer, infobarVTextRenderer;
 Infobox myInfobox;
 Labelor myLabelor;
 
@@ -223,7 +223,7 @@ ControlP5 buildControlP5(ControlMap thePrefs) {
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
   controlP5.setColorForeground(#093967);
-
+  
   thePrefs.buildControlP5(controlP5);
   
   return controlP5;
@@ -250,9 +250,15 @@ void restart() {
   int fontSize = (int)(0.025 * height);
   Font font = loadFont(fontBytes, fontSize);
   
+  infobarVTextRenderer = new VTextRenderer(font.deriveFont(11f), (int)(1*fontSize));
+  infobarVTextRenderer.setColor(1, 0.5, 0.6, 1);
+  
   myInfobox = new Infobox(font, fontSize);
-  myVTextRenderer = new VTextRenderer(font.deriveFont((float)40), (int)(1*fontSize));
+  myVTextRenderer = new VTextRenderer(font.deriveFont(40f), (int)(1*fontSize));
   myLabelor = new Labelor();
+  
+  kamera = new Kamera();
+  //kamera.setFov(prefs.getFloat("fov"));
   
   // SCENE OBJECTS
   targets = new ArrayList();
@@ -315,51 +321,6 @@ void restart() {
     addRigidBody(rb);
   }
   
-  for (int i=1; i<prefs.getInteger("PARTICLES"); i++) {
-    
-    float xScale = prefs.getFloat("START_POS_X_SCALE");
-    float yScale = prefs.getFloat("START_POS_Y_SCALE");
-    
-    float x, y;
-    
-    float rScale = pow(10, prefs.getFloat("START_POS_DISPERSION"));
-    
-    if (prefs.getString("startPosWeight") == "cauchy") {
-      
-      float cauchyGamma = prefs.getFloat("cauchyGamma");
-      float radius = rScale * cauchyWeightedRandom(cauchyGamma);
-      float theta = random(0, TWO_PI);
-      
-      x = radius * cos(theta) * xScale;
-      y = radius * sin(theta) * yScale;
-    }
-    else {
-      x = random(-xScale, +xScale);
-      y = random(-yScale, +yScale);
-    }
-    
-    Vector3f pos = new Vector3f(x, y, 0);
-    
-    // Exponentially weight distribution of velocities towards lightspeed
-    float vel_mag = 1-pow(random(1, 2), -prefs.getFloat("START_VEL_DISPERSION"));
-    float heading = random(TWO_PI);
-    
-    float velXScale = prefs.getFloat("START_VEL_X_SCALE");
-    float velYScale = prefs.getFloat("START_VEL_Y_SCALE");
-    
-    float vx = velXScale * vel_mag * cos(heading);
-    float vy = velYScale * vel_mag * sin(heading) * (pow(1.5, -prefs.getFloat("START_VEL_ECCENTRICITY")));
-    
-    Vector3f vel = new Vector3f(vx, vy, 0);
-    
-    Particle p = new Particle(pos, vel);
-    p.setFillColor(color(#1B83F0));
-    particles.add(p);
-  }
-  
-  kamera = new Kamera();
-  //kamera.setFov(prefs.getFloat("fov"));
-  
   // FRAMES
   AxesSettings targetAxesSettings = (AxesSettings)((AxesSettingsVisibilityUpdater)prefs.getControl("show_Target_Axes_Grid").getUpdater()).toUpdate;
   AxesSettings originAxesSettings = (AxesSettings)((AxesSettingsVisibilityUpdater)prefs.getControl("show_Origin_Axes_Grid").getUpdater()).toUpdate;
@@ -389,94 +350,28 @@ void restart() {
   Dbg.say("controlP5.controller(\"show_Target_Axes_Grid\"): " + controlP5.controller("show_Target_Axes_Grid"));
   Dbg.say("  listenerSize():" + controlP5.controller("show_Target_Axes_Grid").listenerSize());
   
-  myTwinParticleScene = new TwinParticleScene();
-  addScene(myTwinParticleScene);
+  // TODO: SELECT SCENES
+  // INIT SCENES
+  
+  // TWIN PARTICLE SCENE
+  // addTwinParticleScenesVaryingVelocity(float minSpeed, float maxSpeed, int count)
+  for (int r=1; r<10; r++) {
+    float relativeSpeed = 0.1 * r; //0.9;
+    float turnaroundTime = 50;
+    myTwinParticleScene = new TwinParticleScene(relativeSpeed, turnaroundTime);
+    addScene(myTwinParticleScene);
+  }
+  
+  // RANDOM PARTICLE SCENE
+  ParticleScene randomParticleScene = new RandomParticleScene(prefs.getInteger("PARTICLES"));
+  addScene(randomParticleScene);
+  Dbg.say("randomParticleScene: " + randomParticleScene);
+  addParticles(randomParticleScene.particles);
   
   prefs.notifyAllUpdaters();
   // THREADING
   //particleUpdater = new ParticleUpdater(targetParticle, particles);
   //particleUpdater.start();
-}
-
-abstract class Scene {
-  void update() {};
-}
-class TwinParticleScene extends Scene {
-  
-  TwinParticlePair twinParticlePair;
-  
-  TwinParticleScene() {
-    
-    float relativeSpeed = 0.9;
-    float turnaroundTime = 100;
-    this.twinParticlePair = new TwinParticlePair(relativeSpeed, turnaroundTime);
-    
-    //addTarget(twinParticlePair.twinA);
-    addParticle(twinParticlePair.twinA);
-    addParticle(twinParticlePair.twinB);
-    
-    println(twinParticlePair.twinA);
-    println(twinParticlePair.twinB);
-  }
-  
-  void update() {
-    this.twinParticlePair.update();
-    
-    if (twinParticlePair.isTripComplete()) {
-      prefs.getStateControl("playStatus").setState("paused");
-    }
-  }
-}
-
-class TwinParticlePair {
-  Particle twinA, twinB;
-  float relativeSpeed;
-  float turnaroundTime;
-  float initialAgeTwinB;
-  float elapsedTime;
-  
-  boolean returnHasBegun;
-  
-  /** Returns a list containing a new pair of "twin" Particles
-    * @param relativeSpeed
-    *    The relative speed between the frames of twins A and B,
-    *    as a fraction of C
-    * @param turnaroundTime
-    *    Elapsed time before twinB decelerates and begins to return,
-    *    in seconds as measured by twinB
-    */
-  TwinParticlePair(float relativeSpeed, float turnaroundTime) {
-    
-    this.relativeSpeed = relativeSpeed;
-    this.turnaroundTime = turnaroundTime;
-    //Velocity theDepartVelocity = new Velocity(relativeSpeed, 0.0f);
-    
-    twinA = new Particle();
-    twinB = new Particle();
-    twinB.setVelocity(relativeSpeed, 0);
-    
-    println("twinA position: " + nfVec(twinA.position, 3) + 
-      "\ntwinB.getDisplayPosition(): " + twinB.getDisplayPosition() +
-      "\ntwinA velocity: " + twinA.velocity.vx + ", " + twinA.velocity.vy);
-    
-    initialAgeTwinB = twinB.properTime;
-  }
-  
-  void update() {
-
-    if (!returnHasBegun) {
-      elapsedTime = twinB.properTime - initialAgeTwinB;
-      
-      if (elapsedTime > turnaroundTime) {
-        twinB.setVelocity(-twinB.velocity.vx, -twinB.velocity.vy);
-        returnHasBegun = true;
-      }
-    }
-  }
-  
-  boolean isTripComplete() {
-    return (elapsedTime >= 2 * turnaroundTime);
-  }
 }
 
 float cauchyWeightedRandom(float gamma) {
@@ -494,9 +389,17 @@ float cauchyPDF(float x, float gamma) {
   return 1.0f / (PI*(1 + pow(x / gamma, 2.0)));
 }
 
+// MANAGEMENT - SCENE, PARTICLE, EMISSION, RIGIDBODIES
 void addScene(Scene s) {
   if (!scenes.contains(s)) {
     scenes.add(s);
+  }
+}
+
+void addParticles(List theParticles) {
+  for (Iterator iter=theParticles.iterator(); iter.hasNext(); ) {
+    Particle p = (Particle) iter.next();
+    addParticle(p);
   }
 }
 
@@ -543,7 +446,7 @@ void addRigidBody(RigidBody rb){
   rigidBodies.add(rb);  
 }
 
-void draw() {
+void draw() {  
   pgl = (PGraphicsOpenGL)g;
   gl = pgl.beginGL();
   
@@ -561,26 +464,32 @@ void draw() {
   pgl.endGL();
   
   // SCENE PREP
-  //color c = #000020; //#3473F7;
-  colorMode(HSB, 1.0f); //c = color((frameCount * 0.5)%255, 100, 75, 255);
+  color c =  #000020; // #3473F7;//
+  //colorMode(HSB, 255); color c = color((frameCount * 0.5)%255, 100, 75, 255);
+  /*
+  colorMode(HSB, 1.0f); 
   color c = color(
     prefs.getFloat("backgroundColorHue"),
     prefs.getFloat("backgroundColorSaturation"),
     prefs.getFloat("backgroundColorBrightness")
   );
+  */
   background(c);
   colorMode(RGB, 1.0f);
+  
   //float LIGHTING_PARTICLES = 0.9;
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
   //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
-  prefs.getFloat("STROKE_WIDTH");
   
   // UPDATE SCENE
 //  inputDispatch.update();
-  myTwinParticleScene.update();
+  for (Iterator iter=scenes.iterator(); iter.hasNext(); ) {
+    Scene scene = (Scene)iter.next();
+    scene.update();
+  }
   
   // UPDATE TARGET
-  float dt;  
+  float dt;
   if (prefs.getState("playStatus") != "paused") {
     
     float secondsPerFrame = myFpsTimer.getSecondsPerFrame();
@@ -670,9 +579,20 @@ void draw() {
   // GUI LAYER
   camera();
   imageMode(CORNERS);
-  noLights(); //lights();
+  noLights();
   perspective(PI/3.0, float(width)/float(height), 0.1, 10E7);
   controlP5.draw();
+  
+  // INFOBARS (IN SCENES)
+  beginCamera();  //rectMode(CORNER); //camera();
+    
+    for (Iterator iter=scenes.iterator(); iter.hasNext(); ) {
+      Scene scene = (Scene)iter.next();
+      if (scene == scenes.get(0)) {
+        scene.draw();
+      }
+    }
+  endCamera();
   
   // RESET CAMERA 
   kamera.commit();
@@ -775,112 +695,81 @@ class InputDispatch {
       particle.propelSelf(dp_x, dp_y);
   }
   
+  boolean particleDragInProgress() {
+    return ( dragInProgress && mouseButton == LEFT
+             && !particleSelector.isEmpty() && clickedParticle != null );
+  }
+  
   void updateParticleDragging() {
     
-    if ( dragInProgress && mouseButton == LEFT
-         && !particleSelector.isEmpty() && clickedParticle != null ) {
+    if ( particleDragInProgress() ) {
       
       Vector3f dragPointerDisplayPos = kamera.screenToModel(mouseX, mouseY);
       Vector3f dragPointerPos = Relativity.inverseDisplayTransform(targetParticle.velocity, dragPointerDisplayPos);
       
       Vector3f kameraPos = Relativity.inverseDisplayTransform(targetParticle.velocity, kamera.pos);
       
-      Vector3f dragRayDirection = new Vector3f();
-      dragRayDirection.sub(dragPointerPos, kameraPos);
-      
-      println("dragRayDirection: " + nfVec(dragRayDirection, 1));
-      
       Line dragLine = new Line();
       dragLine.defineBySegment(kameraPos, dragPointerPos);
       
-      println("kamera.pos: " + kamera.pos);
-      println("kameraPos:  " + kameraPos);
-      println("dragLine:   " + dragLine);
-      
       Plane clickedPlane = clickedParticle.getSimultaneityPlane();
-      println("clickedPlane: " + clickedPlane);
       
       Vector3f intersect = new Vector3f();
       clickedPlane.getIntersection(dragLine, intersect);
       
-      Vector3f intersectDisplayPos = new Vector3f();
-      Relativity.displayTransform(lorentzMatrix, intersect, intersectDisplayPos);
+      // RENDER DRAGGED PARTICLE
+      drawDragParticle(intersect, clickedParticle);
       
-//      intervalSay(10, "intersect: " + nfVec(intersect, 1));
+      /*
+      intervalSay(45, "kamera.pos: " + kamera.pos);
+      intervalSay(45, "kameraPos:  " + kameraPos);
+      intervalSay(45, "dragLine:   " + dragLine);
+      intervalSay(45, "clickedPlane: " + clickedPlane);
       
-      pgl = (PGraphicsOpenGL)g;
-      gl = pgl.beginGL();
-        
-        clickedParticle.drawHeadGL(gl, intersectDisplayPos);
-        
-        Frame draggedFrame = clickedParticle.headFrame.clone();
-        ((DefaultFrame)draggedFrame).setPosition(intersect);
-        
-        myAxes.drawGL(gl, draggedFrame);
-//        intervalSay(45, "drawingClickedParticle: " + nfVec(intersectDisplayPos, 1));
-//        intervalSay(45, "clickedParticle: " + clickedParticle);
-        
-      pgl.endGL();
-      
-      Vector3f dragDirMarker = new Vector3f();
-      dragDirMarker.scaleAdd(1, dragRayDirection, kameraPos);
-      //dragDirMarker.scaleAdd(1, dragRayDirection, dragPointerDisplayPos);
-      Vector3f dragDirMarkerDisplay = Relativity.displayTransform(targetParticle.velocity, dragDirMarker);
-      
-      Plane testPlane = new Plane();
-      testPlane.setPoint(0,0,0);
-      testPlane.setNormal(1,0,1);
-      
-      Line testLine = new Line();
-      testLine.setPoint(0, 0, 20);
-      testLine.setDirection(-1, 0, -1);
-      
-      Vector3f testIntersect = new Vector3f();
-      testPlane.getIntersection(testLine, testIntersect);
-      
-      stroke(1, 1, 1, 1);
-      color(1, 1, 1, 1);
-      
-      line(testIntersect.x, testIntersect.y, testIntersect.z, testLine.p.x, testLine.p.y, testLine.p.z);
-      line(testIntersect.x, testIntersect.y, testIntersect.z, 0, 0, 0);
-      
-      line(testPlane.p.x, testPlane.p.y, testPlane.p.z, 
-           testPlane.p.x + testPlane.n.x, testPlane.p.y + testPlane.n.y, testPlane.p.z + testPlane.n.z);
-      
-      noStroke();
-      
+      // DEBUG MARKERS
       HashMap debugMarkersMap = new HashMap();
       debugMarkersMap.put("intersect", intersect);
       debugMarkersMap.put("intersectDisplayPos", intersectDisplayPos);
       debugMarkersMap.put("dragPointerDisplayPos", dragPointerDisplayPos);
+      //debugMarkersMap.put("dragDirMarkerDisplay", dragDirMarkerDisplay);
       
-      pgl = (PGraphicsOpenGL)g;
-      gl = pgl.beginGL();
+      drawDragDebugMarkers(debugMarkersMap);
+      */
+    }
+  }
+  
+  void drawDragParticle(Vector3f dragPos, Particle dragParticle) {
+    
+    Vector3f dragDisplayPos = new Vector3f();
+    Relativity.displayTransform(lorentzMatrix, dragPos, dragDisplayPos);
+    
+    pgl = (PGraphicsOpenGL)g;
+    gl = pgl.beginGL();
       
-      for (Iterator keyIter = debugMarkersMap.keySet().iterator(); keyIter.hasNext(); ) {
-        String label = (String) keyIter.next();
-        Vector3f labelPos = (Vector3f) debugMarkersMap.get(label);
+      clickedParticle.drawHeadGL(gl, dragDisplayPos);
+      
+      DefaultFrame draggedFrame = clickedParticle.headFrame.clone();
+      draggedFrame.setPosition(dragPos);
+      
+      myAxes.drawGL(gl, draggedFrame);
+
+    pgl.endGL();
+  }
+  
+  void drawDragDebugMarkers( Map labelPositionMap ) {
+    // MARKER LABELS
+    pgl = (PGraphicsOpenGL)g;
+    gl = pgl.beginGL();
+      for (Iterator iter = labelPositionMap.keySet().iterator(); iter.hasNext(); ) {
+        String label = (String) iter.next();
+        Vector3f labelPos = (Vector3f) labelPositionMap.get(label);
         myLabelor.drawLabelGL(gl, label, labelPos, 0.5);
       }
-      
-      pgl.endGL();
-      
-      // DRAW DEBUG MARKERS
-      Vector3f[] debugMarkers = new Vector3f[] {
-//        testIntersect,
-        
-//        kamera.pos,              // CORRECT
-//        dragPointerDisplayPos,   // CORRECT
-        intersect,
-        intersectDisplayPos,
-//        dragDirMarkerDisplay,
-      };
-      
-      for (Iterator valsIter = debugMarkersMap.values().iterator(); valsIter.hasNext(); ) {
-        Vector3f drawPos = (Vector3f) valsIter.next();
-        drawSphere(drawPos, 1f);
-//        drawSphere(debugMarkers[i], 1f);
-      }
+    pgl.endGL();
+    
+    for (Iterator iter = labelPositionMap.values().iterator(); iter.hasNext(); ) {
+      Vector3f drawPos = (Vector3f) iter.next();
+      drawSphere(drawPos, 1f);
     }
   }
 }
@@ -891,12 +780,10 @@ void drawSphere(Vector3f pos, float radius) {
     sphere(radius);
   popMatrix();
 }
-
 /*
 class ParticleDragger {
   
   boolean dragStarted;
-  float millisLastClick;
   Particle clickedParticle;
   Vector3f dragPointerIntersect;
   Vector3f dragOffset;
@@ -910,19 +797,40 @@ boolean isFanSelectionOpen() {
 
 void openFanSelection(Particle pickedParticle) {
   SelectableLabel[] labels = new SelectableLabel[] {
-    new SelectableLabel("menuDummy1", pickedParticle.getDisplayPositionVec()),
+    new SelectableLabel("makeTargetParticle", pickedParticle),
     new SelectableLabel("menuDummy2", pickedParticle.getDisplayPositionVec()),
     new SelectableLabel("menuDummy3", pickedParticle.getDisplayPositionVec()),
     new SelectableLabel("menuDummy4", pickedParticle.getDisplayPositionVec()),
-    new SelectableLabel("menuDummy5", pickedParticle.getDisplayPositionVec()),
-  };
+/*    new SelectableLabel("menuDummy5", pickedParticle.getDisplayPositionVec()),
+*/  };
   
   myFanSelection = new FanSelection( pickedParticle, labels);
   labelSelector.addToSelectables(myFanSelection.getSelectableLabels());
   labelSelector.selection.add(myFanSelection);
 }
 
+// SelectableLabel Actions
+void makeTargetParticle(Particle p) {
+  //addTarget(p);
+  targetParticle = p;
+}
+
+void mousePickedLabel(SelectableLabel sl) {
+  
+  String label = sl.getLabel();
+  Selectable parentSelectable = sl.getParentSelectable();
+  
+  Dbg.say("mousePickedLabel(): " + label + ", parentSelectable: " + parentSelectable);
+  
+  if (label == "makeTargetParticle" && parentSelectable instanceof Particle) {
+    makeTargetParticle((Particle)parentSelectable);
+  }
+}
+
 void mousePickedParticle(Particle pick) {
+  
+  clickedParticle = pick;
+  
   if (mouseButton == RIGHT) {
     openFanSelection(pick);
   }
@@ -952,15 +860,18 @@ void mousePressedOnScene() {
   Selectable pickedParticle = (Particle) particleSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pickedLabel = labelSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pick = (pickedLabel != null) ? pickedLabel : pickedParticle;
-    
+  
+  Dbg.say("pickedLabel: " + pickedLabel + ", pick: " + pick);
+  //Dbg.say("labelSelector.selectables" + labelSelector.selectables);
+  
   if (pickedParticle == null && pickedLabel == null) {
     mousePressedOnBackground();
   }
   else if (isFanSelectionOpen() && mouseButton == RIGHT) {
     labelSelector.drop(myFanSelection.getSelectableLabels());
   }
-  else if (pickedLabel != null) {
-    //mousePickedLabel(pickedLabel);
+  else if (pickedLabel != null && pickedLabel instanceof SelectableLabel) {
+    mousePickedLabel((SelectableLabel)pickedLabel);
   }
   else if (pickedParticle != null) {
     mousePickedParticle((Particle)pickedParticle);

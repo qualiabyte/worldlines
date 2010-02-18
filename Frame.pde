@@ -15,7 +15,14 @@ interface Frame extends Selectable {
   
   AxesSettings getAxesSettings();
   
+  /* @return    elapsed time represented by this frame
+   *            between its starting and current position
+   */
   float getAge();
+  
+  /* @return    sum of elapsed time represented by chain of frames
+   *            leading to the start of this frame
+   */
   float getAncestorsAge();
   //void setAge(float age);
 }
@@ -150,6 +157,10 @@ class DefaultFrame implements Frame {
     return this.axesSettings;
   }
   
+  String toString() {
+    return "DefaultFrame@" + Integer.toHexString(hashCode())
+      + " age: " + age + ", pos" + nfVec(position, 1);
+  }
   /*
   Vector3f getPosition(){
     return position;

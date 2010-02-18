@@ -104,6 +104,7 @@ class ParticlesLayer {
   void draw() {
     
     this.PARTICLE_SIZE = prefs.getFloat("PARTICLE_SIZE");
+    restFrame.setPosition(targetParticle.getPositionVec());
     
     // GL SECTION BEGIN
     pgl = (PGraphicsOpenGL)g;
@@ -212,9 +213,6 @@ class ParticlesLayer {
     for (Iterator iter = intersectionArrays.iterator(); iter.hasNext(); ) {
       Vector3f[] intersections = (Vector3f[]) iter.next();
       
-      //intervalSay(30, "intersections.length: " + intersections.length);
-      //intervalSay(30, "particles.size():     " + particles.size());
-      
       for (int i=0; i<intersections.length; i++) {
         Particle p = (Particle) particles.get(i);
         Vector3f displayTmp = new Vector3f();
@@ -249,53 +247,52 @@ class ParticlesLayer {
   
   void drawParticleClockTicksGL(GL gl, List theParticles, Texture theTexture) {
     
-    theTexture.enable();
-    theTexture.bind();
+    int[] tickColors = new int[] {
+      //A R G B
+      0xFFFF0044, // 0 red
+      0XFFFFFF00, // 1 yellow
+      0XFFFF7700, // 2 orange
+      0XFF00FF44, // 3 green
+      0XFF0077FF, // 4 blue
+      0XFF9900FF, // 5 violet
+    };
+    
+    beginTextureGL(theTexture);
     
     for (int i=0; i < theParticles.size(); i++) {
       Particle p = (Particle)theParticles.get(i);
       Vector3f tickPos = new Vector3f();
       Vector3f tickDisplayPos = new Vector3f();
       
-      float tickSpacing = 10;
-      
-      float tickSpacingExponent = (int) ( log(p.getAge() + p.getAncestorsAge()) / log(10) );
-      tickSpacing = pow(10, tickSpacingExponent);
-      
-      int[] tickColors = new int[] {
-        //A R G B
-        0xFFFF0044, // 0 red
-        0XFFFF7700, // 1 yellow
-        0XFFFFFF00, // 2 orange
-        0XFF00FF44, // 3 green
-        0XFF0077FF, // 4 blue
-        0XFF9900FF, // 5 violet
-      };
+      float tickSpacing = nearestPowerOf10Below(p.getAge());
+      float tickSpacingExponent = logBase10(tickSpacing);
       
       int colorIndex = max(0, (int)tickSpacingExponent);
       int c = tickColors[colorIndex];
       
-      gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
-      
-      /*
-      if (p == targetParticle) {
-        intervalSay(45, "tickSpacingExponent: " + tickSpacingExponent);
-        intervalSay(45, "colorIndex: " + colorIndex);
-        Dbg.dumphex("c", c);
-      }
-      */
+      glColorGL(gl, c);
       
       for (int j=0; j<p.histCount; j++) {
         Frame f = p.frameHist[j];
         Frame fNext = p.frameHist[j+1];
         
-        Vector3f threeVelocity = fNext.getVelocity().getThreeVelocity();
+        Vector3f threeVelocity = f.getVelocity().getThreeVelocity();
         
-        tickPos.scaleAdd(tickSpacing - f.getAncestorsAge() % tickSpacing, threeVelocity, f.getPositionVec());
-        Plane nextSimultPlane = fNext.getSimultaneityPlane();
+        float timeToFirstTick = tickSpacing - fNext.getAncestorsAge() % tickSpacing;
+        float timeFirstTickToNextFrame = fNext.getAge() - timeToFirstTick;
         
-        //while ( ! nextSimultPlane.liesBelow(tickPos) ) {
-        while ( tickPos.z < fNext.getPositionVec().z ) {
+        float numTickSegments = timeFirstTickToNextFrame / tickSpacing;
+        int numTicks = (numTickSegments < 0) ? 0 : 1 + (int) numTickSegments;
+        
+        // FIRST TICK POS
+        tickPos.scaleAdd(timeToFirstTick, threeVelocity, f.getPositionVec());
+        
+//        if (p == targetParticle) {
+//          intervalSay(45, "frame[" + j + "]: " + f.toString());
+//          intervalSay(45, "numTickSegments: " + numTickSegments + ", numTicks: " + numTicks);
+//        }
+        
+        for (int n=0; n < numTicks; n++) {
           Relativity.displayTransform(lorentzMatrix, tickPos, tickDisplayPos);
           
           float farClampRatio = 0.05; //0.01;
@@ -312,7 +309,7 @@ class ParticlesLayer {
         }
       }
     }
-    theTexture.disable();
+    endTextureGL(theTexture);
   }
   
   void drawParticleClockPulsesGL(
@@ -366,6 +363,9 @@ class ParticlesLayer {
   
   void drawSelectedParticleLabelsGL(GL gl) {
     
+    color particleLabelColor = #22DDFF;//#BBCCCCCC;
+    myLabelor.vtext.setColor(getColor4fv(particleLabelColor));
+    
     for (Iterator iter = selectedParticles.iterator(); iter.hasNext(); ) {
       
       Particle p = (Particle) iter.next();
@@ -385,7 +385,13 @@ class ParticlesLayer {
     
     ArrayList labels = theFanSelection.getSelectableLabels();
     for (int i=0; i<labels.size(); i++) {
-      myLabelor.drawLabelGL(gl, (SelectableLabel) labels.get(i), 0.5);
+      SelectableLabel selecLabel = (SelectableLabel) labels.get(i);
+      myLabelor.drawLabelGL(gl, selecLabel, 0.5);
+      
+      Vector3f v = selecLabel.getDisplayPositionVec();
+      beginCylindricalBillboardGL(v.x, v.y, v.z);
+        simpleQuadGL(gl);//, v.x, v.y, v.z);
+      endBillboardGL();
     }
     myLabelor.drawLabelGL(gl, (SelectableLabel) myFanSelection, 0.5);
   }

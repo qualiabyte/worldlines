@@ -137,6 +137,10 @@ class DefaultFrame implements Frame {
     return velocityLine;
   }
   
+  boolean isAbove(Plane thePlane) {
+    return thePlane.liesBelow(this.getPositionVec());
+  }
+  
   void setAge(float age) {
     this.age = age;
   }
@@ -159,7 +163,7 @@ class DefaultFrame implements Frame {
   
   String toString() {
     return "DefaultFrame@" + Integer.toHexString(hashCode())
-      + " age: " + age + ", pos" + nfVec(position, 1);
+      + " age: " + age + ", pos" + nfVec(position, 1) + "\n";
   }
   /*
   Vector3f getPosition(){

@@ -1,14 +1,33 @@
 // Scene
 // tflorez
 
+//class World {}
+
 abstract class Scene {
+  List subScenes;
   
-  void update() {};
-  void draw() {};
+  Scene() {
+    this.subScenes = new ArrayList();
+  }
+  
+  void update() {}
+  void draw() {}
+  
+  List getParticles() {
+    return null;
+  }
+  
+  void getParticleLists(Collection target) {
+    
+    target.add(this.getParticles());
+    
+    for (Iterator iter = subScenes.iterator(); iter.hasNext(); ) {
+      Scene subscene = (Scene) iter.next();
+      subscene.getParticleLists(target);
+    }
+  }
 }
 
-//class World {
-//}
 
 abstract class ParticleScene extends Scene {
   List particles;
@@ -16,7 +35,13 @@ abstract class ParticleScene extends Scene {
   ParticleScene () {
     this.particles = new ArrayList();
   }
+  
+  List getParticles() {
+    return this.particles;
+  }
 }
+
+//class MultiTwinScene extends ParticleScene {}
 
 class TwinParticleScene extends ParticleScene {
   
@@ -120,16 +145,50 @@ class TwinParticlePair {
     returnHasBegun = false;
   }
 }
-
+class UniformParticleScene extends ParticleScene {
+  
+  UniformParticleScene(int count) {
+    this.particles.addAll( buildUniformParticles(count) );
+  }
+  
+  List buildUniformParticles(float theCount) {
+    List theParticles = new ArrayList();
+    
+    float xLim, yLim, spacing;
+    //float theCount = prefs.getInteger("PARTICLES");
+    
+    xLim = pow(10, prefs.getFloat("START_POS_X_SCALE"));
+    yLim = pow(10, prefs.getFloat("START_POS_Y_SCALE"));
+    spacing = sqrt(xLim*yLim / theCount);
+    
+    Vector3f pos = new Vector3f();
+    Velocity vel = new Velocity();
+    
+    for (float x=0; x < xLim; x += spacing) {
+      for (float y=0; y < yLim; y+= spacing) {
+        if (theParticles.size() >= theCount) {
+          break;
+        }
+        else {
+          pos.set(x - xLim/2, y - yLim/2, 0);
+          
+          Particle p = new Particle(pos, vel);
+          theParticles.add(p);
+        }
+      }
+    }
+    return theParticles;
+  }
+}
 class RandomParticleScene extends ParticleScene {
   
   RandomParticleScene(int count) {
     
-    this.particles.addAll( buildRandomParticles() );
+    this.particles.addAll( buildRandomParticles( count ) );
   }
   
   List buildRandomParticles (
-    //int count,
+    int count
     //float xScale,
     //float yScale,
     //float dispersionScale,
@@ -139,7 +198,7 @@ class RandomParticleScene extends ParticleScene {
   {
     List theParticles = new ArrayList();
     
-    for (int i=1; i<prefs.getInteger("PARTICLES"); i++) {
+    for (int i=1; i<count; i++) {
       
       float xScale = prefs.getFloat("START_POS_X_SCALE");
       float yScale = prefs.getFloat("START_POS_Y_SCALE");

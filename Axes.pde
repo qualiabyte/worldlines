@@ -8,7 +8,14 @@ class AxesSettings {
   boolean axesGridVisible = false;
   boolean simultaneityPlaneVisible = true;
   
-  boolean axesVisible(){
+  void setAllVisibility(boolean b) {
+    this.setAxesVisible(b);
+    this.setAxesLabelsVisible(b);
+    this.setAxesGridVisible(b);
+    this.setSimultaneityPlaneVisible(b);
+  }
+  
+  boolean axesVisible() {
     return this.axesVisible;
   }
   
@@ -16,7 +23,7 @@ class AxesSettings {
     this.axesVisible = axesVisible;
   }
   
-  boolean axesLabelsVisible(){
+  boolean axesLabelsVisible() {
     return this.axesLabelsVisible;
   }
   
@@ -24,7 +31,7 @@ class AxesSettings {
     this.axesLabelsVisible = axesLabelsVisible;
   }
   
-  boolean axesGridVisible(){
+  boolean axesGridVisible() {
     return this.axesGridVisible;
   }
   
@@ -60,11 +67,11 @@ class Axes {
   Vector3f[] restFrameDisplayBasis = new Vector3f[] { new Vector3f(), new Vector3f(), new Vector3f() };
   Vector3f[] axesFrameDisplayBasis = new Vector3f[] { new Vector3f(), new Vector3f(), new Vector3f() };
   
-  float alpha = 0.4;
+  //float alpha = 0.4;
   float[][] axisColors = new float[][] {
-    {1.0, 0.5, 0.5, alpha+0.2},
-    {0.5, 0.5, 1.0, alpha+0.2},
-    {0.15, 0.9, 1.0, alpha+0.2}, // {0.5, 1.0, 0.5, alpha+0.2},
+    {1.0, 0.5, 0.5, 0.6},
+    {0.5, 0.5, 1.0, 0.6},
+    {0.15, 0.9, 1.0, 0.6}, // {0.5, 1.0, 0.5, alpha+0.2},
   };
   
   void setGridLineSpacing(float spacing) {
@@ -81,6 +88,9 @@ class Axes {
     this.axisBoundary = boundary;
   }
   
+  Axes() {
+  }
+  
   Axes(Frame f) {
     this.frame = f;
   }
@@ -90,7 +100,6 @@ class Axes {
   }
   
   void drawGL(GL gl, Frame f) {
-    
     drawAxesGL(gl, f);
   }
   

@@ -3,23 +3,36 @@
 
 class Infobar {
   
-  Vector2f size, pos;
   FloatControl floatControl;
-  //Infoline infoline = new Infoline();
+  Vector2f size, pos;
+  VTextRenderer vtext;
   
   float textMarginX;
   float textMarginY;
   
-  Infobar(FloatControl theFloatControl)  {
+  final int ABOVE = 0;
+  final int INSIDE = 1;
+  final int BELOW = 2;
+  
+  Infobar(FloatControl theFloatControl, Font theFont)  {
+    
     this.floatControl = theFloatControl;
     this.size = new Vector2f(width/3.0f, height/30f);
     this.pos = new Vector2f( (width - size.x)/2f, (height - 3*size.y) );
     this.textMarginX = 0.01*size.x;
     this.textMarginY = 0.3*size.y;
+    
+    float fontSize = theFont.getSize();
+    this.vtext = new VTextRenderer(theFont.deriveFont(11f), (int)(1*fontSize));
+    this.vtext.setColor(1, 0.5, 0.6, 1);
+  }
+  
+  Infobar(FloatControl theFloatControl) {
+    this(theFloatControl, new Font("Serif", Font.TRUETYPE_FONT, 11));
   }
   
   Infobar() {
-    this( new FloatControl("Infobox", 0, -100, +100) );
+    this(new FloatControl("Infobox", 0, -100, +100));
   }
   
   void setSize(int theWidth, int theHeight) {
@@ -29,11 +42,11 @@ class Infobar {
   void setPosition(int posX, int posY) {
     this.pos.set(posX, posY);
   }
-  /*
+  
   void setLabel(String theLabel) {
-    //this.infoline.setText(theText);
+    this.floatControl.setLabel(theLabel);
   }
-  */
+  
   void draw() {
     String label = floatControl.label + ": " + buildMarkerLabel(floatControl.getValue());
     drawInfobar(label);
@@ -57,14 +70,14 @@ class Infobar {
   void drawInfobarVtext(String theLabel) {
     
     // LABEL
-    drawLabelAtPos(0, 0, theLabel);
+    drawLabelAtPos(0, ABOVE, theLabel);
     
     // UNIT MARKS
     this.updateBounds();
     
     drawMarkerAt(floatControl.min);
     drawMarkerAt(floatControl.max);
-    drawMarkerAt(floatControl.getValue(), 1);
+    drawMarkerAt(floatControl.getValue(), INSIDE);
     
     float zeroToMin = barPositionOf(0) - (barPositionOf(floatControl.min));
     if (zeroToMin > 0.05) {
@@ -80,17 +93,24 @@ class Infobar {
     return nf(theValue, 1, 2) + floatControl.unitsLabel;
   }
   
+  /* @param linesOffset  Float representing number of lines below label
+   *                     Optionally, use constants ABOVE, INSIDE, or BELOW here.
+   */
   void drawMarkerAt(float theValue, float linesOffset) {
     drawLabelAtPos(barPositionOf(theValue), linesOffset, buildMarkerLabel(theValue));
   }
   
+  void drawMarkerInsideAt(float theValue) {
+    drawMarkerAt(theValue, INSIDE);
+  }
+  
   void drawMarkerAt(float theValue) {
-    drawMarkerAt(theValue, 2);
+    drawMarkerAt(theValue, BELOW);
   }
   
   void drawLabelAtPos(float barPositionX, float linesOffsetY, String theLabel) {
     
-    infobarVTextRenderer.print(
+    vtext.print(
       theLabel,
       (int)(pos.x + (size.x * barPositionX) + textMarginX),
       (int)((height - pos.y) - (size.y * linesOffsetY) + textMarginY)

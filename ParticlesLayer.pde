@@ -117,7 +117,7 @@ class ParticlesLayer {
     Frame[] displayFrames = new Frame[] {restFrame, targetParticle};
     
     HashMap frameIntersectionsMap = this.buildFrameIntersectionsMap(displayFrames, particles);
-
+    
     // DRAW HEADS
     this.drawHeadsGL(gl, frameIntersectionsMap);    
     

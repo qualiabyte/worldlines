@@ -28,6 +28,8 @@ class Particle implements Frame, Selectable {
   float impulseX, impulseY, impulseTotal;
   
   // DISPLAY + APPEARANCE
+  boolean isVisible = true;
+  
   String name = "";
   String label = "";
   
@@ -128,6 +130,11 @@ class Particle implements Frame, Selectable {
     updateHistory();
   }
   
+  void setAllVisibility(boolean b) {
+    this.isVisible = b;
+    this.headFrame.axesSettings.setAllVisibility(b);
+  }
+  
   void setVelocity(float x, float y){
     velocity.setComponents(x, y);
     headFrame.setVelocity(x, y);
@@ -204,6 +211,8 @@ class Particle implements Frame, Selectable {
   }
   
   void drawHead(float x, float y, float z) {
+    if (! this.isVisible) { return; }
+    
     pushMatrix();
 
     translate(x, y, z);
@@ -215,7 +224,8 @@ class Particle implements Frame, Selectable {
     popMatrix();
   }
   
-  void drawHeadGL(GL gl, float[] pos){
+  void drawHeadGL(GL gl, float[] pos) {
+    if (! this.isVisible) { return; }
     drawHeadGL(gl, pos[0], pos[1], pos[2]);
   }
   
@@ -246,61 +256,59 @@ class Particle implements Frame, Selectable {
   }
 
   Vector3f getIntersection(Frame f) {
+    Vector3f theIntersection = new Vector3f();
+    
     Plane plane = f.getSimultaneityPlane();
     
-    Vector3f intersection = new Vector3f();
+    Line intersectingLine;
+    DefaultFrame intersectingFrame = null;
+    
+    if (frameHist[0].isAbove(plane)) {
+      return null;
+    }
+    else if ( ! headFrame.isAbove(plane) || histCount == 1) {
+      intersectingFrame = headFrame;
+    }
+    else {
+      intersectingFrame = this.findHighestFrameBelow(plane);
+    }
+    
+    if (intersectingFrame == null) {
+      theIntersection = null;
+    }
+    else {
+      intersectingLine = intersectingFrame.getVelocityLine();
+      plane.getIntersection(intersectingLine, theIntersection);
+    }
+    
+    return theIntersection;
+  }
+  
+  DefaultFrame findHighestFrameBelow(Plane thePlane) {
+    DefaultFrame highestBelow = null;
     
     // Bounds on where the intersect lies in this particles frame history
     int lowerIndex = 0;
-    int upperIndex = this.histCount;
+    int upperIndex = this.histCount + 1;
     
-    if ( plane.liesBelow(frameHist[0].getPositionVec()) ) {
-      return null;
+    for (int theIndex = (upperIndex - lowerIndex) / 2;
+         (upperIndex - lowerIndex) > 1;
+         theIndex = lowerIndex + (upperIndex - lowerIndex) / 2 ) {
+      
+      if (frameHist[theIndex].isAbove(thePlane)) {
+        upperIndex = theIndex;
+      }
+      else {
+        lowerIndex = theIndex;
+      }
     }
-//    else if ( ! plane.liesBelow(frameHist[upperIndex].getPositionVec()) ) {
-//      plane.getIntersection(frameHist[upperIndex].getVelocityLine(), intersection);
-//      return intersection;
-//    }
     
-    Line line = this.headFrame.getVelocityLine();
-    
-    plane.getIntersection(line, intersection);
-    
-    Vector3f intersection_target = new Vector3f();
-    
-    return intersection;
-    
-//    int theIndex;
-//    for (theIndex = upperIndex / 2; (upperIndex - lowerIndex) > 1; theIndex = lowerIndex + (upperIndex - lowerIndex) / 2) {
-//      if (plane.liesBelow(frameHist[theIndex].getPositionVec()) ) {
-//        upperIndex = theIndex;
-//      }
-//      else {
-//        lowerIndex = theIndex;
-//      }
-//    }
-//    plane.getIntersection(frameHist[theIndex].getVelocityLine(), intersection);
-//    
-//    return intersection;
+    if (frameHist[lowerIndex].isAbove(thePlane) ) {
+      highestBelow = frameHist[lowerIndex];
+    }
+    return highestBelow;
   }
-
-/*
-  Vector3f getIntersection(Frame f) {
-    
-    Plane plane = f.getSimultaneityPlane();
-    Line line = this.headFrame.getVelocityLine();
-    
-    Vector3f intersection = new Vector3f();
-    
-    plane.getIntersection(line, intersection);
-    
-    Vector3f intersection_target = new Vector3f();
-    //intersection = Relativity.displayTransform(targetParticle.velocity, intersection);
-    Relativity.displayTransform(lorentzMatrix, intersection, intersection_target);
-    
-    return intersection_target;
-  }
-  */
+  
   void drawIntersectionGL(GL gl, Frame f){
     
     drawHeadGL(gl, getIntersection(f));

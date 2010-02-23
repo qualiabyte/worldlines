@@ -405,7 +405,7 @@ void scaleVectors(Vector3f[] v, float scale) {
   }
 }
 
-Vector3f[] genPolygonVertices(int n) {
+Vector3f[] genPolygonVerticesAt(Vector3f theOffsetPos, int n) {
   
   Vector3f[] vecs = new Vector3f[n];
   for (int i=0; i<n; i++) {
@@ -414,7 +414,7 @@ Vector3f[] genPolygonVertices(int n) {
     float r = 5 * n;
     
     Vector3f pos = new Vector3f(cos(theta)-1, sin(theta), 0);
-    pos.scaleAdd(r, pos, targetParticle.getPositionVec());
+    pos.scaleAdd(r, pos, theOffsetPos);
     vecs[i] = pos;
     
     //Dbg.say("theta/TWO_PI, r: " + theta/TWO_PI + " " + r);
@@ -433,6 +433,16 @@ float nearestPowerOf10Below(float value) {
 }
 
 // STRING FORMATTING
+String nfVecArray(Vector3f[] vecArray, int digits) {
+  StringBuilder sb = new StringBuilder();
+  
+  for (int i=0; i<vecArray.length; i++) {
+    sb.append(nfVec(vecArray[i], digits));
+    sb.append(", \n");
+  }
+  return sb.toString();
+}
+
 String nfVec(Vector3f v, int digits) {
   String s = "(" + 
   nfs(v.x, digits, 1) + ", " + 

@@ -28,6 +28,8 @@ List particles;
 Scene myTwinParticleScene;
 
 Particle targetParticle;
+AxesSettings originAxesSettings, targetAxesSettings;
+
 ArrayList targets;
 ArrayList emissions;
 
@@ -52,7 +54,7 @@ float C = 1.0;
 FpsTimer myFpsTimer;
 
 // GUI Control Vars
-public int PARTICLES = 50;//1;//50;
+public int PARTICLES = 16;//49;
 
 public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
@@ -134,7 +136,7 @@ ControlPanel[] buildControlPanels() {
   panel.addControl(restart);
   panel.addControl(randomize);
   panel.putInteger("PARTICLES", PARTICLES, 0, PARTICLES*5);
-  panel.putInteger("TARGETS", 1, 1, PARTICLES); //3
+  panel.putInteger("TARGETS", 3, 1, PARTICLES); //3
   panel.putFloat("START_POS_DISPERSION", 2.6, 0, 4);
   panel.putFloat("START_POS_X_SCALE", 2.6, 0, 3);
   panel.putFloat("START_POS_Y_SCALE", 2.6, 0, 3);
@@ -152,16 +154,16 @@ ControlPanel[] buildControlPanels() {
   panel.addControl(randomize);
   panel.putFloat("timestep", 8, 0, 20);
   panel.putBoolean("PROPERTIME_SCALING", true);
-  panel.putBoolean("toggle_Spatial_Transform", true);
-  panel.putBoolean("toggle_Temporal_Transform", true);
-  panel.putBoolean("1-D_control", true);
-  panel.putBoolean("use_Emissions", true);
+  panel.putBoolean("toggle_Spatial_Transform", false);//true);
+  panel.putBoolean("toggle_Temporal_Transform", false);//true);
+  panel.putBoolean("1-D_control", false);//true);
+  panel.putBoolean("use_Emissions", false);//true);
   panel.putBoolean("energy_Conservation", false);
   panel.putBoolean("show_Rigid_Bodies", true);
   //panel.putBoolean("showAxesGrid", false);
   
-  AxesSettings targetAxesSettings = new AxesSettings();
-  AxesSettings originAxesSettings = new AxesSettings();
+  targetAxesSettings = new AxesSettings();
+  originAxesSettings = new AxesSettings();
   
   panel.putBoolean("show_Target_Axes_Grid", true).addUpdater(
     new AxesSettingsVisibilityUpdater(targetAxesSettings));
@@ -250,11 +252,11 @@ void restart() {
   int fontSize = (int)(0.025 * height);
   Font font = loadFont(fontBytes, fontSize);
   
-  infobarVTextRenderer = new VTextRenderer(font.deriveFont(11f), (int)(1*fontSize));
-  infobarVTextRenderer.setColor(1, 0.5, 0.6, 1);
-  
-  myInfobox = new Infobox(font, fontSize);
+  // TEXT RENDERER
   myVTextRenderer = new VTextRenderer(font.deriveFont(40f), (int)(1*fontSize));
+  
+  // INFOBOX + LABELOR
+  myInfobox = new Infobox(font, fontSize);
   myLabelor = new Labelor();
   
   kamera = new Kamera();
@@ -275,103 +277,143 @@ void restart() {
   particleSelector = new Selector(particles);
   
   // INIT LORENTZ FOR PARTICLE CREATION
+  Vector3f targetPos = new Vector3f();
   Velocity targetVelocity = new Velocity(0f, 0f); //1E-7f,0f);
+  
   lorentzMatrix = Relativity.getLorentzTransformMatrix(targetVelocity);
   inverseLorentzMatrix = Relativity.getInverseLorentzTransformMatrix(targetVelocity);
   
   // TARGET PARTICLES
-  //targetParticle = new Particle(targetPos, targetVel);
-  targetParticle = new Particle();
-  targetParticle.setVelocity(targetVelocity.vx, targetVelocity.vy);
-  targetParticle.setPosition(0, 0, 0);
+  //targetParticle = new Particle(targetPos, targetVelocity);
+  //targetParticle.headFrame.axesSettings = targetAxesSettings;
   
-  addTarget(targetParticle);
+  Vector3f[] polygonPositions = genPolygonVerticesAt(targetPos, prefs.getInteger("TARGETS"));
+  scaleVectors(polygonPositions, 3);
   
-  //Dbg.say("target pos: " + targetParticle.position.x + ", " + targetParticle.position.y);
-  //Dbg.say("target direction: " + targetParticle.velocity.direction);
-  //Dbg.say("target magnitude: " + targetParticle.velocity.magnitude);
-  //Dbg.say("target gamma:     " + targetParticle.velocity.gamma);
+  List polyTargets = buildParticlesAt(polygonPositions, targetVelocity);
+  addTargets(polyTargets);
   
-  int numTargets = prefs.getInteger("TARGETS");
-  
-  Vector3f[] targetPositions = genPolygonVertices(numTargets);
-  scaleVectors(targetPositions, 3);
-  
-  for (int i=1; i < numTargets; i++) {
-    Particle p = new Particle(targetPositions[i], targetParticle.velocity);
-    particles.add(p);
-    addTarget(p);
-  }
+  makeTargetParticle((Particle)polyTargets.get(0));
   
   // RIGID BODIES
-  Vector3f[] bodyVertices = new Vector3f[] {
-    new Vector3f(1, 0.25, 0),
-    new Vector3f(1, -0.25, 0),
-    new Vector3f(-1, -1, 0),
-    new Vector3f(-1, +1, 0),
-  };
-  
+  Vector3f[] bodyVertices = buildTrapezoidVertices();
   scaleVectors(bodyVertices, 10);
   
-  targetRigidBody = new RigidBody(targetParticle, bodyVertices);
-  addRigidBody(targetRigidBody);
-  
-  for (int i=1; i < numTargets; i++) {
-    RigidBody rb = new RigidBody((Particle) particles.get(i), bodyVertices);
-    addRigidBody(rb);
-  }
+  List polyRigidBodies = buildRigidBodiesAt(bodyVertices, polyTargets);
+  addRigidBodies(polyRigidBodies);
   
   // FRAMES
-  AxesSettings targetAxesSettings = (AxesSettings)((AxesSettingsVisibilityUpdater)prefs.getControl("show_Target_Axes_Grid").getUpdater()).toUpdate;
-  AxesSettings originAxesSettings = (AxesSettings)((AxesSettingsVisibilityUpdater)prefs.getControl("show_Origin_Axes_Grid").getUpdater()).toUpdate;
-  (targetParticle.headFrame).axesSettings = targetAxesSettings;
-  targetParticle.getAxesSettings().setAxesGridVisible(true);
-  targetParticle.getAxesSettings().setAxesLabelsVisible(true);
-  targetParticle.getAxesSettings().setAxesVisible(true);
+  targetParticle.headFrame.axesSettings = targetAxesSettings;
+  targetAxesSettings.setAllVisibility(true);
   
   originFrame = new DefaultFrame();
   originFrame.axesSettings = originAxesSettings;
-  originFrame.getAxesSettings().setAxesVisible(true);
-  originFrame.getAxesSettings().setSimultaneityPlaneVisible(false);
-  originFrame.getAxesSettings().setAxesGridVisible(true);
+  originAxesSettings.setAllVisibility(false);
+  originAxesSettings.setAxesVisible(true);
   
   restFrame = new DefaultFrame();
   restFrame.setVelocity(0,0);
-  //restFrame.setAxesVisible(true);
-  //restFrame.getAxesSettings().setSimultaneityPlaneVisible(false);
-  
   particlesLayer = new ParticlesLayer(particles, prefs.getString("particleImagePath"), kamera, particleSelector.selection);
   
   inputDispatch = new InputDispatch(targets);
   
-  myAxes = new Axes((Frame)targetParticle);
+  myAxes = new Axes();
   myFpsTimer = new FpsTimer();
   
   Dbg.say("controlP5.controller(\"show_Target_Axes_Grid\"): " + controlP5.controller("show_Target_Axes_Grid"));
   Dbg.say("  listenerSize():" + controlP5.controller("show_Target_Axes_Grid").listenerSize());
   
   // TODO: SELECT SCENES
-  // INIT SCENES
   
-  // TWIN PARTICLE SCENE
-  // addTwinParticleScenesVaryingVelocity(float minSpeed, float maxSpeed, int count)
-  for (int r=1; r<10; r++) {
-    float relativeSpeed = 0.1 * r; //0.9;
-    float turnaroundTime = 50;
-    myTwinParticleScene = new TwinParticleScene(relativeSpeed, turnaroundTime);
-    addScene(myTwinParticleScene);
-  }
+  // PRIMARY SCENE
+  //String primarySceneName = "multiTwinParticleScene";
+  String primarySceneName = "twinParticleScene";
+  ParticleScene primaryScene = buildPrimaryScene(primarySceneName);
   
-  // RANDOM PARTICLE SCENE
-  ParticleScene randomParticleScene = new RandomParticleScene(prefs.getInteger("PARTICLES"));
-  addScene(randomParticleScene);
-  Dbg.say("randomParticleScene: " + randomParticleScene);
-  addParticles(randomParticleScene.particles);
+  addScene(primaryScene);
+  
+  // SECONDARY SCENE
+  //String secondarySceneName = "randomScene";
+  String secondarySceneName = "uniformScene";
+  ParticleScene secondaryScene = buildSecondaryScene(secondarySceneName);
+  
+  addScene(secondaryScene);
+  addParticles(secondaryScene.particles);
   
   prefs.notifyAllUpdaters();
   // THREADING
   //particleUpdater = new ParticleUpdater(targetParticle, particles);
   //particleUpdater.start();
+}
+
+Vector3f[] buildTrapezoidVertices() {
+  return new Vector3f[] {
+    new Vector3f(1, 0.25, 0),
+    new Vector3f(1, -0.25, 0),
+    new Vector3f(-1, -1, 0),
+    new Vector3f(-1, +1, 0),
+  };
+}
+
+List buildRigidBodiesAt(Vector3f[] bodyVertices, List theParticles) {
+  List theBodies = new ArrayList();
+  
+  for (Iterator iter=theParticles.iterator(); iter.hasNext(); ) {
+    Particle p = (Particle) iter.next();
+    RigidBody rb = new RigidBody(p, bodyVertices);
+    theBodies.add(rb);
+  }
+  return theBodies;
+}
+
+List buildParticlesAt(Vector3f[] positions, Velocity theVelocity) {
+  List theParticles = new ArrayList();
+  
+  for (int i=0; i < positions.length; i++) {
+    Particle p = new Particle(positions[i], theVelocity);
+    theParticles.add(p);
+  }
+  return theParticles;
+}
+
+void addMultipleTwinParticleScenes(float turnaroundTime, float minSpeed, float maxSpeed, float speedSeparation) {
+  
+  for (float speed=minSpeed; speed <= maxSpeed; speed += speedSeparation) {
+    TwinParticleScene twinScene = new TwinParticleScene(speed, turnaroundTime);
+    
+    // Hide twinA for all but the first pair; it's always at origin
+    if (speed != minSpeed) {
+      twinScene.twinParticlePair.twinA.setAllVisibility(false);
+    }
+    addScene(twinScene);
+  }
+}
+
+ParticleScene buildPrimaryScene(String name) {
+  ParticleScene scene = null;
+  
+  if (name == "twinParticleScene") {
+    float relativeSpeed = 0.9;
+    float turnaroundTime = 50;
+    scene = new TwinParticleScene(relativeSpeed, turnaroundTime);
+  }
+  else if (name == "multiTwinParticleScene") {
+    addMultipleTwinParticleScenes(50, 0.1, 0.9, 0.1);
+    //addMultipleTwinParticleScenes(50, 0.1, 0.95, 0.05);
+  }
+  return scene;
+}
+
+ParticleScene buildSecondaryScene(String secondarySceneName) {
+  ParticleScene secondaryScene = null;
+  
+  if (secondarySceneName == "randomScene") {
+    secondaryScene = new RandomParticleScene(prefs.getInteger("PARTICLES"));
+  }
+  else if (secondarySceneName == "uniformScene") {
+    secondaryScene = new UniformParticleScene(prefs.getInteger("PARTICLES"));
+  }
+  return secondaryScene;
 }
 
 float cauchyWeightedRandom(float gamma) {
@@ -391,9 +433,12 @@ float cauchyPDF(float x, float gamma) {
 
 // MANAGEMENT - SCENE, PARTICLE, EMISSION, RIGIDBODIES
 void addScene(Scene s) {
+  if (s == null) { return; }
+  
   if (!scenes.contains(s)) {
     scenes.add(s);
   }
+  addParticles(s.getParticles());
 }
 
 void addParticles(List theParticles) {
@@ -404,29 +449,41 @@ void addParticles(List theParticles) {
 }
 
 void addParticle(Particle p) {
+  if (p == null) { return; }
+  
   if (!particles.contains(p)) {
     particles.add(p);
   }
   addSelectable(p);
 }
 
-void addSelectable(Particle p) {  
+void addSelectable(Particle p) {
+  
   if (!particleSelector.selectables.contains(p)) {
     particleSelector.addToSelectables(p);
   }
 }
 
-void addTarget(Particle p){
+void addTargets(List theParticles) {
+  
+  for (Iterator iter=theParticles.iterator(); iter.hasNext(); ) {
+    Particle p = (Particle) iter.next();
+    addTarget(p);
+  }
+}
+
+void addTarget(Particle p) {
+  if (p == null) { return; }
   
   addParticle(p);
-  if ( ! targets.contains(p) ) {
+  if ( !targets.contains(p) ) {
     targets.add(p);
   }
-  p.velocity.set(targetParticle.velocity);
+  //p.velocity.set(targetParticle.velocity);
   p.setFillColor(TARGET_COLOR);
 }
 
-void addEmission(Particle e){
+void addEmission(Particle e) {
   if ( prefs.getBoolean("use_Emissions") ) {
     
     addParticle(e);
@@ -442,8 +499,18 @@ void addEmission(Particle e){
   }
 }
 
-void addRigidBody(RigidBody rb){
-  rigidBodies.add(rb);  
+void addRigidBody(RigidBody rb) {
+  if (rb == null) { return; }
+  
+  rigidBodies.add(rb);
+}
+
+void addRigidBodies(List theBodies) {
+  
+  for (Iterator iter=theBodies.iterator(); iter.hasNext(); ) {
+    RigidBody rb = (RigidBody) iter.next();
+    addRigidBody(rb);
+  }
 }
 
 void draw() {  
@@ -464,16 +531,16 @@ void draw() {
   pgl.endGL();
   
   // SCENE PREP
-  color c =  #000020; // #3473F7;//
+  //color c =  #000020; // #3473F7;//
   //colorMode(HSB, 255); color c = color((frameCount * 0.5)%255, 100, 75, 255);
-  /*
+  
   colorMode(HSB, 1.0f); 
   color c = color(
     prefs.getFloat("backgroundColorHue"),
     prefs.getFloat("backgroundColorSaturation"),
     prefs.getFloat("backgroundColorBrightness")
   );
-  */
+  
   background(c);
   colorMode(RGB, 1.0f);
   
@@ -755,7 +822,7 @@ class InputDispatch {
 
     pgl.endGL();
   }
-  
+  /*
   void drawDragDebugMarkers( Map labelPositionMap ) {
     // MARKER LABELS
     pgl = (PGraphicsOpenGL)g;
@@ -772,14 +839,16 @@ class InputDispatch {
       drawSphere(drawPos, 1f);
     }
   }
+  */
 }
-
+/*
 void drawSphere(Vector3f pos, float radius) {
   pushMatrix();
     translate(pos.x, pos.y, pos.z);
     sphere(radius);
   popMatrix();
 }
+*/
 /*
 class ParticleDragger {
   
@@ -801,8 +870,8 @@ void openFanSelection(Particle pickedParticle) {
     new SelectableLabel("menuDummy2", pickedParticle.getDisplayPositionVec()),
     new SelectableLabel("menuDummy3", pickedParticle.getDisplayPositionVec()),
     new SelectableLabel("menuDummy4", pickedParticle.getDisplayPositionVec()),
-/*    new SelectableLabel("menuDummy5", pickedParticle.getDisplayPositionVec()),
-*/  };
+//    new SelectableLabel("menuDummy5", pickedParticle.getDisplayPositionVec()),
+  };
   
   myFanSelection = new FanSelection( pickedParticle, labels);
   labelSelector.addToSelectables(myFanSelection.getSelectableLabels());
@@ -811,7 +880,17 @@ void openFanSelection(Particle pickedParticle) {
 
 // SelectableLabel Actions
 void makeTargetParticle(Particle p) {
-  //addTarget(p);
+  addTarget(p);
+  
+  // SWAP AXES SETTINGS
+  //AxesSettings tmp = p.getAxesSettings();
+  //p.headFrame.axesSettings = targetParticle.getAxesSettings();
+  //targetParticle.headFrame.axesSettings = tmp;
+  
+  if (targetParticle != null) {
+    targetParticle.headFrame.axesSettings = p.getAxesSettings();
+  }
+  p.headFrame.axesSettings = targetAxesSettings;
   targetParticle = p;
 }
 

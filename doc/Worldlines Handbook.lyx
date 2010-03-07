@@ -17,14 +17,16 @@
 
 \graphics default
 \paperfontsize default
+\spacing single
 \use_hyperref false
 \papersize default
-\use_geometry false
+\use_geometry true
 \use_amsmath 1
 \use_esint 1
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
+\leftmargin 3cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -41,53 +43,268 @@
 
 \begin_body
 
-\begin_layout Section
-Table of Contents / Appendix
+\begin_layout Title
+Worldlines
+\size larger
+ - An Interactive Special Relativity Visualization
 \end_layout
 
-\begin_layout Subsection
-Phenomena
+\begin_layout Standard
+
+\color red
+Worldlines pic here
 \end_layout
 
-\begin_layout Enumerate
-Time Dilation (Objects moving relative to a frame of measurement age more
- slowly in that frame than in their own)
+\begin_layout Abstract
+\begin_inset Quotes eld
+\end_inset
+
+Worldlines
+\begin_inset Quotes erd
+\end_inset
+
+ is an interactive visualization of Special Relativity which presents particle
+ paths in a 3D slice (2 space + 1 time) of the 4D Minkowski spacetime.
+ The displayed coordinate space can be changed between the world frame and
+ the frame of a 
+\begin_inset Quotes eld
+\end_inset
+
+target
+\begin_inset Quotes erd
+\end_inset
+
+ particle by toggling the space and time components of the Lorentz transformatio
+n for the currently targeted frame.
+ Scenarios and phenomena presented include the twin paradox (time dilation),
+ 
+\color red
+the barn-pole paradox
+\color inherit
+ and 
+\color red
+Bell's spaceship paradox
+\color inherit
+ (length contraction / relativity of simultaneity).
+ Graphical elements include particle paths, coordinate axes, simultaneity
+ planes and their particle intersections, pulsing clocks, and clock tick
+ history.
+ 
+\color red
+Scripted and free-exploration
+\color inherit
+ modes are available, which focus on intuitive controls for accelerating
+ to, and steering near, lightspeed.
 \end_layout
 
-\begin_layout Enumerate
-Relativity of Simultaneity
+\begin_layout Part*
+Introduction
 \end_layout
 
-\begin_layout Enumerate
-Length Contraction
+\begin_layout Standard
+Special Relativity (SR) is fascinating because it suggests that some of
+ the seemingly foundational aspects of normal experience (and the physical
+ reality which underpins it) aren't quite so in general.
+ The forward flow of time, which once seemed an inescapable constant, uniform
+ for all observers, turns out to be completely dependent upon the relative
+ velocity of entities.
+ Frames of reference in relative motion record each other's clocks as advancing
+ more slowly, as given by the time dilation factor:
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Standard
+\begin_inset Formula \[
+1/\gamma\text{ , the Time Dilation Factor}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+ the Lorentz Factor is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\gamma=\frac{1}{\sqrt{1-v^{2}/c^{2}}}\text{ , the Lorentz Factor}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $v$
+\end_inset
+
+ is the relative speed of one frame relative to another, and 
+\begin_inset Formula $c$
+\end_inset
+
+ is the speed of light.
+ The speed of light, a constant according to SR, shatters another foundation
+ of our experience - the idea that we can generally approach the velocity
+ of objects moving relative to us by accelerating out of our old frame of
+ reference.
+ This is not true in the case of light, as time dilation conspires to ensure
+ that our clocks slow down as we approach the velocity of photons (as seen
+ from an external frame) so that they always seem to remain at 
+\begin_inset Formula $c$
+\end_inset
+
+ relative to us.
+ Our inability to catch up with light is a special case of SR's contradiction
+ of Galilean concept of velocity addition; in SR, finding the velocity of
+ an object 
+\begin_inset Formula $u_{B}$
+\end_inset
+
+ in frame B with known velocity 
+\begin_inset Formula $u_{A}$
+\end_inset
+
+ in frame A is no longer as simple as saying:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+u_{B}=v_{AB}+u_{A}\text{ , Galilean velocity addition (not generally true)}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+But instead:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+u_{B}=\frac{u_{A}-v_{AB}}{1-u_{A}v_{AB}/c^{2}}\text{ , velocity addition in SR}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
 Scenarios
 \end_layout
 
-\begin_layout Enumerate
+\begin_layout Subsection*
 Twin Paradox
 \end_layout
 
-\begin_deeper
-\begin_layout Enumerate
-The Scenario: In the Twin Paradox, a pair of identical twins (A and B) depart
- from a common starting location (putting them in relative motion of increasing
- distance), whereafter one reverses course and returns (now once again in
- relative motion, nearing each other).
+\begin_layout Subsubsection*
+The Scenario:
 \end_layout
 
-\begin_layout Enumerate
-The Effect: The startling effect in this case, more noticeable at very high
- (i.e.
- relativistic) speeds, is the difference in elapsed time affecting observers
- who begin at the same location, departing in relative motion, before returning
- to meet again.
+\begin_layout Standard
+In the twin paradox, a pair of identical twins (A and B) begin at a common
+ starting location.
+ Twin B departs at a constant speed v, while twin A remains at rest.
+ Some time later for twin B, 
+\begin_inset Formula $\Delta\tau_{B}$
+\end_inset
+
+, twin B reverses course and returns to A.
 \end_layout
 
-\begin_layout Enumerate
-The Paradox: The 
+\begin_layout Standard
+
+\color red
+Representative pic of twin paradox in Worldlines goes here
+\end_layout
+
+\begin_layout Subsubsection*
+The Effect:
+\end_layout
+
+\begin_layout Standard
+If each of the twins carry clocks to record the duration of their trip to
+ be compared upon B's return, they will find a discrepancy between their
+ measurements for the total elapsed time of the trip.
+ That is, the elapsed time 
+\begin_inset Formula $\tau_{A}$
+\end_inset
+
+ observed by twin A (who remained at the initial point of departure) will
+ always be greater than that for B.
+\end_layout
+
+\begin_layout Standard
+This startling effect becomes more noticeable at very high (i.e.
+ relativistic) speeds.
+\end_layout
+
+\begin_layout Subsubsection*
+Observables
+\end_layout
+
+\begin_layout Standard
+\align left
+Elapsed time 
+\begin_inset Formula $\tau$
+\end_inset
+
+ for Twin A should be longer than for Twin B:
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula $\tau_{A}>\tau_{B}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+
+\color red
+Or, the age difference between A and B should be greater than 0:
+\end_layout
+
+\begin_layout Standard
+\align left
+
+\color red
+\begin_inset Formula $\Delta\tau_{A-B}>0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Quantitave Example
+\end_layout
+
+\begin_layout Subsubsection*
+The Phenomena:
+\end_layout
+
+\begin_layout Standard
+Time Dilation
+\end_layout
+
+\begin_layout Subsubsection*
+The Paradox:
+\end_layout
+
+\begin_layout Standard
+The 
 \begin_inset Quotes eld
 \end_inset
 
@@ -100,50 +317,69 @@ paradox
  on their rate of temporal experience (and thus, age).
 \end_layout
 
-\begin_layout Enumerate
-Phenomena: Time Dilation
+\begin_layout Subsection*
+Multiple Twins and Invariant Surfaces
 \end_layout
 
-\begin_layout Enumerate
-Observables
+\begin_layout Subsection*
+Lorentz Contraction
 \end_layout
 
-\begin_deeper
-\begin_layout Enumerate
-Elapsed time should be longer for the non-inertial travelor, Twin B
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Enumerate
+\begin_layout Subsection*
 Bell's Spaceship Paradox
 \end_layout
 
-\begin_layout Enumerate
+\begin_layout Subsection*
+
+\color red
 Mass-Energy Equivalence
 \end_layout
 
-\begin_deeper
-\begin_layout Enumerate
-Situation: Particle emits photons to accelerate
+\begin_layout Subsubsection*
+Scenario
 \end_layout
 
-\begin_layout Enumerate
-Phenomena:
+\begin_layout Standard
+Particle emits photons to accelerate
 \end_layout
 
-\begin_deeper
-\begin_layout Enumerate
+\begin_layout Subsubsection*
+Phenomena
+\end_layout
+
+\begin_layout Standard
 Energy-momentum conservation
 \end_layout
 
-\begin_layout Enumerate
+\begin_layout Standard
 Asymptotic approach to lightspeed
 \end_layout
 
-\end_deeper
-\end_deeper
-\begin_layout Subsection
+\begin_layout Part*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Section
+Phenomena
+\end_layout
+
+\begin_layout Enumerate
+Time Dilation - Objects moving relative to an inertial frame of measurement
+ age more slowly in that frame than in their own
+\end_layout
+
+\begin_layout Enumerate
+Relativity of Simultaneity - Events simultaneous in one frame of reference
+ are not necessarily simultaneous in another.
+\end_layout
+
+\begin_layout Enumerate
+Length Contraction - Rigid bodies with a definite length as measured in
+ their rest frame are seen to contract in the direction of motion.
+\end_layout
+
+\begin_layout Section
 Descriptions
 \end_layout
 
@@ -159,7 +395,7 @@ Brehme Diagrams
 Lorentz Formulas
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Program Features
 \end_layout
 
@@ -207,5 +443,13 @@ Transform Display Toggles
 \end_layout
 
 \end_deeper
+\begin_layout Section
+Other Relativity Programs
+\end_layout
+
+\begin_layout Standard
+sadf
+\end_layout
+
 \end_body
 \end_document

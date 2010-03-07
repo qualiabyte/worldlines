@@ -1,7 +1,7 @@
 // Particle
 // tflorez
 
-class Particle implements Frame, Selectable {
+class Particle implements Frame, ISelectableLabel {
   
   // PHYSICAL STATE
   Vector3f position = new Vector3f();
@@ -32,6 +32,8 @@ class Particle implements Frame, Selectable {
   
   String name = "";
   String label = "";
+  
+  ParticleLabelBuilder labelBuilder;
   
   color fillColor = #1B83F0;
 
@@ -91,6 +93,9 @@ class Particle implements Frame, Selectable {
   }
   
   Particle( Vector3f pos, Vector3f vel ){
+    
+    this.labelBuilder = new ParticleLabelBuilder();
+    
     headFrame = new DefaultFrame(pos, vel);
     recordStateToPathHistory();
     
@@ -152,6 +157,7 @@ class Particle implements Frame, Selectable {
     setProperTime(this.properTime + dt / this.velocity.gamma);
     
     //updateHist();
+    updateLabel();
   }
   
   void setProperTime(float time) {
@@ -321,31 +327,24 @@ class Particle implements Frame, Selectable {
     
     float r, g, b, a;
     
-    //float alphaFactor = 0.5 * pathColorA / ((float)histCount);
-    float alphaFactor = 0.5 * prefs.getFloat("LIGHTING_WORLDLINES") / ((float)histCount);
+    float alphaFactor = 0.5 * prefs.getFloat("LIGHTING_WORLDLINES");// / ((float)histCount);
     
-    //float wavenumberFactor = TWO_PI * HARMONIC_FRINGES / position.z;
     float wavenumberFactor = TWO_PI * prefs.getFloat("HARMONIC_FRINGES") / position.z;
-    //float redWavenumberFactor = TWO_PI / 800;
-    float harmContrib = prefs.getFloat("HARMONIC_CONTRIBUTION");
+    float harmonicFactor = prefs.getFloat("HARMONIC_CONTRIBUTION");
     
     for (int i=0; i <= histCount; i++) {
       
-      //float harmonic = HARMONIC_CONTRIBUTION * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
-      float harmonic = harmContrib * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
+      float harmonic = harmonicFactor * 0.5*(1 - cos((wavenumberFactor * properTimeHist[i])%TWO_PI));
       
       r = (pathColorR+properTimeHist[i]%400)/400;
-      g = pathColorG - harmonic;
+      g = 0.2 + pathColorG - harmonic;
       b = pathColorB;
-      a = alphaFactor * g * i * (1 + sin(TWO_PI * 0.01 * properTimeHist[i]%100));
+      a = 0.2 + alphaFactor * g * i * (1 + sin(TWO_PI * 0.01 * properTimeHist[i]%100));
       
       gl.glColor4f(r, g, b, a);
-      //gl.glVertex3f(xyt_prime_hist[i][0], xyt_prime_hist[i][1], xyt_prime_hist[i][2]);
       gl.glVertex3fv(frameHist[i].getDisplayPosition(), 0);
     }
-    //float[] head = frameHist[histCount].getDisplayPosition();
     //float[] head = this.getDisplayPosition();
-    
     //gl.glVertex3f(head[0], head[1], head[2]);
     gl.glEnd();
   }
@@ -455,5 +454,47 @@ class Particle implements Frame, Selectable {
     pathColorB = blue(c);
     pathColorA = alpha(c);
   }
+  
+  String getLabel() {
+    return this.label;
+  }
+  String getName() {
+    return this.name;
+  }
+  void setName(String theName) {
+    this.name = theName;
+  }
+  void setLabel(String theLabel) {
+    this.label = theLabel;
+  }
+  void updateLabel() {
+    setLabel(
+      this.name + "\n" + 
+      labelBuilder.buildLabel(this)
+     );
+  }
 }
 
+public class ParticleLabelBuilder {
+  
+  ParticleLabelBuilder() {
+  }
+  
+  String buildLabel(Particle p) {
+    
+    String theLabel = (
+      "p : " + nfVec(p.getPositionVec(), 3) + "\n" +
+      "p': " + nfVec(p.getDisplayPositionVec(), 3) + "\n" +
+      //"fromTarget : " + nfVec(targetToParticle, 3) + "\n" +
+      //"fromTarget': " + nfVec(targetToParticlePrime, 3) + "\n" +
+      "velocity: (" + nf(p.velocity.magnitude, 0, 6) + ")\n" +
+      "mass: ("  + nf(p.mass, 0, 4) + ")\n" +
+      "age: (" + nf(p.properTime, 0, 1) + ")\n" +
+      
+      "headFrame.getAncestorsAge(): " + nf(p.headFrame.getAncestorsAge(), 0, 2) + "\n" +
+      "headFrame.getAge(): " + nf(p.headFrame.getAge(), 0, 2)  + "\n"
+      );
+    
+    return theLabel;
+  }
+}

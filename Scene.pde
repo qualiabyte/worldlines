@@ -1,17 +1,32 @@
 // Scene
 // tflorez
 
-//class World {}
-
-abstract class Scene {
+class Scene {
   List subScenes;
+  List distanceMeasurements;
   
+  //boolean isDescriptionVisible = false;
+  
+  Infopanel infolayerPanel = new Infopanel();
+  Infopanel descriptionPanel = new Infopanel(
+    new Infopane(
+      new Vector2f(width/2, height*0.9), // size
+      new Vector2f( (width - width/2)/2, (height - height*0.9)/2 ) // pos
+    ));
+    
   Scene() {
     this.subScenes = new ArrayList();
+    this.distanceMeasurements = new ArrayList();
+    
+    this.infolayerPanel.isVisible = false;
+    this.descriptionPanel.isVisible = false;
   }
   
   void update() {}
-  void draw() {}
+  
+  void addMeasurement(DistanceMeasurement measurement) {
+    this.distanceMeasurements.add(measurement);
+  }
   
   List getParticles() {
     return null;
@@ -26,8 +41,57 @@ abstract class Scene {
       subscene.getParticleLists(target);
     }
   }
-}
+  
+  void getAllScenes(Collection target) {
+    target.add(this);
+    for (Iterator iter = this.subScenes.iterator(); iter.hasNext(); ) {
+      Scene subScene = (Scene) iter.next();
+      
+      subScene.getAllScenes(target);
+    }
+  }
+  
+  void setDescription(String theDescriptionText) {
+    descriptionPanel.addLine(theDescriptionText);
+  }
+  
+  void showDescription() {
+    this.descriptionPanel.isVisible = true;
+  }
+  
+  void drawDescription() {
+    intervalSay(45, "scene.drawDescription(): " + this);
+    descriptionPanel.draw();
+  }
+  
+  void drawMeasurements() {
+    
+    //intervalSay(45, "drawMeasurements()");
+    //intervalSay(45, "this.distanceMeasurements: " + this.distanceMeasurements);
+    
+    if (this.distanceMeasurements.isEmpty()) { return; }
+    
+    kamera.commit();
+    pgl =  (PGraphicsOpenGL)g;
+    gl = pgl.beginGL();
+    
+    for (Iterator iter=distanceMeasurements.iterator(); iter.hasNext(); ) {
+      DistanceMeasurement measurement = (DistanceMeasurement)iter.next();
 
+      measurement.drawGL(gl);
+    }
+    pgl.endGL();
+  }
+  
+  void draw() {
+    
+    intervalSay(45, "scene.draw(): " + this);
+    
+    this.infolayerPanel.draw();
+    drawDescription();
+    drawMeasurements();
+  }
+}
 
 abstract class ParticleScene extends Scene {
   List particles;
@@ -50,7 +114,11 @@ class TwinParticleScene extends ParticleScene {
   
   TwinParticleScene(float relativeSpeed, float turnaroundTime) {
     
+    this.setDescription("Twin Particle Scene");
+    
     this.twinParticlePair = new TwinParticlePair(relativeSpeed, turnaroundTime);
+    
+    this.subScenes.add(twinParticlePair);
     
     //addTarget(twinParticlePair.twinA);
     addParticle(twinParticlePair.twinA);
@@ -65,6 +133,7 @@ class TwinParticleScene extends ParticleScene {
   }
   
   void draw() {
+    super.draw();
     this.ageDiffInfobar.draw();
   }
   
@@ -80,7 +149,7 @@ class TwinParticleScene extends ParticleScene {
   }
 }
 
-class TwinParticlePair {
+class TwinParticlePair extends Scene {
   Particle twinA, twinB;
   float relativeSpeed;
   float turnaroundTime;
@@ -90,6 +159,21 @@ class TwinParticlePair {
   float separation, separationLastUpdate;
   
   boolean returnHasBegun;
+  
+  class TwinParticleLabelBuilder extends ParticleLabelBuilder {
+  
+    String buildLabel(Particle p) {
+      
+      String theLabel = (
+        "pos : " + nfVec(p.getPositionVec(), 1) + "\n" +
+        "pos': " + nfVec(p.getDisplayPositionVec(), 1) + "\n" +
+        "velocity: (" + nf(p.velocity.magnitude, 0, 6) + ")\n" +
+        "age: (" + nf(p.properTime, 0, 1) + ")\n"
+        );
+      
+      return theLabel;
+    }
+  }
   
   /** Returns a list containing a new pair of "twin" Particles
     * @param relativeSpeed
@@ -106,6 +190,14 @@ class TwinParticlePair {
     
     twinA = new Particle();
     twinB = new Particle();
+    
+    twinA.setName("Twin A");
+    twinB.setName("Twin B");
+    
+    twinA.labelBuilder = new TwinParticleLabelBuilder();
+    twinB.labelBuilder = new TwinParticleLabelBuilder();
+    
+    this.addMeasurement(new DistanceMeasurement(twinA, twinB));
     
     this.beginDeparture();
   }
@@ -145,6 +237,7 @@ class TwinParticlePair {
     returnHasBegun = false;
   }
 }
+
 class UniformParticleScene extends ParticleScene {
   
   UniformParticleScene(int count) {
@@ -180,6 +273,7 @@ class UniformParticleScene extends ParticleScene {
     return theParticles;
   }
 }
+
 class RandomParticleScene extends ParticleScene {
   
   RandomParticleScene(int count) {
@@ -242,5 +336,47 @@ class RandomParticleScene extends ParticleScene {
     }
     
     return theParticles;
+  }
+}
+
+class PolygonParticleScene extends ParticleScene {
+  
+  PolygonParticleScene(int numVertices) {
+    
+    Vector3f pos = new Vector3f();
+    Velocity vel = new Velocity();
+    
+    Vector3f[] polygonPositions = genPolygonVerticesAt(pos, numVertices);
+    scaleVectors(polygonPositions, 3);
+    
+    this.particles = buildParticlesAt(polygonPositions, vel);
+  }
+}
+
+class InfolayerScene extends Scene {
+  
+  Infobox infobox;
+  
+  InfolayerScene(Font theFont) {
+    this.descriptionPanel = null;
+    
+    this.infobox = new Infobox(theFont);//new Infobox(font, fontSize);
+    this.infolayerPanel.addPane(infobox);
+  }
+  
+  void draw() {
+    // INFO LAYER
+    this.infobox.print(
+    + (int) myFpsTimer.seconds + " seconds\n"
+    + (int) myFpsTimer.fpsRecent +  "fps (" + (int)(frameCount / myFpsTimer.seconds) + "avg)\n"
+    + "particles: " + particles.size() + "\n"
+  //  + "target age:        " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
+  //  + "target speed:      " + nf(targetParticle.velocity.magnitude, 1, 8) + " c\n"
+  //  + "target gamma:      " + nf(targetParticle.velocity.gamma, 1, 8) + "\n"
+  //  + "target position:   " + nfVec(targetParticle.position, 5) + "\n"
+  //  + "target displayPos: " + nfVec(targetParticle.getDisplayPositionVec(), 5)  
+  //  + "mouseX: " + mouseX + ", mouseY: " + mouseY + "\n"
+    + "Controls: Arrows or W,A,S,D to Move; Right mouse button toggles camera rotation"
+    );
   }
 }

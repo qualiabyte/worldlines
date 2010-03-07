@@ -1,6 +1,120 @@
 // Infobox
 // tflorez
 
+class Infopane {
+  
+  VTextRenderer vtext;
+  Vector2f size, pos;
+  Vector2f lineSize;
+  
+  boolean isVisible = false;
+  boolean isBackgroundVisible = true;
+  
+  color backgroundColor = 0xcc000000;
+  color foregroundColor = 0xccffffff;
+  
+  Infopane(Vector2f size, Vector2f pos, VTextRenderer vtext) {
+    this.size = size;
+    this.pos = pos;
+    this.vtext = vtext;
+    this.lineSize = new Vector2f(this.size.x, vtext._fontSize);
+  }
+  
+  Infopane(Vector2f size, Vector2f pos, Font theFont) {
+    this( size, pos, new VTextRenderer(theFont, theFont.getSize()) );
+  }
+  
+  Infopane(Vector2f size, Vector2f pos) {
+    this(size, pos, new Font("Monospace", Font.TRUETYPE_FONT, 12));
+  }
+  
+  Infopane(Font theFont) {
+    this(new Vector2f(), new Vector2f(), theFont);
+  }
+  
+  Infopane() {
+    this(new Font("Monospace", Font.TRUETYPE_FONT, 12));
+  }
+  
+  /* Expected to be overidden by derived classes
+  */
+  void draw() {
+    if (! this.isVisible) { return; }
+    
+    drawBackground();
+  }
+  
+  void drawBackground() {
+    if (! this.isBackgroundVisible) { return; }
+    
+    gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+    
+    stroke(foregroundColor);
+    fill(backgroundColor);
+    rect(pos.x, pos.y, size.x, size.y);
+  }
+  
+  void useLightOnDark() {
+    backgroundColor = 0xee000000;
+    foregroundColor = 0xeeffffff;
+  }
+  
+  void useDarkOnLight() {
+    backgroundColor = 0xeeffffff;
+    foregroundColor = 0xee000000;
+  }
+}
+
+class Infopanel extends Infopane {
+  
+  List infopanes = new ArrayList();
+  
+  Infopanel(Infopane thePane) {
+    super(thePane.size, thePane.pos, thePane.vtext);
+  }
+  
+  Infopanel() {
+    super(
+      new Vector2f(width/2, height*0.9),
+      new Vector2f( (width - width/2)/2, (height - height*0.9)/2 ),
+      new VTextRenderer(new Font("Monospace", Font.TRUETYPE_FONT, 12), 12)
+      );
+  }
+  
+  void addPane(Infopane thePane) {
+    this.infopanes.add(thePane);
+  }
+  
+  void addLine(String theText) {
+    Infoline theLine = new Infoline(this, theText);
+    this.addPane(theLine);
+  }
+  
+  void draw() {
+    if (! this.isVisible) { return; }
+    
+    this.drawBackground();
+    this.drawPanes();
+  }
+  
+  void drawPanes() {
+    
+    int xOffset = (int)pos.x;
+    int yOffset = (int)(height - pos.y - lineSize.y);
+    
+    for (Iterator iter = infopanes.iterator(); iter.hasNext();) {
+      Infopane thePane = (Infopane) iter.next();
+      
+      if (thePane instanceof Infoline) {
+        Infoline theLine = (Infoline) thePane;
+        
+        vtext.print(theLine.toString(), xOffset, yOffset);
+        yOffset += thePane.size.y;
+      }
+    }
+  }
+}
+
 class Infobar {
   
   FloatControl floatControl;
@@ -124,76 +238,81 @@ class Infobar {
   }
 }
 
-class Infobox {
+class Infobox extends Infopane {
+
+  //VTextRenderer textRenderer;
+  //int fontSize;
+  //int xOffset, yOffset;
   
+  Infoline[] infolines;
+  
+  int numlines = 0;
+  int maxlines = 10;
+  /*
+  private void init( int fontSize ) {
+    
+    this.fontSize = fontSize;
+    xOffset = yOffset = (int)(0.5 * fontSize);
+    infolines = new Infoline[maxlines];
+  }
+  */
+  Infobox( Font font ) {
+    super(font);
+  }
+  /*
   Infobox( String fontName, int fontSize ){
     
     init( fontSize );
     textRenderer = new VTextRenderer(fontName, fontSize);
   }
-/*
-  Infobox( File fontFile, int fontSize ){
-
-    init( fontSize );
-    textRenderer = new VTextRenderer( loadFont(fontFile), fontSize );
-  }
-*/
-  Infobox( Font font, int fontSize) {//byte[] fontBytes, int fontSize ){
+  
+  Infobox( Font font, int fontSize) {
 
     init( fontSize );
     textRenderer = new VTextRenderer( font, fontSize );
   }
-  
-  private void init( int fontSize ){
-    
-    this.fontSize = fontSize;    
-    xOffset = yOffset = (int)(0.5 * fontSize);
-    infolines = new Infoline[maxlines];
-  }
-  
+  */
   Infoline addLine( String text ) {
-  
-      return infolines[numlines++] = new Infoline(text);
+    return infolines[numlines++] = new Infoline(text);
   }
   
   void print( String text ) {
     
+    int xOffset = (int)this.pos.x;
+    int yOffset = (int)this.pos.y;
+    
     String[] lines = split(text, "\n");
         
     for (int i=0; i < lines.length; i++) {
-      textRenderer.print( lines[i], xOffset, yOffset + (int)(lines.length - i - 0.5) * fontSize);
+      vtext.print( lines[i], xOffset, (int)( yOffset + (lines.length - i - 0.5) * lineSize.y ));
     }
   }
   
   void draw() {
-    
     for (int i=0; i < numlines; i++) {
-        textRenderer.print( infolines[i].toString(), xOffset, yOffset + (int)(0.5 + i) * fontSize);
+        vtext.print( infolines[i].toString(), (int)pos.x, (int)(pos.y + (0.5 + i) * lineSize.y) );
     }
   }
-
-  VTextRenderer textRenderer;
-
-  int fontSize;
-  
-  int xOffset, yOffset;
-  
-  Infoline[] infolines;
-  int numlines = 0;
-  int maxlines = 10;
 }
 
-// Infoline
-// tflorez
-
-class Infoline {
-
-  Infoline() {
-    text = "";
+class Infoline extends Infopane {
+  
+  String text;
+  
+  Infoline (Infopane theParent, String theText) {
+    super(new Vector2f(theParent.size.x, theParent.lineSize.y),
+      new Vector2f(0, 0),
+      theParent.vtext
+      );
+    this.text = theText;
   }
   
-  Infoline( String text ) {
-    this.text = text;
+  Infoline() {
+    this("");
+  }
+  
+  Infoline( String theText ) {
+    this( new Infopane(), theText );
   }
   
   void setText( String text ) {
@@ -203,8 +322,6 @@ class Infoline {
   String toString() {
     return text;
   }
-  
-  String text;
 }
 
 /*

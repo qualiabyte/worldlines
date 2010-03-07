@@ -9,6 +9,8 @@ class ParticlesLayer {
   Kamera kamera;
   
   Texture particleTexture;
+  Texture particleClockTickTexture;
+  
   Texture selectedParticleTexture;
   
   float PARTICLE_SIZE;
@@ -25,51 +27,11 @@ class ParticlesLayer {
     gl = pgl.beginGL();
       this.particleTexture = loadTextureFromStream(openStream(particleImagePath));
       this.selectedParticleTexture = loadTextureFromStream(openStream(prefs.getString("selectedParticleImagePath")));
+      this.particleClockTickTexture = loadTextureFromStream(openStream(prefs.getString("particleClockTickImagePath")));
       
       //this.particleTexture = loadTexture(particleImagePath);
       //loadTextureGL(openStream(particleImagePath));
     pgl.endGL();
-  }
-  
-  void loadTextureGL(InputStream textureStream){
-    
-    TextureData textureData = null;
-    //dumpStreamBytes(textureStream, 32);
-    try {
-      textureData = TextureIO.newTextureData(textureStream, true, TextureIO.PNG);
-      //texture = TextureIO.newTexture(textureStream, false, TextureIO.PNG);
-    }
-    catch(Exception e) {
-      println("Error loading textureData: " + e);
-    }
-    
-    int imgWidth = textureData.getWidth();
-    int imgHeight = textureData.getHeight();
-    int bytesPerPixel = 4;
-    
-    Buffer textureBuffer = textureData.getBuffer();
-    
-    gl.glGenTextures(1, textures, 0);
-    gl.glBindTexture(GL.GL_TEXTURE_2D, textures[0]);
-    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_WRAP_S, GL.GL_REPEAT);
-    gl.glTexImage2D(
-      GL.GL_TEXTURE_2D,
-      0,
-      GL.GL_RGBA,
-      imgWidth,
-      imgHeight,
-      0,
-      GL.GL_UNSIGNED_BYTE,//GL.GL_INT,//GL.GL_BYTE,//
-      GL.GL_RGBA,
-      textureBuffer
-    );
-    
-    if (textureBuffer != null) {
-      println("textureBuffer.toString(): " + textureBuffer.toString());
-    }
-    else {
-      println("textureBuffer was null");
-    }
   }
   
   Texture loadTextureFromStream(InputStream textureStream){
@@ -85,19 +47,6 @@ class ParticlesLayer {
       println("Error loading texture: " + e);
     }
     
-    return texture;
-  }
-  
-  Texture loadTexture(String pImagePath) {
-    Texture texture = null;
-    
-    try {
-      texture = TextureIO.newTexture(new File(dataPath(pImagePath)), true);
-    }
-    catch(Exception e) {
-      println("Error loading texture: " + e);
-    }
-      
     return texture;
   }
   
@@ -121,13 +70,13 @@ class ParticlesLayer {
     // DRAW HEADS
     this.drawHeadsGL(gl, frameIntersectionsMap);    
     
-    // PARTICLE CLOCK TICKS
-    if (prefs.getBoolean("show_Particle_Clock_Ticks")) {
-      this.drawParticleClockTicksGL(gl, particles, particleTexture);
-    }
-    
     // PARTICLES (TEXTURED BILLBOARDS)
     this.drawParticleClockPulsesGL(gl, particles, displayFrames, frameIntersectionsMap);
+    
+    // PARTICLE CLOCK TICKS
+    if (prefs.getBoolean("show_Particle_Clock_Ticks")) {
+      this.drawParticleClockTicksGL(gl, particles, particleClockTickTexture);
+    }
     
     // SELECTION RETICLES (TEXTURED BILLBOARDS)
     this.drawSelectionReticlesGL(gl, selectedParticleTexture, selectedParticles);
@@ -247,6 +196,8 @@ class ParticlesLayer {
   
   void drawParticleClockTicksGL(GL gl, List theParticles, Texture theTexture) {
     
+    beginTextureGL(theTexture);
+    
     int[] tickColors = new int[] {
       //A R G B
       0xFFFF0044, // 0 red
@@ -257,10 +208,9 @@ class ParticlesLayer {
       0XFF9900FF, // 5 violet
     };
     
-    beginTextureGL(theTexture);
-    
     for (int i=0; i < theParticles.size(); i++) {
       Particle p = (Particle)theParticles.get(i);
+      
       Vector3f tickPos = new Vector3f();
       Vector3f tickDisplayPos = new Vector3f();
       
@@ -269,6 +219,8 @@ class ParticlesLayer {
       
       int colorIndex = max(0, (int)tickSpacingExponent);
       int c = tickColors[colorIndex];
+      
+      float tickScale = 0.2 + 0.1 * colorIndex;
       
       glColorGL(gl, c);
       
@@ -287,29 +239,31 @@ class ParticlesLayer {
         // FIRST TICK POS
         tickPos.scaleAdd(timeToFirstTick, threeVelocity, f.getPositionVec());
         
-//        if (p == targetParticle) {
-//          intervalSay(45, "frame[" + j + "]: " + f.toString());
-//          intervalSay(45, "numTickSegments: " + numTickSegments + ", numTicks: " + numTicks);
-//        }
-        
         for (int n=0; n < numTicks; n++) {
+          
           Relativity.displayTransform(lorentzMatrix, tickPos, tickDisplayPos);
           
-          float farClampRatio = 0.05; //0.01;
-          
-          beginCylindricalBillboardGL(tickDisplayPos.x, tickDisplayPos.y, tickDisplayPos.z);
-          beginDistanceScaleGL(tickDisplayPos, kamera.pos, 1, 1, farClampRatio);
-            
-            simpleQuadGL(gl);
-            
-          endDistanceScaleGL();
-          endBillboardGL();
+          drawTickGL(gl, tickScale, tickDisplayPos);
           
           tickPos.scaleAdd(tickSpacing, threeVelocity, tickPos);
         }
       }
     }
+    
     endTextureGL(theTexture);
+  }
+  
+  void drawTickGL(GL gl, float tickScale, Vector3f tickDisplayPos) {
+
+    float farClampRatio = 0.05 * tickScale; //0.01;
+    
+    beginCylindricalBillboardGL(tickDisplayPos.x, tickDisplayPos.y, tickDisplayPos.z);
+    beginDistanceScaleGL(tickDisplayPos, kamera.pos, 1, 1, farClampRatio);
+      
+      simpleQuadGL(gl);
+      
+    endDistanceScaleGL();
+    endBillboardGL();
   }
   
   void drawParticleClockPulsesGL(
@@ -383,14 +337,19 @@ class ParticlesLayer {
   
   void drawFanSelectionLabelsGL(GL gl, FanSelection theFanSelection) {
     
+    int fanSelectionColor = 0xFFFF1778;
+    myLabelor.setTextColor(fanSelectionColor);
+    
     ArrayList labels = theFanSelection.getSelectableLabels();
     for (int i=0; i<labels.size(); i++) {
       SelectableLabel selecLabel = (SelectableLabel) labels.get(i);
+      
       myLabelor.drawLabelGL(gl, selecLabel, 0.5);
       
       Vector3f v = selecLabel.getDisplayPositionVec();
+      
       beginCylindricalBillboardGL(v.x, v.y, v.z);
-        simpleQuadGL(gl);//, v.x, v.y, v.z);
+        simpleQuadGL(gl);
       endBillboardGL();
     }
     myLabelor.drawLabelGL(gl, (SelectableLabel) myFanSelection, 0.5);
@@ -407,31 +366,21 @@ class ParticlesLayer {
       label += "ControlParticle(" + targets.indexOf(p) + ")\n";
     }
     else if (emissions.contains(p)) {
-      label +=
-        "Emission(" + emissions.indexOf(p) + ")\n";
+      label += "Emission(" + emissions.indexOf(p) + ")\n";
     }
     else if (particles.contains(p)) {
       label += "Particles(" + particles.indexOf(p) + ")\n";
     }
     
+    label += p.label;
+    
+    /*
     targetToParticle.sub(p.getPositionVec(), targetParticle.getPositionVec());
     //Relativity.displayTransform(lorentzMatrix, targetToParticle, targetToParticlePrime);
+    
     lorentzMatrix.transform(targetToParticle, targetToParticlePrime);
+    */
     
-    Vector3f displayPos = p.getDisplayPositionVec();
-    
-    label += (
-      "p : " + nfVec(p.getPositionVec(), 3) + "\n" +
-      "p': " + nfVec(displayPos, 3) + "\n" +
-      "fromTarget : " + nfVec(targetToParticle, 3) + "\n" +
-      "fromTarget': " + nfVec(targetToParticlePrime, 3) + "\n" +
-      "velocity: (" + nf(p.velocity.magnitude, 0, 4) + ")\n" +
-      "mass: ("  + nf(p.mass, 0, 4) + ")\n" +
-      "age: (" + nf(p.properTime, 0, 1) + ")\n" +
-      
-      "headFrame.getAncestorsAge(): " + nf(p.headFrame.getAncestorsAge(), 0, 2) + "\n" +
-      "headFrame.getAge(): " + nf(p.headFrame.getAge(), 0, 2)  + "\n"
-      );
     return label;
   }
 }

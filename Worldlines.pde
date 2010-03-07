@@ -22,6 +22,8 @@ Kamera kamera;
 Matrix3f lorentzMatrix;
 Matrix3f inverseLorentzMatrix;
 
+Scene topScene;
+
 List scenes;
 List particles;
 
@@ -84,7 +86,6 @@ void setup() {
 }
 
 VTextRenderer myVTextRenderer, infobarVTextRenderer;
-Infobox myInfobox;
 Labelor myLabelor;
 
 static ControlMap prefs;
@@ -224,8 +225,7 @@ ControlP5 buildControlP5(ControlMap thePrefs) {
   
   controlP5 = new ControlP5(this);
   controlP5.setAutoDraw(false);
-  controlP5.setColorForeground(#093967);
-  
+  //controlP5.setColorForeground(#093967);
   thePrefs.buildControlP5(controlP5);
   
   return controlP5;
@@ -241,7 +241,10 @@ void restart() {
   prefs = buildPrefs(controlPanels);
   
   prefs.put("particleImagePath", "particle_hard.png");//"particle_cushioned_core.png");
+  prefs.put("particleClockTickImagePath", "particle_clock_tick.png");
+  
   prefs.put("selectedParticleImagePath", "particle_reticle.png");
+  
   prefs.put("startPosWeight", "cauchy");
   
   // CONTROLP5
@@ -256,7 +259,6 @@ void restart() {
   myVTextRenderer = new VTextRenderer(font.deriveFont(40f), (int)(1*fontSize));
   
   // INFOBOX + LABELOR
-  myInfobox = new Infobox(font, fontSize);
   myLabelor = new Labelor();
   
   kamera = new Kamera();
@@ -270,6 +272,7 @@ void restart() {
   
   // SCENES
   scenes = new ArrayList();
+  topScene = new Scene();
   
   // SELECTABLES
   myFanSelection = null;
@@ -287,19 +290,18 @@ void restart() {
   //targetParticle = new Particle(targetPos, targetVelocity);
   //targetParticle.headFrame.axesSettings = targetAxesSettings;
   
-  Vector3f[] polygonPositions = genPolygonVerticesAt(targetPos, prefs.getInteger("TARGETS"));
-  scaleVectors(polygonPositions, 3);
+  // Target Scene
+  ParticleScene polyScene = new PolygonParticleScene(prefs.getInteger("TARGETS"));
+  List polySceneParticles = polyScene.getParticles();
   
-  List polyTargets = buildParticlesAt(polygonPositions, targetVelocity);
-  addTargets(polyTargets);
-  
-  makeTargetParticle((Particle)polyTargets.get(0));
+  addTargets(polySceneParticles);
+  makeTargetParticle((Particle) polySceneParticles.get(0));
   
   // RIGID BODIES
   Vector3f[] bodyVertices = buildTrapezoidVertices();
   scaleVectors(bodyVertices, 10);
   
-  List polyRigidBodies = buildRigidBodiesAt(bodyVertices, polyTargets);
+  List polyRigidBodies = buildRigidBodiesAt(bodyVertices, polySceneParticles);
   addRigidBodies(polyRigidBodies);
   
   // FRAMES
@@ -337,10 +339,14 @@ void restart() {
   String secondarySceneName = "uniformScene";
   ParticleScene secondaryScene = buildSecondaryScene(secondarySceneName);
   
-  addScene(secondaryScene);
-  addParticles(secondaryScene.particles);
+  //addScene(secondaryScene);
+  //addParticles(secondaryScene.particles);
   
   prefs.notifyAllUpdaters();
+  
+  // INFOLAYER SCENE
+  addScene(new InfolayerScene(font));
+  
   // THREADING
   //particleUpdater = new ParticleUpdater(targetParticle, particles);
   //particleUpdater.start();
@@ -435,6 +441,8 @@ float cauchyPDF(float x, float gamma) {
 void addScene(Scene s) {
   if (s == null) { return; }
   
+  topScene.subScenes.add(s);
+  
   if (!scenes.contains(s)) {
     scenes.add(s);
   }
@@ -442,6 +450,8 @@ void addScene(Scene s) {
 }
 
 void addParticles(List theParticles) {
+  if (theParticles == null) { return; }
+  
   for (Iterator iter=theParticles.iterator(); iter.hasNext(); ) {
     Particle p = (Particle) iter.next();
     addParticle(p);
@@ -544,12 +554,7 @@ void draw() {
   background(c);
   colorMode(RGB, 1.0f);
   
-  //float LIGHTING_PARTICLES = 0.9;
-  //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, 0.5, -0.5);
-  //directionalLight(LIGHTING_PARTICLES, LIGHTING_PARTICLES, LIGHTING_PARTICLES, 0.5, -0.5, -0.5);
-  
   // UPDATE SCENE
-//  inputDispatch.update();
   for (Iterator iter=scenes.iterator(); iter.hasNext(); ) {
     Scene scene = (Scene)iter.next();
     scene.update();
@@ -604,6 +609,47 @@ void draw() {
   inputDispatch.update();
   
   // PICKER / MOUSE
+  drawMouse();
+  
+  // UPDATE FPS
+  myFpsTimer.update();
+  
+  // GUI LAYER
+  camera();
+  imageMode(CORNERS);
+  noLights();
+  perspective(PI/3.0, float(width)/float(height), 0.1, 10E7);
+  controlP5.draw();
+  
+  // SCENE-SPECIFIC DRAW ROUTINES
+  drawScenes();
+  
+  // RESET CAMERA
+  kamera.commit();
+}
+
+void drawScenes() {
+  
+  // SCENE DESCRIPTION & INFOLAYERS
+  //beginCamera();  //rectMode(CORNER); //camera();
+    
+    Collection allScenes = new ArrayList();
+    topScene.getAllScenes(allScenes);
+    intervalSay(45, "allScenes: " + allScenes);
+    
+    for (Iterator iter=allScenes.iterator(); iter.hasNext(); ) {
+      Scene scene = (Scene)iter.next();
+      
+      if (scene instanceof TwinParticleScene) {
+        //scene.showDescription();
+      }
+      
+      scene.draw();
+    }
+  //endCamera();
+}
+
+void drawMouse() {
   Vector3f mouse = kamera.screenToModel(mouseX, mouseY);
   
   pgl = (PGraphicsOpenGL)g;
@@ -625,44 +671,6 @@ void draw() {
   endBillboardGL();
   
   pgl.endGL();
-  
-  // UPDATE FPS
-  myFpsTimer.update();
-  
-  // INFO LAYER
-  myInfobox.print(
-  + (int) myFpsTimer.seconds + " seconds\n"
-  + (int) myFpsTimer.fpsRecent +  "fps (" + (int)(frameCount / myFpsTimer.seconds) + "avg)\n"
-  + "particles: " + particles.size() + "\n"
-//  + "target age:        " + nf(targetParticle.properTime, 3, 2) + " seconds\n"
-//  + "target speed:      " + nf(targetParticle.velocity.magnitude, 1, 8) + " c\n"
-//  + "target gamma:      " + nf(targetParticle.velocity.gamma, 1, 8) + "\n"
-//  + "target position:   " + nfVec(targetParticle.position, 5) + "\n"
-//  + "target displayPos: " + nfVec(targetParticle.getDisplayPositionVec(), 5)  
-//  + "mouseX: " + mouseX + ", mouseY: " + mouseY + "\n"
-  + "Controls: Arrows or W,A,S,D to Move; Right mouse button toggles camera rotation"
-  );
-  
-  // GUI LAYER
-  camera();
-  imageMode(CORNERS);
-  noLights();
-  perspective(PI/3.0, float(width)/float(height), 0.1, 10E7);
-  controlP5.draw();
-  
-  // INFOBARS (IN SCENES)
-  beginCamera();  //rectMode(CORNER); //camera();
-    
-    for (Iterator iter=scenes.iterator(); iter.hasNext(); ) {
-      Scene scene = (Scene)iter.next();
-      if (scene == scenes.get(0)) {
-        scene.draw();
-      }
-    }
-  endCamera();
-  
-  // RESET CAMERA 
-  kamera.commit();
 }
 
 class InputDispatch {
@@ -841,23 +849,14 @@ class InputDispatch {
   }
   */
 }
-/*
+
 void drawSphere(Vector3f pos, float radius) {
   pushMatrix();
     translate(pos.x, pos.y, pos.z);
     sphere(radius);
   popMatrix();
 }
-*/
-/*
-class ParticleDragger {
-  
-  boolean dragStarted;
-  Particle clickedParticle;
-  Vector3f dragPointerIntersect;
-  Vector3f dragOffset;
-}
-*/
+
 Particle clickedParticle;
 
 boolean isFanSelectionOpen() {
@@ -865,6 +864,7 @@ boolean isFanSelectionOpen() {
 }
 
 void openFanSelection(Particle pickedParticle) {
+  
   SelectableLabel[] labels = new SelectableLabel[] {
     new SelectableLabel("makeTargetParticle", pickedParticle),
     new SelectableLabel("menuDummy2", pickedParticle.getDisplayPositionVec()),
@@ -876,6 +876,11 @@ void openFanSelection(Particle pickedParticle) {
   myFanSelection = new FanSelection( pickedParticle, labels);
   labelSelector.addToSelectables(myFanSelection.getSelectableLabels());
   labelSelector.selection.add(myFanSelection);
+}
+
+void closeFanSelection() {
+  labelSelector.drop(myFanSelection.getSelectableLabels());
+  labelSelector.drop(myFanSelection);
 }
 
 // SelectableLabel Actions
@@ -943,11 +948,11 @@ void mousePressedOnScene() {
   Dbg.say("pickedLabel: " + pickedLabel + ", pick: " + pick);
   //Dbg.say("labelSelector.selectables" + labelSelector.selectables);
   
-  if (pickedParticle == null && pickedLabel == null) {
-    mousePressedOnBackground();
+  if (isFanSelectionOpen() && pickedLabel == null) {
+    closeFanSelection();
   }
-  else if (isFanSelectionOpen() && mouseButton == RIGHT) {
-    labelSelector.drop(myFanSelection.getSelectableLabels());
+  else if (pickedParticle == null && pickedLabel == null) {
+    mousePressedOnBackground();
   }
   else if (pickedLabel != null && pickedLabel instanceof SelectableLabel) {
     mousePickedLabel((SelectableLabel)pickedLabel);

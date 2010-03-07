@@ -2,12 +2,86 @@
 
 interface Selectable {
   //Vector2f getScreenPosition();
+  Vector3f getPositionVec();
   Vector3f getDisplayPositionVec();
 }
 
 interface Label {
+  void setName(String name);
+  String getName();
+  
   void setLabel(String label);
   String getLabel();
+}
+
+class DistanceMeasurement {
+  
+  ISelectableLabel start, end;
+  
+  Vector3f difference = new Vector3f();
+  Vector3f differenceInTargetCoords = new Vector3f();
+  Vector3f midpoint = new Vector3f();
+  Vector3f midpointDisplayPos = new Vector3f();
+  Vector3f labelDisplayPos = new Vector3f();
+  
+  int textColor = 0xFFFFFFFF;
+  
+  DistanceMeasurement(ISelectableLabel start, ISelectableLabel end) {
+    this.start = start;
+    this.end = end;
+    
+    update();
+  }
+  
+  void update() {
+    
+    difference.sub(end.getPositionVec(), start.getPositionVec());
+    
+    lorentzMatrix.transform(difference, differenceInTargetCoords);
+    
+    midpoint.scaleAdd(0.5, difference, start.getPositionVec());
+    
+    Relativity.displayTransform(lorentzMatrix, midpoint, midpointDisplayPos);
+  }
+  
+  void drawGL(GL gl) {
+    
+    update();
+    
+    String theLabel = this.buildLabel();
+    float theScale = 0.5;
+    
+    float labelX = screenX(midpointDisplayPos);
+    float labelY = screenY(midpointDisplayPos) + height / 5f;
+    labelDisplayPos = kamera.screenToModel(labelX, labelY);
+    
+    Vector3f startDispVec = start.getDisplayPositionVec();
+    Vector3f endDispVec = end.getDisplayPositionVec();
+    
+    gl.glBegin(GL.GL_TRIANGLES);
+      gl.glColor4f(1, 1, 1, 0);
+      glVertexGL(gl, startDispVec);
+      glVertexGL(gl, endDispVec);
+      
+      gl.glColor4f(1, 1, 1, 0.5);
+      glVertexGL(gl, labelDisplayPos);
+    gl.glEnd();
+    
+    myLabelor.setTextColor(this.textColor);
+    myLabelor.drawLabelGL(gl, theLabel, labelDisplayPos, theScale);
+  }
+  
+  String buildLabel() {
+    
+    String theLabel = new String(
+      "Distance Measurement: \n"
+      + start.getName() + " to " + end.getName()
+      + "\nworld coord distance:  " + nfVec(this.difference, 1)
+      + "\ntarget coord distance: " + nfVec(this.differenceInTargetCoords, 1)
+      );
+    
+    return theLabel;
+  }
 }
 
 class FanSelection extends SelectableLabel {
@@ -24,10 +98,11 @@ class FanSelection extends SelectableLabel {
   FanSelection(Selectable parentSelectable, SelectableLabel[] selectableLabels) {
     this.parentSelectable = parentSelectable;
     this.selectableLabels = new ArrayList(Arrays.asList(selectableLabels));
-    this.selectableLabels.add(this);
+    //this.selectableLabels.add(this);
     
     if (parentSelectable instanceof Label) {
-      this.setLabel(((Label)parentSelectable).getLabel());
+      //this.setLabel(((Label)parentSelectable).getLabel());
+      this.setLabel( ((Label) parentSelectable).getName() );
       this.setDisplayPosition(parentSelectable.getDisplayPositionVec());
     }
     
@@ -35,13 +110,15 @@ class FanSelection extends SelectableLabel {
   }
   
   void update() {
-    Vector3f parentPos = parentSelectable.getDisplayPositionVec();
+    Vector3f parentDisplayPos = parentSelectable.getDisplayPositionVec();
     Vector3f labelPos = new Vector3f();
     Vector3f radialVec = new Vector3f(kamera.up);
     Vector3f distToLabel = new Vector3f();
     
+    this.setDisplayPosition(parentDisplayPos);
+    
     //distToLabel.scaleAdd(distToKameraPlane, kamera.look, kamera.pos);
-    distToLabel.sub(parentPos, kamera.pos);
+    distToLabel.sub(parentDisplayPos, kamera.pos);
     
     radius = height / 10 * this.selectableLabels.size();
     radialVec.scale(distToLabel.length() / 15 * selectableLabels.size());
@@ -53,7 +130,7 @@ class FanSelection extends SelectableLabel {
     for (int i=0; i<selectableLabels.size(); i++) {
       
       rotLook.transform(radialVec);
-      labelPos.add(radialVec, parentPos);
+      labelPos.add(radialVec, parentDisplayPos);
       
       ((SelectableLabel)selectableLabels.get(i)).setDisplayPosition(labelPos);
     }
@@ -64,12 +141,17 @@ class FanSelection extends SelectableLabel {
   }
 }
 
-class SelectableLabel implements Selectable, Label {
+interface ISelectableLabel extends Selectable, Label {
+}
+
+class SelectableLabel implements ISelectableLabel {
+  
   Selectable parentSelectable;
   
   Vector2f screenPosition;
   Vector3f displayPosition;
   
+  String name;
   String label;
   
   SelectableLabel(String theLabel, float theScreenX, float theScreenY) {
@@ -93,6 +175,12 @@ class SelectableLabel implements Selectable, Label {
     this(theLabel, screenX(displayPos), screenY(displayPos));
   }
   
+  Vector3f getPositionVec() {
+    
+    Vector3f position = Relativity.inverseDisplayTransform(targetParticle.velocity, this.displayPosition);
+    return position;
+  }
+  
   Vector3f getDisplayPositionVec() {
     return this.displayPosition;
   }
@@ -114,12 +202,20 @@ class SelectableLabel implements Selectable, Label {
     displayPosition = kamera.screenToModel(screenPosition.x, screenPosition.y);
   }
   
+  String getLabel() {
+    return label;
+  }
+  
   void setLabel(String label) {
     this.label = label;
   }
   
-  String getLabel() {
-    return label;
+  String getName() {
+    return name;
+  }
+  
+  void setName(String name) {
+    this.name = name;
   }
   
   Selectable getParentSelectable() {
@@ -281,7 +377,11 @@ class Labelor {
     // Use the highest lineHeight expected, rather than the sporadic bounds textRender gives for each string
     lineHeight = (float) vtext._textRender.getBounds("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ|()123456789!@#$%^&*").getHeight();
   }
-    
+  
+  void setTextColor(int theColorARGB) {
+    this.vtext.setColor(getColor4fv(theColorARGB));
+  }
+  
   void drawLabelGL(GL gl, SelectableLabel sl, float scale) {
     drawLabelGL(gl, sl.getLabel(), sl.getDisplayPositionVec(), scale, 0f);
   }
@@ -344,6 +444,10 @@ class Labelor {
 }
 
 // GL CONVENIENCE UTILS - COLOR
+void glVertexGL(GL gl, Vector3f v) {
+  gl.glVertex3f(v.x, v.y, v.z);
+}
+
 void glColorGL(GL gl, color c) {
   gl.glColor4ub((byte)((c>>16) & 0xFF), (byte)((c>>8) & 0xFF), (byte)(c & 0xFF), (byte)((c>>24) & 0xFF));
 }

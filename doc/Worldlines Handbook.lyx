@@ -3,6 +3,10 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\usepackage{multicol}
+\date{}
+\end_preamble
 \use_default_options true
 \language english
 \inputencoding auto
@@ -26,33 +30,126 @@
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
-\leftmargin 3cm
+\leftmargin 1.5cm
+\rightmargin 1.5cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
-\defskip medskip
+\defskip smallskip
 \quotes_language english
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
-\tracking_changes false
+\listings_params "basicstyle={\ttfamily},breaklines=true,commentstyle={\ttfamily\color{blue}},firstline=1,firstnumber=1,identifierstyle={\ttfamily\color{black}},keywordstyle={\ttfamily\color{black}},language=Java,numberfirstline=true,numbers=left,numberstyle={\ttfamily},showstringspaces=false,stepnumber=5"
+\tracking_changes true
 \output_changes false
-\author "" 
+\author "qualiabyte,,," 
 \author "" 
 \end_header
 
 \begin_body
 
+\begin_layout Standard
+\begin_inset VSpace 0.5in
+\end_inset
+
+
+\end_layout
+
 \begin_layout Title
+
+\series bold
 Worldlines
 \size larger
  - An Interactive Special Relativity Visualization
 \end_layout
 
 \begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/bells_ship.png
+	lyxscale 25
+	height 2.5in
 
-\color red
-Worldlines pic here
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+\align center
+
+\size large
+Tyler Florez
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace 0.5in
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+\paragraph_spacing single
+\align center
+Physics Department
+\end_layout
+
+\begin_layout Address
+\paragraph_spacing single
+\align center
+California Polytechnic State University
+\end_layout
+
+\begin_layout Address
+\paragraph_spacing single
+\align center
+San Luis Obispo, California 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace vfill
+\end_inset
+
+
+\end_layout
+
+\begin_layout Address
+\align center
+March 15, 2010
+\change_inserted 0 1272361170
+
+\end_layout
+
+\begin_layout Address
+\align center
+
+\change_inserted 0 1272361215
+© 2010 Tyler Florez
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Title
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Abstract
@@ -77,28 +174,36 @@ target
  particle by toggling the space and time components of the Lorentz transformatio
 n for the currently targeted frame.
  Scenarios and phenomena presented include the twin paradox (time dilation),
- 
-\color red
-the barn-pole paradox
-\color inherit
- and 
-\color red
-Bell's spaceship paradox
-\color inherit
- (length contraction / relativity of simultaneity).
+ length contraction and Bell's spaceship paradox.
  Graphical elements include particle paths, coordinate axes, simultaneity
  planes and their particle intersections, pulsing clocks, and clock tick
  history.
- 
-\color red
-Scripted and free-exploration
-\color inherit
- modes are available, which focus on intuitive controls for accelerating
- to, and steering near, lightspeed.
+ Scripted and free-exploration modes are available, with a focus on intuitive
+ controls for accelerating to, and steering near, light speed.
 \end_layout
 
-\begin_layout Part*
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{multicols}{2}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
 Introduction
+\end_layout
+
+\begin_layout Subsection
+Time Dilation & the Lorentz Factor
 \end_layout
 
 \begin_layout Standard
@@ -114,15 +219,54 @@ Special Relativity (SR) is fascinating because it suggests that some of
 
 \begin_layout Standard
 \begin_inset Formula \[
-1/\gamma\text{ , the Time Dilation Factor}\]
+\gamma\equiv dt/d\tau\text{ , the Time Dilation Factor}\]
 
 \end_inset
 
 
+\change_inserted 0 1272403714
+
 \end_layout
 
 \begin_layout Standard
-where
+
+\change_inserted 0 1272806163
+Here 
+\begin_inset Formula $d\tau$
+\end_inset
+
+ and 
+\begin_inset Formula $dt$
+\end_inset
+
+ are infinitesimal time increments, where 
+\begin_inset Formula $d\tau$
+\end_inset
+
+ corresponds to the proper time 
+\begin_inset Formula $\tau$
+\end_inset
+
+ measured between events by a clock at rest in a given frame, and 
+\begin_inset Formula $dt$
+\end_inset
+
+ corresponds to the time intervals 
+\begin_inset Formula $t$
+\end_inset
+
+ between the same events given by the first clock, but as measured in another
+ coordinate frame.
+ Thus 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ gives the ratio of time intervals as measured by a pair of clocks in different
+ frames.
+\end_layout
+
+\begin_layout Standard
+
 \family roman
 \series medium
 \shape up
@@ -131,12 +275,13 @@ where
 \bar no
 \noun off
 \color none
- the Lorentz Factor is:
+The time dilation factor is given by the Lorentz term, which is crucial
+ in SR:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \[
-\gamma=\frac{1}{\sqrt{1-v^{2}/c^{2}}}\text{ , the Lorentz Factor}\]
+\gamma(v)=\frac{1}{\sqrt{1-v^{2}/c^{2}}}\text{ , the Lorentz Factor}\]
 
 \end_inset
 
@@ -148,12 +293,245 @@ Where
 \begin_inset Formula $v$
 \end_inset
 
- is the relative speed of one frame relative to another, and 
+ is the 
+\change_deleted 0 1272805778
+relative
+\change_unchanged
+ speed of one frame relative to another, and 
 \begin_inset Formula $c$
 \end_inset
 
  is the speed of light.
- The speed of light, a constant according to SR, shatters another foundation
+ Because all objects with mass move slower than light, as their speed 
+\begin_inset Formula $v<c$
+\end_inset
+
+ increases, then 
+\begin_inset Formula $\sqrt{1-v^{2}/c^{2}}<1$
+\end_inset
+
+ approaches 
+\begin_inset Formula $0$
+\end_inset
+
+, and thus 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+
+\begin_inset Formula $\gamma>1$
+\end_inset
+
+ goes to positive infinity.
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+Thus, we can see how clocks at relativistic speeds are seen to advance at
+ a reduced rate, as proper time intervals 
+\begin_inset Formula $\Delta\tau$
+\end_inset
+
+ in the clock's rest frame appear stretched according to the time dilation
+ factor
+\change_deleted 0 1272805896
+ to
+\change_unchanged
+:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \[
+\Delta t=\gamma\Delta\tau\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\Delta t$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Time outside the rest frame
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula $\Delta\tau$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Proper time measured by clock at rest
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\gamma$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Time dilation factor
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\change_inserted 0 1272811341
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 0 1272811375
+\begin_inset VSpace medskip
+\end_inset
+
+
+\change_unchanged
+
+\end_layout
+
+\begin_layout Standard
+This gives the relation between the propertime
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+ 
+\begin_inset Formula $\tau$
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\noun default
+\color inherit
+ (measured by a clock at rest in an inertial frame, present at events 
+\begin_inset Formula $e_{1}$
+\end_inset
+
+and 
+\begin_inset Formula $e_{2}$
+\end_inset
+
+) and the general time 
+\begin_inset Formula $t$
+\end_inset
+
+ associated with the span between the same events (for example by a pair
+ of separate, synchronized clocks in an arbitrary inertial frame, each only
+ present at one event).
+\end_layout
+
+\begin_layout Standard
+(See Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Twin-Paradox"
+
+\end_inset
+
+ on the Twin Paradox for the classic Time Dilation example.)
+\end_layout
+
+\begin_layout Subsection
+Universal Speed of Light and Velocity Addition
+\end_layout
+
+\begin_layout Standard
+The speed of light, a constant according to SR, shatters another foundation
  of our experience - the idea that we can generally approach the velocity
  of objects moving relative to us by accelerating out of our old frame of
  reference.
@@ -164,22 +542,55 @@ Where
 \end_inset
 
  relative to us.
- Our inability to catch up with light is a special case of SR's contradiction
- of Galilean concept of velocity addition; in SR, finding the velocity of
- an object 
+
+\change_deleted 0 1272812349
+ 
+\change_inserted 0 1272812352
+
+\end_layout
+
+\begin_layout Standard
+Our inability to catch up with light is a special case of SR's contradiction
+ of Galilean 
+\change_deleted 0 1272885965
+concept of 
+\change_unchanged
+velocity addition; in SR, 
+\change_inserted 0 1272886100
+if we are interested in the velocity 
+\begin_inset Formula $u$
+\end_inset
+
+ of an object, then 
+\change_unchanged
+finding the velocity 
 \begin_inset Formula $u_{B}$
 \end_inset
 
- in frame B with known velocity 
+
+\change_deleted 0 1272812349
+ of an object in
+\change_inserted 0 1272810647
+ as measured in
+\change_unchanged
+ frame B with known velocity 
 \begin_inset Formula $u_{A}$
 \end_inset
 
- in frame A is no longer as simple as saying:
+ 
+\change_inserted 0 1272808677
+as measured 
+\change_unchanged
+in frame A is no longer as simple as saying:
+\change_inserted 0 1272807621
+
 \end_layout
 
 \begin_layout Standard
+
+\change_inserted 0 1272808989
 \begin_inset Formula \[
-u_{B}=v_{AB}+u_{A}\text{ , Galilean velocity addition (not generally true)}\]
+u_{B}=u_{A}-v_{B,A}=u_{A}+v_{A,B}\]
 
 \end_inset
 
@@ -187,28 +598,798 @@ u_{B}=v_{AB}+u_{A}\text{ , Galilean velocity addition (not generally true)}\]
 \end_layout
 
 \begin_layout Standard
-But instead:
-\end_layout
 
-\begin_layout Standard
+\change_inserted 0 1272808990
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
 \begin_inset Formula \[
-u_{B}=\frac{u_{A}-v_{AB}}{1-u_{A}v_{AB}/c^{2}}\text{ , velocity addition in SR}\]
+\text{ Galilean velocity addition (not generally true)}\]
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Part*
+\begin_layout Standard
+
+\change_inserted 0 1272810867
+(Where the notation 
+\begin_inset Formula $u_{B}$
+\end_inset
+
+ reads 
+\begin_inset Quotes eld
+\end_inset
+
+the velocity 
+\begin_inset Formula $u$
+\end_inset
+
+ as measured in B
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Formula $v_{A,B}$
+\end_inset
+
+ reads 
+\begin_inset Quotes eld
+\end_inset
+
+the velocity of frame A as measured in B.
+\begin_inset Quotes erd
+\end_inset
+
+) Instead, we now have the following relation for parallel velocities:
+\change_deleted 0 1272808987
+
+\begin_inset Formula \[
+u_{in\, B}=v_{A\, in\, B}+u_{in\, A}\]
+
+\end_inset
+
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+
+\begin_inset Formula \[
+\text{ Galilean velocity addition (not generally true)}\]
+
+\end_inset
+
+
+\change_unchanged
+
+\end_layout
+
+\begin_layout Standard
+
+\change_deleted 0 1272810768
+Where 
+\begin_inset Formula $v_{A,B}$
+\end_inset
+
+ is the velocity of frame A in frame B, parallel to 
+\begin_inset Formula $u_{A}$
+\end_inset
+
+, but instead:
+\change_unchanged
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+u_{B}=\frac{u_{A}+v_{A,B}}{1+u_{A}v_{A,B}/c^{2}}\text{ , velocity addition in SR}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Velocity Addition Example
+\end_layout
+
+\begin_layout Standard
+For example, if 
+\begin_inset Formula $u$
+\end_inset
+
+ represents the speed of a light particle, and frame A moves away from B
+ at half of lightspeed, then
+\change_inserted 0 1274056219
+ using geometrized natural units (here defining the unit velocity as the
+ speed of light, with 
+\begin_inset Formula $c=1$
+\end_inset
+
+)
+\change_unchanged
+ we have: 
+\begin_inset Formula $u_{photon,A}=c=1$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{A,B}=0.5$
+\end_inset
+
+, so:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+u_{photon,B}=\frac{1+0.5}{1+1*0.5}=\frac{1.5}{1.5}=1\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is no surprise, since the relation 
+\begin_inset Formula $u_{B}=1$
+\end_inset
+
+ holds for any relative speed 
+\begin_inset Formula $v_{A,B}$
+\end_inset
+
+ between the two frames when 
+\begin_inset Formula $u_{A}=1$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \[
+u_{B}=\frac{1+v_{A,B}}{1+1*v_{A,B}/1^{2}}=\frac{1+v_{A,B}}{1+v_{A,B}}=1\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Length Contraction
+\end_layout
+
+\begin_layout Standard
+Just as time dilation describes how moving clocks are seen to run slower,
+ length contraction in SR tells us that distances measured outside an object's
+ rest frame appear contracted along the direction of motion.
+ Like the proper time 
+\begin_inset Formula $\tau$
+\end_inset
+
+, an object's proper length 
+\begin_inset Formula $L_{0}$
+\end_inset
+
+
+\change_inserted 0 1272812452
+ 
+\change_unchanged
+measured in its frame of rest is related to the length 
+\begin_inset Formula $L$
+\end_inset
+
+ in general frames of motion by the Lorentz factor:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+L=\frac{L_{0}}{\gamma}\]
+
+\end_inset
+
+With the proper length divided by 
+\begin_inset Formula $\gamma>1$
+\end_inset
+
+, we see the distance 
+\begin_inset Formula $L_{0}$
+\end_inset
+
+ will be the longest seen in any frame.
+\end_layout
+
+\begin_layout Subsection
+Coordinate Transformations
+\end_layout
+
+\begin_layout Standard
+The 
+\change_deleted 0 1272238323
+lorentz
+\change_inserted 0 1272238323
+Lorentz
+\change_unchanged
+ equations which map event coordinates 
+\begin_inset Formula $(x,t)$
+\end_inset
+
+ in frame 
+\begin_inset Formula $S$
+\end_inset
+
+ to 
+\begin_inset Formula $(x',t')$
+\end_inset
+
+ in frame 
+\begin_inset Formula $S'$
+\end_inset
+
+ (moving in 
+\begin_inset Formula $S$
+\end_inset
+
+ along the 
+\begin_inset Formula $x$
+\end_inset
+
+ direction at speed 
+\begin_inset Formula $v$
+\end_inset
+
+) are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{eqnarray*}
+x' & = & \gamma\,(x-vt)\\
+t' & = & \gamma\,(t-vx/c^{2})\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 0 1273514780
+The Lorentz transformation can be expressed using a matrix 
+\begin_inset Formula $\mathbf{L}$
+\end_inset
+
+ which performs an operation mapping column vectors 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ to 
+\begin_inset Formula $\mathbf{x'}$
+\end_inset
+
+ (mixing the space and time components in the process in a rotation-like
+ fashion).
+ The equation for the transformed space-time component 
+\begin_inset Formula $\mathbf{x'}$
+\end_inset
+
+ takes the general form:
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 0 1273514780
+\begin_inset Formula \[
+\mathbf{x'}=\mathbf{L}\mathbf{x}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the 
+\change_deleted 0 1272812491
+w
+\change_inserted 0 1272812492
+W
+\change_unchanged
+orldlines program, I've used the following 
+\change_inserted 0 1273514791
+explicit 
+\change_unchanged
+matrix form for the 
+\change_deleted 0 1272238325
+lorentz
+\change_inserted 0 1272238325
+Lorentz
+\change_unchanged
+ transformation 
+\change_deleted 0 1273885197
+for
+\change_inserted 0 1273885197
+in
+\change_unchanged
+ the case of one-dimensional motion along
+\change_deleted 0 1273885204
+ in
+\change_unchanged
+ the positive 
+\change_deleted 0 1272812520
+x
+\change_inserted 0 1272812520
+
+\begin_inset Formula $x$
+\end_inset
+
+
+\change_unchanged
+ direction:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\left[\begin{array}{c}
+x'\\
+y'\\
+ct'\end{array}\right]=\left[\begin{array}{ccc}
+\gamma & 0 & -\beta\gamma\\
+0 & 1 & 0\\
+-\beta\gamma & 0 & \gamma\end{array}\right]\left[\begin{array}{c}
+x\\
+y\\
+ct\end{array}\right]\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+\text{Where: }\beta=v/c\]
+
+\end_inset
+
+
+\change_inserted 0 1273452138
+
+\end_layout
+
+\begin_layout Standard
+
+\change_deleted 0 1273537674
+And this matrix for t
+\change_inserted 0 1273537749
+Similarly, t
+\change_unchanged
+he inverse 
+\change_deleted 0 1272238329
+lorentz
+\change_inserted 0 1272238329
+Lorentz
+\change_unchanged
+ transform, which takes coordinates in the moving frame just described and
+ maps them into the world frame
+\change_inserted 0 1273537712
+, has the general form
+\change_unchanged
+:
+\change_inserted 0 1273537723
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 0 1273537729
+\begin_inset Formula \[
+\mathbf{x=}\mathbf{L^{-1}x'}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 0 1273537816
+Where I've used the following explicit matrix form:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\left[\begin{array}{c}
+x\\
+y\\
+ct\end{array}\right]=\left[\begin{array}{ccc}
+\gamma & 0 & \beta\gamma\\
+0 & 1 & 0\\
+\beta\gamma & 0 & \gamma\end{array}\right]\left[\begin{array}{c}
+x'\\
+y'\\
+ct'\end{array}\right]\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is basically the standard configuration for the 
+\change_deleted 0 1272238334
+lorentz
+\change_inserted 0 1272238334
+Lorentz
+\change_unchanged
+ transformation (but with the time coordinate listed last), in which the
+ difference between the forward and inverse transformations is just a change
+ in sign.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Since for a pair
+\change_inserted 0 1272889984
+ of
+\change_unchanged
+ frames with coordinate axes facing the same direction, relative velocities
+ for the same action will have opposite sign, whether the motion is towards
+ or away
+\change_inserted 0 1272889999
+.
+\change_unchanged
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Use in Worldlines
+\end_layout
+
+\begin_layout Standard
+For example, when drawing the axes basis and grid of a particle, the inverse
+ transform corresponding to 
+\begin_inset Formula $v_{particle}$
+\end_inset
+
+ is used to map 
+\begin_inset Formula $r_{basis_{rest}}$
+\end_inset
+
+, the basis vectors of the particle's coordinate system in its rest frame,
+ into the world frame:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+r_{basis_{world}}=L^{-1}\left(r_{basis_{rest}},\, v_{particle}\right)\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Then, any display transforms for the target particle are applied to the
+ world coordinates of the vector:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+r_{basis_{display}}=L\left(r_{basis_{world}},\, v_{target}\right)\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where the functions 
+\begin_inset Formula $L$
+\end_inset
+
+ and 
+\begin_inset Formula $L^{-1}$
+\end_inset
+
+ apply the regular or inverse Lorentz transformation matrix to the vector
+ 
+\begin_inset Formula $r$
+\end_inset
+
+, given velocity 
+\begin_inset Formula $v$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+In constructing 
+\begin_inset Formula $L$
+\end_inset
+
+ suitable for 2 dimensional velocities 
+\begin_inset Formula $v$
+\end_inset
+
+, first an inverse rotation matrix for the particle's heading is applied;
+ this is then multiplied by the 1D Lorentz matrix; last the regular rotation
+ matrix is applied:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+L_{2D}(v)=R(\theta_{v})\, L_{1D}(v)\, R^{-1}(\theta_{v})\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\text{Where: }\theta_{v}=tan^{-1}(v_{y}/v_{x})\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
 Scenarios
 \end_layout
 
-\begin_layout Subsection*
-Twin Paradox
+\begin_layout Subsection
+Axes Scene - Coordinate Transforms & the Simultaneity Plane
 \end_layout
 
-\begin_layout Subsubsection*
-The Scenario:
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/axesScene_sideview2_crop_less.png
+	lyxscale 25
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The goal of the axes scene is to show how the system of rest coordinates
+ for a moving particle are mapped into the rest frame of other particles
+ - here, the 
+\begin_inset Quotes eld
+\end_inset
+
+world frame
+\begin_inset Quotes erd
+\end_inset
+
+ - in which the first particle as moving.
+ The basis vectors for the world frame are labeled 
+\begin_inset Formula $(x,y,ct)$
+\end_inset
+
+; and those for the moving particle are labeled 
+\begin_inset Formula $(x',y',ct')$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The vector 
+\begin_inset Formula $ct'$
+\end_inset
+
+ represents the particle's 3-velocity here through the (2+1) Minkowski space,
+ analogous to the 4-velocity in real-world 4D spacetime.
+ The point is that 
+\begin_inset Formula $ct'$
+\end_inset
+
+ is always tangent to the particle's path, and shows where the particle
+ will be if it keeps its current velocity.
+ The vector 
+\begin_inset Formula $ct'$
+\end_inset
+
+ is notable because in SR, it is not generally perpendicular to the 
+\begin_inset Formula $x'y'$
+\end_inset
+
+plane in all frames of reference.
+ That is, space and time between different frames are mixed - motion along
+ only along time (parallel to 
+\begin_inset Formula $ct'$
+\end_inset
+
+) for the moving particle in frame 
+\begin_inset Formula $S'$
+\end_inset
+
+ has a changing spatial component in frame 
+\begin_inset Formula $S$
+\end_inset
+
+ (along 
+\begin_inset Formula $x$
+\end_inset
+
+ in the above picture).
+\end_layout
+
+\begin_layout Standard
+For any frame 
+\begin_inset Formula $S'$
+\end_inset
+
+, the 
+\begin_inset Formula $x'y'$
+\end_inset
+
+ plane gives the surface of simultaneity; events in this plane are simultaneous
+ for observers within the frame.
+ The phenomena of relativity of simultaneity refers to the fact that given
+ events A, B, and C such that A and B are simultaneous in frame S, and B
+ and C are simultaneous frame 
+\begin_inset Formula $S'$
+\end_inset
+
+, events A and C will generally not be simultaneous in either frame S or
+ 
+\begin_inset Formula $S'$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/axesScene_general.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The axes scene begins with a few simple particles at rest for reference,
+ and a single 
+\begin_inset Quotes eld
+\end_inset
+
+driven particle
+\begin_inset Quotes erd
+\end_inset
+
+ whose velocity component 
+\begin_inset Formula $v_{x}$
+\end_inset
+
+ is defined as a sine wave oscillating between 0 and 0.99c, completing a
+ cycle every 200 s in the world frame.
+ The driven particle has been made the 
+\begin_inset Quotes eld
+\end_inset
+
+target particle
+\begin_inset Quotes erd
+\end_inset
+
+, meaning it's tracked by the camera, and that any coordinate (Lorentz)
+ transforms later activated for display will be done for 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ between it and the world frame.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/axesScene_stretch_0.95to98c.png
+	lyxscale 25
+	scale 18
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Clicking on the particle selects it, showing its identification and some
+ information about its state.
+ Above, we see an already dramatically stretched axes at 0.95c nearly completely
+ collapses with just a ~0.037 c increase to 0.988 c.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/axesScene_0.95c_again_crop_axes.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The particle is again at 0.95c, but now the Lorentz transforms have been
+ activated - meaning the coordinate space used for display now matches the
+ space of the target particle.
+ This is why the 
+\begin_inset Formula $ct'$
+\end_inset
+
+ and 
+\begin_inset Formula $x'$
+\end_inset
+
+ basis vectors again appear orthogonal (even at this high speed), since
+ we are now in the the rest frame of the particle.
+ The 
+\begin_inset Formula $ct$
+\end_inset
+
+ and 
+\begin_inset Formula $x$
+\end_inset
+
+ basis have been skewed in the opposite directions, stretching off-screen
+ in the image above.
+\end_layout
+
+\begin_layout Subsection
+Twin Paradox Scene
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Twin-Paradox"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+The Scenario
+\change_deleted 0 1272403388
+:
+\change_unchanged
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/twinScene_turn_crop.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -222,14 +1403,12 @@ In the twin paradox, a pair of identical twins (A and B) begin at a common
 , twin B reverses course and returns to A.
 \end_layout
 
-\begin_layout Standard
+\begin_layout Subsubsection
+The Effect and Observables
+\change_deleted 0 1272403440
+:
+\change_unchanged
 
-\color red
-Representative pic of twin paradox in Worldlines goes here
-\end_layout
-
-\begin_layout Subsubsection*
-The Effect:
 \end_layout
 
 \begin_layout Standard
@@ -241,66 +1420,369 @@ If each of the twins carry clocks to record the duration of their trip to
 \end_inset
 
  observed by twin A (who remained at the initial point of departure) will
- always be greater than that for B.
+ always be greater than 
+\begin_inset Formula $\tau_{B}$
+\end_inset
+
+ for twin B:
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset Formula \[
+\tau_{A}>\tau_{B}\text{ , Elapsed Propertime in Twin Paradox}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In other words, the twins' age difference should be greater than zero:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \[
+\text{Age Difference in Twin Paradox:}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \[
+\Delta\tau_{A-B}=\tau_{A}-\tau_{B}>0\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/twinScene_start_crop.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The age difference in the twin paradox is a particular result of time dilation.
+ In general, the inertial (non-accelerating) path through spacetime is the
+ longest possible, whether the length under consideration is simply the
+ proper time, or is formulated as the Lorentz invariant:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \[
+\text{The Lorentz Invariant:}\]
+
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\noun default
+\color inherit
+
+\begin_inset Formula \[
+(\Delta s)^{2}=(c\Delta t)^{2}-(\Delta x)^{2}-(\Delta y)^{2}-(\Delta z)^{2}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset citation
+LatexCommand cite
+after "p.49"
+key "Kogut"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 This startling effect becomes more noticeable at very high (i.e.
- relativistic) speeds.
-\end_layout
+ relativistic) speeds; see the Multiple Twins scenario in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Multiple-Twins"
 
-\begin_layout Subsubsection*
-Observables
-\end_layout
-
-\begin_layout Standard
-\align left
-Elapsed time 
-\begin_inset Formula $\tau$
 \end_inset
 
- for Twin A should be longer than for Twin B:
+ for a bit more on this.
+\end_layout
+
+\begin_layout Subsubsection
+Twin Paradox Example
+\end_layout
+
+\begin_layout Paragraph
+Problem Setup:
 \end_layout
 
 \begin_layout Standard
-\align left
+Suppose twin B departs at velocity 
+\begin_inset Formula $v_{B}$
+\end_inset
+
+ (say, 0.9 c) and begins its return at proper time 
+\begin_inset Formula $\tau_{turnaround,B}$
+\end_inset
+
+ (say, 50 s).
+ If twin A remains at rest, we can find the age 
+\begin_inset Formula $\tau_{meet}$
+\end_inset
+
+ for each.
+\end_layout
+
+\begin_layout Paragraph
+Solving for 
+\begin_inset Formula $\tau_{meet,A}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+Finding twin B's age is straightforward:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{eqnarray*}
+\tau_{meet,B} & = & 2*\tau_{turnaround,B}\\
+\tau_{meet,B} & = & 2*50s=100s\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Similarly, twin A ages by twice B's turnaround time - but in A's own frame:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\tau_{meet,A}=2*t_{turnaround,A}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since twin B's local clock measures proper times 
+\begin_inset Formula $\tau_{B}$
+\end_inset
+
+ which appear dilated when seen as 
+\begin_inset Formula $t_{A}$
+\end_inset
+
+ for twin A at rest in the world frame, we have:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+t_{A}=\gamma\tau_{B}\]
+
+\end_inset
+
+
+\begin_inset Formula \[
+\tau_{meet,A}=2*t_{turaround,A}=2*(\gamma\tau_{turnaround,B})\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\gamma=1/\sqrt{1-v_{B}^{2}/c^{2}}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\gamma=1/\sqrt{1-0.9^{2}}=1/\sqrt{1-0.81}=1/\sqrt{0.19}=2.294\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So finally, 
+\begin_inset Formula $\tau_{meet,A}=2*2.294*50s=229.4s$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is reasonable, since 
+\begin_inset Formula $229.4s>100s$
+\end_inset
+
+ giving 
 \begin_inset Formula $\tau_{A}>\tau_{B}$
 \end_inset
 
+ as expected.
+ For reference, their age difference is 
+\begin_inset Formula $\Delta\tau_{A-B}=129.4s$
+\end_inset
 
+.
+\end_layout
+
+\begin_layout Paragraph
+Check result with simulation:
 \end_layout
 
 \begin_layout Standard
-\align left
+The image below shows the conclusion of the twin paradox scene with 
+\begin_inset Formula $v_{B}=0.9c$
+\end_inset
 
-\color red
-Or, the age difference between A and B should be greater than 0:
+ and 
+\begin_inset Formula $\tau_{turnaround,B}=50s$
+\end_inset
+
+.
+ Twin B's age can be verified visually, with 10 segments between yellow
+ clock history ticks, each marking an elapse of 10 s for the particle's
+ proper time.
+ This gives 
+\begin_inset Formula $\tau_{meet,B}=10*10s=100s$
+\end_inset
+
+ as required in the problem setup.
 \end_layout
 
 \begin_layout Standard
-\align left
+\begin_inset Graphics
+	filename images/twinScene_end_crop.png
+	lyxscale 25
+	width 45text%
 
-\color red
-\begin_inset Formula $\Delta\tau_{A-B}>0$
 \end_inset
 
 
 \end_layout
 
-\begin_layout Subsubsection*
-Quantitave Example
-\end_layout
+\begin_layout Standard
+\begin_inset Formula \[
+\text{Conclusion of Twin Paradox Scene}\]
 
-\begin_layout Subsubsection*
-The Phenomena:
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Time Dilation
+Twin A is selected, so its age is displayed beneath it.
+ The result is 
+\begin_inset Formula $\tau_{A,meet,program}=229.6s$
+\end_inset
+
+, which is very close to the 
+\begin_inset Formula $229.4s$
+\end_inset
+
+ expected from the calculation.
+ The 0.2s error is due to the time step used to update the particles, and
+ the simple logic used to decide when twin B should begin its return and
+ when the program should consider the particles to have met (pausing the
+ scene).
 \end_layout
 
-\begin_layout Subsubsection*
-The Paradox:
+\begin_layout Standard
+For convenience, the meter at the bottom shows the currently accumulated
+ age difference between the twin's at each step in the simulation, where
+ 
+\begin_inset Quotes eld
+\end_inset
+
+current difference
+\begin_inset Quotes erd
+\end_inset
+
+ uses twin A's conception of simultaneity in the world rest frame.
+ The resulting age difference shown 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+
+\begin_inset Formula $\Delta\tau_{A-B,program}=129.53s$
+\end_inset
+
+, also close to the expected value of 129.4 s.
+\end_layout
+
+\begin_layout Standard
+The meter gives the user an intuitive sense for how the values are changing
+ as the program runs in real-time.
+ In this case, the sense the user should get is that the age difference
+ accumulates smoothly, as seen in the world frame of twin A.
+\end_layout
+
+\begin_layout Subsubsection
+The Paradox
 \end_layout
 
 \begin_layout Standard
@@ -315,44 +1797,1265 @@ paradox
  in this scenario stems from the seeming discrepancy between the symmetry
  of relative motion between the twins, and the asymmetry between the effect
  on their rate of temporal experience (and thus, age).
+ See Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Visualizing-Twin-B-Turn"
+
+\end_inset
+
+ for a visualization of the asymmetry resolving the paradox - the fact that
+ Twin B turns around, while Twin A does not.
 \end_layout
 
-\begin_layout Subsection*
-Multiple Twins and Invariant Surfaces
+\begin_layout Subsection
+Multiple Twins Scene
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Multiple-Twins"
+
+\end_inset
+
+
 \end_layout
 
-\begin_layout Subsection*
-Lorentz Contraction
-\end_layout
-
-\begin_layout Subsection*
-Bell's Spaceship Paradox
-\end_layout
-
-\begin_layout Subsection*
-
-\color red
-Mass-Energy Equivalence
-\end_layout
-
-\begin_layout Subsubsection*
-Scenario
-\end_layout
-
-\begin_layout Standard
-Particle emits photons to accelerate
-\end_layout
-
-\begin_layout Subsubsection*
-Phenomena
+\begin_layout Subsubsection
+Scene Layout and Invariant Surfaces
 \end_layout
 
 \begin_layout Standard
-Energy-momentum conservation
+\begin_inset Graphics
+	filename images/multiTwin_half_crop.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Asymptotic approach to lightspeed
+The Multi-Twins Scene shows multiple twin B's departing at the same time
+ from a single twin A.
+ Twins B.1 through B.8 have velocities spaced 0.1 c apart, with
+\begin_inset Formula $v_{x}$
+\end_inset
+
+ from 0.1 c to 0.8 c.
+\end_layout
+
+\begin_layout Standard
+Looking at the curves formed by ticks corresponding to the same time (ie,
+ 
+\begin_inset Formula $tick_{1}=10s$
+\end_inset
+
+) between the particles (before the turnaround at 
+\begin_inset Formula $\tau=50\, s$
+\end_inset
+
+), one can see the surfaces of 
+\begin_inset Quotes eld
+\end_inset
+
+constant time
+\begin_inset Quotes erd
+\end_inset
+
+ for a traveler starting at the origin of departure.
+ In worlds like ours for which SR holds true, these surfaces appear curved
+ in any reference frame due to the time dilation effect between different
+ frames.
+ If SR were not true, the surfaces would be flat, indicating an absolute
+ (rather than relative) time between different reference frames.
+\end_layout
+
+\begin_layout Subsubsection
+Visualizing Twin B Before and After Turn
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Visualizing-Twin-B-Turn"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/multiTwin_twin8_preTurn.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Twin B.8: pre turnaround, world frame
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/multiTwin_twin8_preTurn_transformOn.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Twin B.8: pre turnaround, frame of B.8
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/multiTwin_twin8_postTurn_transformOn.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Twin B.8: post turnaround, frame of B.8
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/multiTwin_twin8_postTurn_transformOff.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Twin B.8: post turnaround, world frame
+\end_layout
+
+\begin_layout Subsubsection
+The Asymmetry of the Turnaround (Resolving the Paradox)
+\end_layout
+
+\begin_layout Standard
+The last series of images shows the asymmetry in the twin paradox - from
+ twin B's perspective, by the time he reaches 
+\begin_inset Formula $\tau_{B}=50\, s$
+\end_inset
+
+, twin A has already missed the oppurtunity to take the action which twin
+ B now takes, changing his frame of reference by reversing his velocity.
+ Looking at the clock tick history in the last image, we see that just after
+ twin B turns, just over 
+\begin_inset Formula $80\, s$
+\end_inset
+
+ has elapsed for twin A.
+\end_layout
+
+\begin_layout Subsection
+Length Contraction Scene
+\end_layout
+
+\begin_layout Subsubsection
+Lorentz Contraction Scene Layout
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/lengthContraction_layout_crop.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The image above shows the layout of the length contraction scene in the
+ world rest frame - a single driven target particle (
+\begin_inset Formula $v_{x}$
+\end_inset
+
+ oscillating from 0 to 0.99 c every 200 s), uniform particles at rest, and
+ their intersections with the target's surface of simultaneity.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+width "100col%"
+special "none"
+height "100pheight%"
+height_special "none"
+status open
+
+\begin_layout Subsubsection
+Visualizing Lorentz Contraction
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/lengthContraction_0.030c.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Length contraction at 0.038c
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/lengthContraction_0.708c.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Length contraction at 0.708c
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/lengthContraction_0.885c.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Length contraction at 0.8846c
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/lengthContraction_0.9889c.png
+	lyxscale 25
+	height 25theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Length contraction at 0.9889c
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The last series of images shows how the distances between the uniform particles
+ one would measure in the rest frame of the driven target particle are affected
+ by changes in its velocity.
+ That is, the distances contract along the direction of motion, while perpendicu
+lar distances remain unaffected.
+\end_layout
+
+\begin_layout Subsubsection
+Making a Distance Measurement
+\end_layout
+
+\begin_layout Standard
+Let's try measuring how much the lengths contracted in a case like the one
+ we just saw.
+ The uniform particles in this scene are spaced 10 ls apart - as we can
+ see in the image below, the two particles selected are 10 apart, with 
+\begin_inset Formula $(x,y)$
+\end_inset
+
+ coordinates 
+\begin_inset Formula $(0,0)$
+\end_inset
+
+ and 
+\begin_inset Formula $(100,0)$
+\end_inset
+
+ in the world frame:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/lengthContraction_world_100apart.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here are the same particles again as seen in the rest frame of the driven
+ particle, which has started taking off again.
+ The particles are labeled Particle(1) and Particle(51):
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/lengthContraction_transform_100apart.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To make this interesting, we'll measure the intersections of the particles
+ rather than the particles themselves.
+ Here we've clicked the intersections defined by the intersections
+\change_deleted 0 1268946940
+ of the
+\change_inserted 0 1268946943
+between the simultaneity plane of the
+\change_unchanged
+ driven particle (Particle 0) the paths of particles 1 and 51 (pausing the
+ program or reducing the timestep makes selection easier):
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/lengthContraction_measure_select.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Right clicking on a selected particle brings up a menu of actions which
+ can be applied to it.
+ If 
+\emph on
+two
+\emph default
+ objects are selected (any mix of particles or intersections), then an additiona
+l action, 
+\begin_inset Quotes eld
+\end_inset
+
+measureDistance
+\begin_inset Quotes erd
+\end_inset
+
+ is available:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/lengthContraction_measure_rightClick.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here is the resulting distance measurement we get by right clicking, which
+ tells us which interval is measured, and the distance components 
+\begin_inset Formula $(\Delta x,\Delta y,\Delta t)$
+\end_inset
+
+ in both the world frame and the target frame:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/lengthContraction_measure.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With the program paused at a point we're interested in, and the driven particle
+ selected, we can see that at 
+\begin_inset Formula $v_{x,driven}=0.989995c$
+\end_inset
+
+ (near its set max of 0.99c), the spatial distance between the intersections
+ is 
+\begin_inset Formula $(\Delta x,\Delta y)=(100,0)$
+\end_inset
+
+ in the world rest frame, but now 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+
+\begin_inset Formula $(\Delta x',\Delta y')=(14.1,0)$
+\end_inset
+
+ in the driven target's frame:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/lengthContraction_measure_098995c_angle.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Checking the measurement
+\end_layout
+
+\begin_layout Standard
+Here, the proper length between particles 1 and 51 is: 
+\begin_inset Formula $L_{0}=100ls$
+\end_inset
+
+.
+ Plugging in 
+\begin_inset Formula $v_{x,driven}=0.989995\, c$
+\end_inset
+
+, we have:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\gamma=1/\sqrt{1-(v_{x,driven}/c)^{2}}=1/\sqrt{1-(0.98895)^{2}}=7.087049\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+L=L_{0}/\gamma=100\, ls/7.087049=14.1102\, ls\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From this, we see our measurement of 
+\begin_inset Formula $14.1\, ls$
+\end_inset
+
+ is just what we would expect from the formula for 
+\change_deleted 0 1272238336
+lorentz
+\change_inserted 0 1272238336
+Lorentz
+\change_unchanged
+ contraction.
+ 
+\end_layout
+
+\begin_layout Subsection
+Bell's Spaceship Paradox Scene
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/bells_ship.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is a fun scene in which you can control a fleet of ships, which are
+ modeled as idealized rigid bodies.
+ The bodies are 
+\begin_inset Quotes eld
+\end_inset
+
+attached
+\begin_inset Quotes erd
+\end_inset
+
+ to a particle by defining body vertices at constant points in the particle's
+ rest frame, which are then mapped by an inverse 
+\change_deleted 0 1272238338
+lorentz
+\change_inserted 0 1272238338
+Lorentz
+\change_unchanged
+ transform to the world frame (followed by any active display transforms).
+ Finally, the body is drawn as yellow lines between each body 
+\change_deleted 0 1272238755
+vertice
+\change_inserted 0 1272238755
+vertex
+\change_unchanged
+ every time the particle's frame changes due to acceleration.
+\end_layout
+
+\begin_layout Standard
+You can accelerate the fleet in synchronization by pressing the arrow keys
+ or W,A,S,D keys:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/bells_ship_motion_world.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The paradox is that each ship receives the same boost in the world frame
+ - so the relative positions of each ship in the fleet is preserved; their
+ relative acceleration is 'uniform' by definition.
+ Similarly, the internals of any particular ship appears preserved to its
+ inhabitants, who are in its rest frame, so the acceleration appears 'uniform'
+ to them as well.
+\end_layout
+
+\begin_layout Standard
+Back in the world frame, the length of each moving ship contracts - which
+ would intuitively seem to indicate the distance between the ships increases
+ in their frame.
+ But if the distance between the ships is increasing, what happened to the
+ 'uniformity' of the acceleration observed within each ship?
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Further, if the relative distances within the fleet are preserved in the
+ world frame, length contraction would seem to demand that this spacing
+ would contract in the frame of the ships moving relative to those measurements.
+ This seems to be resolved by the relativity of simultaneity, though; those
+ world frame measurement event coordinates are contracted in the ship's
+ new frame, although they're no longer simultaneous.
+ We still have to address the rigidity though.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/bells_ship_motion_transform.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This preservation of internal distances hinges on how well our idealized
+ rigid bodies holds up.
+ The idea of preservation of distances in the rest frame is known as Born
+ rigidity.
+ Where this rigidity is and is not preserved seems to be at the crux of
+ the paradox.
+ A resolution to the paradox seems to be simply that it's possible to imagine
+ cases where the rigidity is and is not preserved.
+\end_layout
+
+\begin_layout Standard
+If one considers the fleet of ships as an entity, then 
+\change_inserted 0 1268947166
+B
+\change_deleted 0 1268947166
+b
+\change_unchanged
+orn rigidity is not preserved - though their positions are preserved in
+ the world frame, 
+\change_deleted 0 1272238365
+born
+\change_inserted 0 1272238365
+Born
+\change_unchanged
+ rigidity is defined as preservation in the rest frame.
+ In the image below, the we see the target moving towards the fleet.
+ Holding this velocity, we see from the path intersections that their locations
+ in his frame are vastly stretched, confirming our expectation that the
+ 
+\change_deleted 0 1272238367
+born
+\change_inserted 0 1272238367
+Born
+\change_unchanged
+ rigidity of the fleet is broken.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/bells_born_rigidity_broken.png
+	lyxscale 25
+	width 45text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On the other hand, it seems theoretically plausible that an solidly bound
+ entity like a particular ship (rather than an unconnected fleet) moving
+ at relativistic speeds could have it's 
+\change_deleted 0 1272238368
+born
+\change_inserted 0 1272238368
+Born
+\change_unchanged
+ rigidity essentially preserved, perhaps by the application of an external
+ force, or perhaps by the interior attraction between parts of the ship
+\change_inserted 0 1268947327
+'
+\change_unchanged
+s body, restoring the rigidity once the acceleration ceases.
+\end_layout
+
+\begin_layout Section
+Program Manual
+\end_layout
+
+\begin_layout Subsection
+Things to Try
+\end_layout
+
+\begin_layout Subsubsection
+Selecting Particles and Intersections
+\end_layout
+
+\begin_layout Standard
+Left click to select particles and intersections.
+ The object's name and state is shown, and a selection reticle is added.
+ Any menu actions selected will be applied to the currently selected particles.
+\end_layout
+
+\begin_layout Subsubsection
+Camera rotation (Right Mouse click on Background)
+\end_layout
+
+\begin_layout Subsubsection
+Camera zoom (Scroll Middle Mouse)
+\end_layout
+
+\begin_layout Subsubsection
+Change the target particle
+\end_layout
+
+\begin_layout Standard
+Right click a particle, and choose 
+\begin_inset Quotes eld
+\end_inset
+
+makeTargetParticle
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The target particle is followed by the camera, and can be accelerated with
+ the keyboard.
+\end_layout
+
+\begin_layout Subsubsection
+Accelerate the target particle
+\end_layout
+
+\begin_layout Standard
+Use the arrow keys or W,A,S,D keys to boost the particle.
+ Note: it's no use trying to accelerate driven particles - if a driven particle
+ is the only target, try right clicking another particle in the scene, and
+ make that the target.
+ Also, turn on emissions to get a visual sense of the boost being applied
+ to your targets.
+\end_layout
+
+\begin_layout Subsubsection
+Activate Emissions
+\end_layout
+
+\begin_layout Standard
+Click the 
+\emph on
+Use Emissions
+\emph default
+ toggle to display propelled emissions when accelerated with the keyboard.
+\end_layout
+
+\begin_layout Subsubsection
+Attach a Rigid Body
+\end_layout
+
+\begin_layout Standard
+Right click a particle and choose 
+\emph on
+attachRigidBodies
+\emph default
+ to add rigid body vertices.
+\end_layout
+
+\begin_layout Subsubsection
+Add a Distance Measurement
+\end_layout
+
+\begin_layout Standard
+Select two objects, right click one, and select 
+\emph on
+addDistanceMeasurement
+\end_layout
+
+\begin_layout Subsubsection
+Move Particles
+\end_layout
+
+\begin_layout Standard
+Left click a particle, then drag it to a new position.
+\end_layout
+
+\begin_layout Subsection
+Graphical elements
+\end_layout
+
+\begin_layout Subsubsection
+Worldlines 
+\end_layout
+
+\begin_layout Standard
+The particle paths through the 2+1 Minkowski space are shown in 3D.
+\end_layout
+
+\begin_layout Subsubsection
+Pulsing particle clocks
+\end_layout
+
+\begin_layout Standard
+A bright light pulses with a frequency proportional to the rate of proper
+ time currently elapses for it in the simulation.
+\end_layout
+
+\begin_layout Subsubsection
+Clock Ticks
+\end_layout
+
+\begin_layout Standard
+Colored ticks are shown spaced at even proper time intervals along each
+ particles path.
+ Spacing is at powers of 10 s; the spacing exponent changes when 20 ticks
+ are reached.
+ The tick size slightly increases at each exponent change, as does the color.
+ The corresponding intervals for each color are:
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+\begin_inset Formula $10^{0}s$
+\end_inset
+
+ red
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+\begin_inset Formula $10^{1}s$
+\end_inset
+
+ yellow
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+\begin_inset Formula $10^{2}s$
+\end_inset
+
+ orange 
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+\begin_inset Formula $10^{3}s$
+\end_inset
+
+ green
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+\begin_inset Formula $10^{4}s$
+\end_inset
+
+ blue
+\end_layout
+
+\begin_layout List
+\labelwidthstring 00.00.0000
+\begin_inset Formula $10^{5}s$
+\end_inset
+
+ violet
+\end_layout
+
+\begin_layout Subsubsection
+Particle frame plane of simultaneity
+\end_layout
+
+\begin_layout Standard
+The surface of constant time (corresponding to 
+\begin_inset Formula $ct'=0$
+\end_inset
+
+) for each particle's current frame appears as a transparent plane defined
+ by the 
+\begin_inset Formula $x'y'$
+\end_inset
+
+ axes.
+\end_layout
+
+\begin_layout Subsubsection
+Worldline intersections with target plane of simultaneity
+\end_layout
+
+\begin_layout Standard
+Intersections between the each particle's path and the target particle's
+ plane of simultaneity are displayed by a selectable glowing clock pulse.
+ (The pulse timing is just the that of the particle in the current simulation
+ step though, see: 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "enu:Intersection-clock-pulses-bug"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Subsubsection
+Particle frame axes basis
+\end_layout
+
+\begin_layout Standard
+The axes basis for each particle's frame are displayed; mapped first into
+ the world, and then display, coordinates.
+ For the target particle, the labels 
+\begin_inset Formula $(x',y',ct')$
+\end_inset
+
+ are displayed.
+ Additionally, the basis for the simulation's world frame are displayed,
+ labeled 
+\begin_inset Formula $(x,y,ct)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Particle frame axes coordinate grid
+\end_layout
+
+\begin_layout Standard
+The coordinate grid for the target particle and the origin can be activated
+ by toggles under the main panel.
+ Units are displayed in light-seconds -
+\begin_inset Formula $ls$
+\end_inset
+
+.
+ The coordinate grid spacing scales up relative to the distance from the
+ kamera.
+\end_layout
+
+\begin_layout Subsection
+Gui Controls
+\end_layout
+
+\begin_layout Subsubsection
+Pause
+\end_layout
+
+\begin_layout Standard
+Stops the simulation for user inspection.
+ When stopped, the control changes to Play.
+\end_layout
+
+\begin_layout Subsubsection
+Restart
+\end_layout
+
+\begin_layout Standard
+Restarts the currently active scene, keeping the the currently set control
+ preferences.
+\end_layout
+
+\begin_layout Subsubsection
+Toggle Spatial Transform & Toggle Temporal Transform
+\end_layout
+
+\begin_layout Standard
+Toggles whether the space and time parts of the Lorentz transform are applied
+ to the final display coordinates shown onscreen.
+ With both off, all events are shown in world frame coordinates.
+ With both on, the events are seen in the coordinates of the target particle;
+ as observers in its rest frame would measure them.
+\end_layout
+
+\begin_layout Subsubsection
+Timestep
+\end_layout
+
+\begin_layout Standard
+Timestep controls the simulation speed by changing the simulated interval
+ per frame.
+ The slider controls the number of seconds of simulation time (either in
+ the world frame or target particle's frame) which pass per second of user
+ time.
+\end_layout
+
+\begin_layout Subsubsection
+ProperTime Scaling
+\end_layout
+
+\begin_layout Standard
+When active, the simulation timestep is multiplied by the time dilation
+ factor of the target particle.
+ Effectively, this lets you experience time as it passes for the targeted
+ particle.
+ For a particle moving at high velocity, rather than it's clock appearing
+ to slow down, all other activity in the simulation is sped up.
+ The effect can be pretty dramatic in combination with the clock pulses.
+\end_layout
+
+\begin_layout Subsubsection
+1-D Control
+\end_layout
+
+\begin_layout Standard
+This restricts user's control of boosts the target particle's velocity (via
+ the keys W, A, S, and D) to the x-direction.
+\end_layout
+
+\begin_layout Subsubsection
+Show Rigid Bodies
+\end_layout
+
+\begin_layout Standard
+Controls whether any rigid bodies (appearing as yellow polygons, as in Bell's
+ Spaceship Scene) which may be attached to the particles are displayed.
+\end_layout
+
+\begin_layout Subsubsection
+Use Emissions
+\end_layout
+
+\begin_layout Standard
+Controls whether emissions are ejected as the user propels a target particle.
+ Gives the user a sense of the direction the boost is being applied.
+\end_layout
+
+\begin_layout Subsubsection
+Show Target & Origin Axes Grid
+\end_layout
+
+\begin_layout Standard
+Shows or hides the respective axes grid.
+\end_layout
+
+\begin_layout Subsubsection
+Show Particle Clock Ticks
+\end_layout
+
+\begin_layout Standard
+Shows or hides all particle's clock tick history.
+\end_layout
+
+\begin_layout Section
+About the Program
+\end_layout
+
+\begin_layout Subsection
+Tools
+\end_layout
+
+\begin_layout Subsubsection
+Environment: Processing, Java, OpenGL, Git
+\end_layout
+
+\begin_layout Standard
+Processing is a development environment and extension to Sun's Java programming
+ language, focusing on providing ease of use with a minimalistic toolset
+ for creative expression.
+ It also provides the full power of the Java language (through the 1.4 syntax),
+ the many third party libraries, and other pure Java classes.
+ Processing supports OpenGL, accessible through the JOGL implementation
+ of the C interface.
+ Processing provides one-click export to PC, Mac, and Linux binaries - and
+ to Java applets for web use.
+ Git was used for source code management.
+\end_layout
+
+\begin_layout Subsubsection
+Libraries: VTextRenderer, ControlP5, Apache Math Commons
+\end_layout
+
+\begin_layout Standard
+Processing has a great user community, forums, and reference docs.
+ I've used two user-created libraries in particular - V*'s (Victor Martin's)
+ VTextRenderer
+\begin_inset CommandInset citation
+LatexCommand cite
+key "V*"
+
+\end_inset
+
+, for OpenGL text labels, one thing lacking in Processing; and Andreas Schlegel'
+s ControlP5 gui library
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schlegel"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Known Bugs
+\end_layout
+
+\begin_layout Standard
+These graphical details could be confusing:
+\end_layout
+
+\begin_layout Enumerate
+Distance Measurement feature works on Windows and Linux, but has an unresolved
+ graphical glitch on Mac OS X.
+\end_layout
+
+\begin_layout Enumerate
+Intersection clock pulses match the timing of the head particles in the
+ world frame.
+ The timing is physically correct for the heads, but fixing the timing for
+ the intersections needs an additional calculation.
+ (Ie, just the elapsed propertime before the head catches up to the intersection
+ for particles on straight paths; divide the head to intersection distance
+ in the world frame by the length of the head's (2+1) 3-velocity).
+\begin_inset CommandInset label
+LatexCommand label
+name "enu:Intersection-clock-pulses-bug"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "Kogut"
+key "Kogut"
+
+\end_inset
+
+Kogut, J.
+ B.
+ (2001).
+ Introduction to relativity.
+ Complementary science series.
+ San Diego, Calif: Harcourt/Academic Press.
+ 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "A.P. French"
+key "A.P. French"
+
+\end_inset
+
+French, A.
+ P.
+ (1968).
+ Special relativity.
+ The M.I.T.
+ introductory physics series.
+ New York: Norton.
+ 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "Ellis and Williams"
+key "Ellis and Williams"
+
+\end_inset
+
+Ellis, G.
+ F.
+ R., & Williams, R.
+ M.
+ (1988).
+ Flat and curved space-times.
+ Oxford [England]: Clarendon Press.
+ 
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "WP: Bell's Spacehip Paradox"
+key "WP: Bell's Spacehip Paradox"
+
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Wikipedia - Bell's spaceship paradox"
+target "http://en.wikipedia.org/wiki/Bell%27s_spaceship_paradox"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "Redbook"
+key "Redbook"
+
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "OpenGL Redbook"
+target "http://www.glprogramming.com/red/"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "V*"
+key "V*"
+
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "V* (Victor Martin)"
+target "http://www.pixelnerve.com/v/"
+
+\end_inset
+
+, author
+\begin_inset CommandInset href
+LatexCommand href
+name "VTextRenderer"
+target "http://www.pixelnerve.com/v/2009/03/08/text-render-for-javaprocessing-using-opengl/"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+label "Schlegel"
+key "Schlegel"
+
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "Andreas Schlegel"
+target "http://www.sojamo.de/libraries/controlP5/#about"
+
+\end_inset
+
+, author
+\begin_inset CommandInset href
+LatexCommand href
+name "ControlP5"
+target "http://www.sojamo.de/libraries/controlP5/"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{multicols}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Part*
@@ -361,94 +3064,175 @@ Appendix
 \end_layout
 
 \begin_layout Section
-Phenomena
+Source Notes
 \end_layout
 
-\begin_layout Enumerate
-Time Dilation - Objects moving relative to an inertial frame of measurement
- age more slowly in that frame than in their own
-\end_layout
-
-\begin_layout Enumerate
-Relativity of Simultaneity - Events simultaneous in one frame of reference
- are not necessarily simultaneous in another.
-\end_layout
-
-\begin_layout Enumerate
-Length Contraction - Rigid bodies with a definite length as measured in
- their rest frame are seen to contract in the direction of motion.
-\end_layout
-
-\begin_layout Section
-Descriptions
-\end_layout
-
-\begin_layout Enumerate
-Minkowski Diagrams
-\end_layout
-
-\begin_layout Enumerate
-Brehme Diagrams
-\end_layout
-
-\begin_layout Enumerate
-Lorentz Formulas
-\end_layout
-
-\begin_layout Section
-Program Features
-\end_layout
-
-\begin_layout Enumerate
-Graphical elements
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-Worldlines
-\end_layout
-
-\begin_layout Enumerate
-Pulsing particle clocks
-\end_layout
-
-\begin_layout Enumerate
-Clock Ticks
-\end_layout
-
-\begin_layout Enumerate
-Particle frame plane of simultaneity
-\end_layout
-
-\begin_layout Enumerate
-Worldline intersections with target plane of simultaneity
-\end_layout
-
-\begin_layout Enumerate
-Particle frame axes basis
-\end_layout
-
-\begin_layout Enumerate
-Particle frame axes coordinate grid
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Gui Controls
-\end_layout
-
-\begin_deeper
-\begin_layout Enumerate
-Transform Display Toggles
-\end_layout
-
-\end_deeper
-\begin_layout Section
-Other Relativity Programs
+\begin_layout Subsection
+Axes
 \end_layout
 
 \begin_layout Standard
-sadf
+Stores axes settings and draws axis basis, grid, labels.
+ 
+\end_layout
+
+\begin_layout Subsection
+Control
+\end_layout
+
+\begin_layout Standard
+Wraps and abstracts controlP5 gui controls.
+ Simplifies gui panel construction and provides interface to typed Java
+ values.
+\end_layout
+
+\begin_layout Subsection
+Frame
+\end_layout
+
+\begin_layout Standard
+Stores position and velocity for particle states; provides interface to
+ corresponding velocity lines and simultaneity planes.
+\end_layout
+
+\begin_layout Subsection
+Geom
+\end_layout
+
+\begin_layout Standard
+Simple line and plane implementation to find line-plane intersections, and
+ relative location of points to planes.
+\end_layout
+
+\begin_layout Subsection
+Info
+\end_layout
+
+\begin_layout Standard
+Draws gui panels and console layer.
+\end_layout
+
+\begin_layout Subsection
+Kamera
+\end_layout
+
+\begin_layout Standard
+Interface to position Processing's camera.
+ Available camera classes surprisingly lacked desired mix of mouse interaction,
+ and radial pointing spherical coordinate positioning.
+\end_layout
+
+\begin_layout Subsection
+Particles Layer
+\end_layout
+
+\begin_layout Standard
+Draws scene objects grouped by type.
+\end_layout
+
+\begin_layout Subsection
+Particle
+\end_layout
+
+\begin_layout Standard
+Models particle, and particle path history as a chain of Frames; finds path
+ intersections with simultaneity Planes.
+\end_layout
+
+\begin_layout Subsection
+Relativity
+\end_layout
+
+\begin_layout Standard
+Builds regular and inverse Lorentz matrix for velocities in 2 spatial dimensions
+ from Velocity objects; performs display transforms.
+\end_layout
+
+\begin_layout Subsection
+Rigid Body
+\end_layout
+
+\begin_layout Standard
+Models the 
+\change_deleted 0 1272238371
+born
+\change_inserted 0 1272238371
+Born
+\change_unchanged
+ rigid bodies by associating body 
+\change_deleted 0 1272238763
+vertice
+\change_inserted 0 1272238763
+vertex
+\change_unchanged
+ coordinates with a Particle's chain of Frames.
+\end_layout
+
+\begin_layout Subsection
+Scene
+\end_layout
+
+\begin_layout Standard
+Models the main scenes, which can be composites of other scenes.
+\end_layout
+
+\begin_layout Subsection
+Utils
+\end_layout
+
+\begin_layout Standard
+Handles object selection, labeling, PathPlaneIntersection, and miscellaneous
+ functions.
+\end_layout
+
+\begin_layout Subsection
+VTextRenderer
+\end_layout
+
+\begin_layout Standard
+Written by 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "V*"
+
+\end_inset
+
+.
+ Renders text in OpenGL.
+\end_layout
+
+\begin_layout Subsection
+Velocity
+\end_layout
+
+\begin_layout Standard
+Models velocity components, direction, gamma, and three-velocity.
+\end_layout
+
+\begin_layout Subsection
+Worldlines
+\end_layout
+
+\begin_layout Standard
+Main program.
+\end_layout
+
+\begin_layout Section
+Program Source Code
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "Source Code Listing.lyx"
+
+\end_inset
+
+
 \end_layout
 
 \end_body

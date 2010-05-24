@@ -88,20 +88,16 @@ class FanSelection extends SelectableLabel {
   
   Selectable parentSelectable;
   ArrayList selectableLabels;
-  float radius;
+  //float radius;
   
   AxisAngle4f lookAxisAngle = new AxisAngle4f(kamera.look, 0);
   Matrix4f rotLook = new Matrix4f();
-//  Vector3f labelPos = new Vector3f();
-//  Vector3f radialVec = new Vector3f();
   
-  FanSelection(Selectable parentSelectable, SelectableLabel[] selectableLabels) {
+  FanSelection(Selectable parentSelectable, List selectableLabels) {
     this.parentSelectable = parentSelectable;
-    this.selectableLabels = new ArrayList(Arrays.asList(selectableLabels));
-    //this.selectableLabels.add(this);
+    this.selectableLabels = new ArrayList(selectableLabels);
     
     if (parentSelectable instanceof Label) {
-      //this.setLabel(((Label)parentSelectable).getLabel());
       this.setLabel( ((Label) parentSelectable).getName() );
       this.setDisplayPosition(parentSelectable.getDisplayPositionVec());
     }
@@ -113,17 +109,15 @@ class FanSelection extends SelectableLabel {
     Vector3f parentDisplayPos = parentSelectable.getDisplayPositionVec();
     Vector3f labelPos = new Vector3f();
     Vector3f radialVec = new Vector3f(kamera.up);
-    Vector3f distToLabel = new Vector3f();
+    
+    float distToLabel = getDistance(parentDisplayPos, kamera.pos);
     
     this.setDisplayPosition(parentDisplayPos);
     
-    //distToLabel.scaleAdd(distToKameraPlane, kamera.look, kamera.pos);
-    distToLabel.sub(parentDisplayPos, kamera.pos);
+    radialVec.scale(distToLabel / 12 * selectableLabels.size());
     
-    radius = height / 10 * this.selectableLabels.size();
-    radialVec.scale(distToLabel.length() / 15 * selectableLabels.size());
+    float theta =  TWO_PI / (float)(selectableLabels.size());
     
-    float theta = TWO_PI / (float) selectableLabels.size();
     lookAxisAngle.set(kamera.look, theta);
     rotLook.set(lookAxisAngle);
     
@@ -142,6 +136,62 @@ class FanSelection extends SelectableLabel {
 }
 
 interface ISelectableLabel extends Selectable, Label {
+}
+
+class PathPlaneIntersection extends SelectableLabel {
+  
+  Particle pathParent;
+  Particle planeParent;
+  
+  Vector3f pos = new Vector3f();
+  Vector3f displayPos = new Vector3f();
+  
+  PathPlaneIntersection(Particle thePathParent, Particle thePlaneParent) {
+    pathParent = thePathParent;
+    planeParent = thePlaneParent;
+  }
+  
+  String getName() {
+    return "Intersection\n" + "Path: " + pathParent.getName() + " / Plane:" + planeParent.getName();
+  }
+  
+  Object getPlaneParent() {
+    return planeParent;
+  }
+  
+  Object getPathParent() {
+    return pathParent;
+  }
+  
+  void setPlaneParent(Particle thePlaneParent) {
+    this.planeParent = thePlaneParent;
+  }
+  
+  void setPathParent(Particle thePathParent) {
+    this.pathParent = thePathParent;
+  }
+  
+  Vector3f getPositionVec() {
+    return pos;
+  }
+  
+  Vector3f getDisplayPositionVec() {
+    return displayPos;
+  }
+  
+  void update() {
+    pos = pathParent.getIntersection(planeParent);
+    
+    if (pos == null) {
+      displayPos = null;
+    }
+    else {
+      if (displayPos == null) {
+        displayPos = new Vector3f();
+      }
+      Relativity.displayTransform(lorentzMatrix, pos, displayPos);
+    }
+  }
 }
 
 class SelectableLabel implements ISelectableLabel {
@@ -259,11 +309,13 @@ class Selector extends HashSet {
   }
   
   void addToSelectables (Selectable s) {
+    if (s == null) { return; }
     this.selectables.add(s);
   }
   
   void addToSelectables (Collection theSelectables) {
     this.selectables.addAll(theSelectables);
+    //this.selectables.removeAll(null);
   }
   
   void drop (Selectable toDrop) {
@@ -291,7 +343,7 @@ class Selector extends HashSet {
   }
   
   float getHoverScale(Selectable theSelectable) {
-    Float hoverAngle = (Float) particleSelector.hoverAngles.get(theSelectable);
+    Float hoverAngle = (Float) this.hoverAngles.get(theSelectable);
     float angle = (hoverAngle == null) ? minHoverAngle : hoverAngle;
     float hoverScale = (1 - abs(angle)/(2*minHoverAngle));
     return hoverScale;
@@ -323,11 +375,10 @@ class Selector extends HashSet {
         
     Vector3f cameraToSelectable = new Vector3f();
     
-    //for (int i=0; i<theSelectables.size(); i++) {
     for (Iterator iter=theSelectables.iterator(); iter.hasNext();) {
-      
-      //Selectable p = (Selectable) theSelectables.get(i);
       Selectable p = (Selectable) iter.next();
+      
+      if (p == null || p.getDisplayPositionVec() == null) { continue; }
       
       cameraToSelectable.sub(p.getDisplayPositionVec(), cameraPos);
       
@@ -371,6 +422,9 @@ class Labelor {
   VTextRenderer vtext;
   float lineHeight;
   
+  boolean backgroundVisible = false;
+  float[] backgroundColor = new float[] {0.1f, 0.1f, 0.1f, 0.9f};
+  
   Labelor() {
     vtext = myVTextRenderer;
     
@@ -380,6 +434,10 @@ class Labelor {
   
   void setTextColor(int theColorARGB) {
     this.vtext.setColor(getColor4fv(theColorARGB));
+  }
+  
+  void setBackgroundColor(int theColorARGB) {
+    this.backgroundColor = getColor4fv(theColorARGB);
   }
   
   void drawLabelGL(GL gl, SelectableLabel sl, float scale) {
@@ -411,7 +469,7 @@ class Labelor {
         
         Rectangle2D labelRect = vtext._textRender.getBounds(msgLines[i]);
         
-        //float lw = (float)labelRect.getWidth();
+        float lw = (float)labelRect.getWidth();
         
         float lineOffsetY = -lineHeight * i;
         float groupOffsetY = lineHeight * verticalOffset;
@@ -419,7 +477,7 @@ class Labelor {
         float lx = -(float)labelRect.getCenterX();
         float ly = -(float)labelRect.getCenterY() + lineOffsetY + groupOffsetY;
         
-        //drawLabelBackgroundGL(gl, lx, ly, lw, lineHeight);
+        drawLabelBackgroundGL(gl, lx, ly, lw, lineHeight);
         
         // RENDER LABEL
         vtext.print(msgLines[i], lx, ly, 0);
@@ -430,15 +488,18 @@ class Labelor {
   }
   
   void drawLabelBackgroundGL(GL gl, float lx, float ly, float lw, float lh) {
+    if (!backgroundVisible) { return; }
+    
+    gl.glColor4fv(backgroundColor, 0);
     gl.glPushMatrix();
       gl.glTranslatef(-lx, 0, 0);
-      //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-      gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
+      gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+      //gl.glColor4f(0.1f, 0.1f, 0.1f, 0.5f);
       gl.glTranslatef(lx, ly, 0);
       //simpleQuadGL(gl);
       simpleQuadGL(gl, (0.5*1.2)*lw, lh);
       
-      //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
+      gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
     gl.glPopMatrix();
   }
 }
@@ -503,6 +564,10 @@ float getDistance(Vector3f va, Vector3f vb) {
   return sqrt(x*x + y*y + z*z);
 }
 
+Vector3f getOffset(Vector3f from, Vector3f to) {
+  return new Vector3f(to.x - from.x, to.y - from.y, to.z - from.z);
+}
+
 void scaleVectors(Vector3f[] v, float scale) {
   for (int i=0; i<v.length; i++) {
     v[i].scale(scale);
@@ -525,6 +590,34 @@ Vector3f[] genPolygonVerticesAt(Vector3f theOffsetPos, int n) {
     //Dbg.say("target[" + i + "].pos: " + pos);
   }
   return vecs;
+}
+
+void offsetParticle(Vector3f theOffset, Particle p) {
+  
+  Vector3f newPos = new Vector3f();
+  newPos.add(theOffset, p.getPositionVec());
+  
+  p.setPosition(newPos);
+  
+  Frame[] frameHist = p.frameHist;
+  int numFrames = p.histCount;
+  
+  for (int i=0; i<numFrames; i++) {
+    DefaultFrame histFrame = (DefaultFrame)frameHist[i];
+    
+    Vector3f newHistPos = new Vector3f();
+    newHistPos.add(theOffset, histFrame.getPositionVec());
+    histFrame.setPosition(newHistPos);
+  }
+}
+
+void offsetParticles(Vector3f theOffset, Collection theParticles) {
+  
+  for (Iterator iter=theParticles.iterator(); iter.hasNext(); ) {
+    Particle p = (Particle) iter.next();
+    
+    offsetParticle(theOffset, p);
+  }
 }
 
 // MATH

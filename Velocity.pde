@@ -75,21 +75,14 @@ public class Velocity {
   
   void updateBasis() {
     
-    //threeVelocity.set(0,0,0);
-    
     for (int i=0; i<3; i++) {
-      //basisInverse[i].set(Relativity.inverseTransform(this, basis[i]));
       basisInverse[i] = Relativity.inverseTransform(this, basis[i]);
     }
 
     threeVelocity.set(basisInverse[2]);
     normal.cross(basisInverse[0], basisInverse[1]);
   }
-  /*
-  Vector3f[] getBasisInverse() {
-    return basisInverse;
-  }
-  */
+  
   Vector3f getThreeVelocity() {
     return threeVelocity;
   }

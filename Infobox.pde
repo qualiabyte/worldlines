@@ -1,23 +1,55 @@
 // Infobox
 // tflorez
 
-class Infopane {
+class Action {
+  void doAction() {}
+}
+
+interface IToggleVisible {
+  void toggleVisible();
+  boolean isVisible();
+  void setVisible(boolean b);
+}
+
+class ToggleVisibleAction extends Action {
+  
+  IToggleVisible target;
+  
+  ToggleVisibleAction(IToggleVisible target) {
+    this.target = target;
+  }
+  
+  ToggleVisibleAction() {
+    this(null);
+  }
+  
+  void doAction() {
+    this.target.toggleVisible();
+  }
+}
+
+class Infopane implements IToggleVisible {
   
   VTextRenderer vtext;
+  Vector2f padding;
   Vector2f size, pos;
   Vector2f lineSize;
   
-  boolean isVisible = false;
+  Action clickAction = null;
+  
+  boolean isClickable = false;
+  boolean isVisible = true;
   boolean isBackgroundVisible = true;
   
   color backgroundColor = 0xcc000000;
-  color foregroundColor = 0xccffffff;
+  color foregroundColor = 0xffffffff;
   
   Infopane(Vector2f size, Vector2f pos, VTextRenderer vtext) {
+    this.padding = new Vector2f(10, 10);
     this.size = size;
     this.pos = pos;
     this.vtext = vtext;
-    this.lineSize = new Vector2f(this.size.x, vtext._fontSize);
+    this.lineSize = new Vector2f(this.size.x, 1.5 * vtext._fontSize);
   }
   
   Infopane(Vector2f size, Vector2f pos, Font theFont) {
@@ -25,7 +57,8 @@ class Infopane {
   }
   
   Infopane(Vector2f size, Vector2f pos) {
-    this(size, pos, new Font("Monospace", Font.TRUETYPE_FONT, 12));
+    this(size, pos, new Font("Monospace", Font.TRUETYPE_FONT, 14));
+    //this(size, pos, loadFont(loadBytes(bundledFont), 14));
   }
   
   Infopane(Font theFont) {
@@ -33,24 +66,54 @@ class Infopane {
   }
   
   Infopane() {
-    this(new Font("Monospace", Font.TRUETYPE_FONT, 12));
+    //this(new Font("Monospace", Font.TRUETYPE_FONT, 14));
+    this(loadFont(loadBytes(bundledFont), 14));
   }
   
-  /* Expected to be overidden by derived classes
-  */
+  /* Expect derived classes to override */
   void draw() {
     if (! this.isVisible) { return; }
     
-    drawBackground();
+    drawBackground(this.backgroundColor);
   }
   
-  void drawBackground() {
+  void doClickAction() {
+    if (this.clickAction != null) {
+      clickAction.doAction();
+    }
+  }
+  
+  boolean isMouseOver() {
+    /*
+    Dbg.say("isMouseOver() " + this + "\n  pos: " + pos.x + ", " + pos.y
+      + "size: " + size.x + ", " + size.y );
+    */
+    return ( mouseX > pos.x && mouseX < pos.x + size.x 
+          && mouseY > pos.y && mouseY < pos.y + size.y );
+  }
+  
+  void setClickAction(Action theAction) {
+    this.isClickable = true;
+    this.clickAction = theAction;
+  }
+  
+  boolean isVisible() {
+    return this.isVisible;
+  }
+  void setVisible(boolean b) {
+    this.isVisible = b;
+  }
+  void toggleVisible() {
+    this.setVisible( ! this.isVisible() );
+  }
+  
+  void drawBackground(color theBackgroundColor) {
     if (! this.isBackgroundVisible) { return; }
     
     gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
     
     stroke(foregroundColor);
-    fill(backgroundColor);
+    fill(theBackgroundColor);
     rect(pos.x, pos.y, size.x, size.y);
   }
   
@@ -67,6 +130,11 @@ class Infopane {
 
 class Infopanel extends Infopane {
   
+  // FLOW CONSTANTS FOR ADDING PANELS (NO ENUM IN P5)
+  static final int DOWNWARD = 0;
+  static final int RIGHTWARD = 1;
+  int flow = DOWNWARD;
+  
   List infopanes = new ArrayList();
   
   Infopanel(Infopane thePane) {
@@ -76,42 +144,114 @@ class Infopanel extends Infopane {
   Infopanel() {
     super(
       new Vector2f(width/2, height*0.9),
-      new Vector2f( (width - width/2)/2, (height - height*0.9)/2 ),
-      new VTextRenderer(new Font("Monospace", Font.TRUETYPE_FONT, 12), 12)
+      new Vector2f( (width - width/2)/2, (3*FONT_SIZE)),//height - (lineSize.y + 2*padding.y)) ),//height*0.9)/2 ),
+      //new VTextRenderer(new Font("Monospace", Font.TRUETYPE_FONT, 14), 14)
+      new VTextRenderer(loadFont(loadBytes(bundledFont), 14), 14)
       );
   }
   
+  Infoline addLine(String theText) {
+    
+    Infoline theLine = new Infoline(this, theText);
+    if (flow == RIGHTWARD) {
+      theLine.size.x = theLine.getRenderWidth() + this.padding.x;
+    }
+    addPane(theLine);
+    return theLine;
+  }
+  
   void addPane(Infopane thePane) {
+    
+    positionPaneByFlow(thePane);
     this.infopanes.add(thePane);
   }
   
-  void addLine(String theText) {
-    Infoline theLine = new Infoline(this, theText);
-    this.addPane(theLine);
+  Infopane getLastPane() {
+    
+    return (infopanes.isEmpty()) ? null : (Infopane) infopanes.get(infopanes.size() - 1);
   }
   
-  void draw() {
+  void positionPaneByFlow(Infopane thePane) {
+    
+    positionPaneByFlow(thePane, this.flow);
+  }
+  
+  void positionPaneByFlow(Infopane thePane, int theFlow) {
+    
+    Infopane lastPane = this.getLastPane();
+    
+    if (lastPane == null) {
+      thePane.pos.set(this.pos);
+      thePane.pos.add(this.padding);
+    }
+    else {
+      if (flow == DOWNWARD) {
+        thePane.pos.set(this.pos.x + this.padding.x, lastPane.pos.y + lastPane.size.y);
+      }
+      else if (flow == RIGHTWARD) {
+        thePane.pos.set(lastPane.pos.x + lastPane.size.x, lastPane.pos.y);
+      }
+    }
+  }
+  
+  void setFlow(int theFlow) {
+    this.flow = theFlow;
+  }
+  
+  void draw() { //intervalSay(90, "  drawPanel(): " + this);
     if (! this.isVisible) { return; }
     
-    this.drawBackground();
+    this.drawBackground(backgroundColor);
     this.drawPanes();
   }
   
   void drawPanes() {
     
-    int xOffset = (int)pos.x;
-    int yOffset = (int)(height - pos.y - lineSize.y);
-    
     for (Iterator iter = infopanes.iterator(); iter.hasNext();) {
       Infopane thePane = (Infopane) iter.next();
+      
+      int xPos = (int)thePane.pos.x;
+      int yPos = (int)(height - thePane.pos.y - 0.8*thePane.size.y);
       
       if (thePane instanceof Infoline) {
         Infoline theLine = (Infoline) thePane;
         
-        vtext.print(theLine.toString(), xOffset, yOffset);
-        yOffset += thePane.size.y;
+        if (theLine.isClickable && theLine.isMouseOver()) {
+          
+          // INDICATE ACTION IF MOUSEOVER CLICKABLE
+          theLine.drawBackground(ACTION_COLOR);
+          
+          vtext.setColor(ACTION_COLOR_CONTRAST);
+          vtext.print(theLine.toString(), xPos, yPos);
+          
+          // RESET COLOR
+          vtext.setColor(getColor4fv(foregroundColor));
+        }
+        else {
+          // OTHERWISE JUST DRAW
+          vtext.print(theLine.toString(), xPos, yPos);
+        }
       }
     }
+  }
+  
+  Infopane getClickedPane() {
+    if (!this.isVisible) { return null; }
+    
+    Dbg.say("getClicked(): " + this);
+    
+    for (Iterator iter = infopanes.iterator(); iter.hasNext();) {
+      Infopane thePane = (Infopane) iter.next();
+      /*
+      Dbg.say("  thePane: " + thePane
+          + "\n  isVisible: " + thePane.isVisible + "\n  isClickable: " + thePane.isClickable
+          + "\n  isMouseOver: " + thePane.isMouseOver() );
+      */
+      if (thePane.isVisible && thePane.isClickable && thePane.isMouseOver()) {
+        return thePane;
+      }
+    }
+    return null;
   }
 }
 
@@ -131,18 +271,21 @@ class Infobar {
   Infobar(FloatControl theFloatControl, Font theFont)  {
     
     this.floatControl = theFloatControl;
+    
     this.size = new Vector2f(width/3.0f, height/30f);
     this.pos = new Vector2f( (width - size.x)/2f, (height - 3*size.y) );
+    
     this.textMarginX = 0.01*size.x;
     this.textMarginY = 0.3*size.y;
     
     float fontSize = theFont.getSize();
-    this.vtext = new VTextRenderer(theFont.deriveFont(11f), (int)(1*fontSize));
+    
+    this.vtext = new VTextRenderer(theFont.deriveFont(fontSize), (int)fontSize);
     this.vtext.setColor(1, 0.5, 0.6, 1);
   }
   
   Infobar(FloatControl theFloatControl) {
-    this(theFloatControl, new Font("Serif", Font.TRUETYPE_FONT, 11));
+    this(theFloatControl, new Font("Sans-Serif", Font.TRUETYPE_FONT, FONT_SIZE));
   }
   
   Infobar() {
@@ -239,44 +382,22 @@ class Infobar {
 }
 
 class Infobox extends Infopane {
-
-  //VTextRenderer textRenderer;
-  //int fontSize;
-  //int xOffset, yOffset;
   
   Infoline[] infolines;
   
   int numlines = 0;
   int maxlines = 10;
-  /*
-  private void init( int fontSize ) {
-    
-    this.fontSize = fontSize;
-    xOffset = yOffset = (int)(0.5 * fontSize);
-    infolines = new Infoline[maxlines];
-  }
-  */
+  
   Infobox( Font font ) {
     super(font);
   }
-  /*
-  Infobox( String fontName, int fontSize ){
-    
-    init( fontSize );
-    textRenderer = new VTextRenderer(fontName, fontSize);
-  }
   
-  Infobox( Font font, int fontSize) {
-
-    init( fontSize );
-    textRenderer = new VTextRenderer( font, fontSize );
-  }
-  */
   Infoline addLine( String text ) {
     return infolines[numlines++] = new Infoline(text);
   }
   
   void print( String text ) {
+    if (!this.isVisible()) { return; }
     
     int xOffset = (int)this.pos.x;
     int yOffset = (int)this.pos.y;
@@ -300,11 +421,12 @@ class Infoline extends Infopane {
   String text;
   
   Infoline (Infopane theParent, String theText) {
-    super(new Vector2f(theParent.size.x, theParent.lineSize.y),
+    super(new Vector2f(theParent.size.x - 2 * theParent.padding.x, theParent.lineSize.y),
       new Vector2f(0, 0),
       theParent.vtext
       );
     this.text = theText;
+    this.isVisible = true;
   }
   
   Infoline() {
@@ -319,33 +441,12 @@ class Infoline extends Infopane {
     this.text = text;
   }
   
+  float getRenderWidth() {
+    return (float) vtext._textRender.getBounds(this.toString()).getWidth();
+  }
+  
   String toString() {
     return text;
   }
 }
-
-/*
-  private Font loadFont( File fontFile ){
-
-    Font font = null;
-    
-    try {
-      FileInputStream fontStream = new FileInputStream(fontFile);
-      font = Font.createFont(Font.TRUETYPE_FONT, fontStream);
-      font = font.deriveFont((float)fontSize );
-    }
-    catch (FontFormatException e) {
-      println(e.getMessage());
-    }
-    catch (IOException e) {
-      println(e.getMessage());
-    }
-    finally {
-      if (font==null) {
-        font = new Font("Sans-Serif", Font.PLAIN, fontSize);
-      }
-    }
-    return font;
-  }
-*/
 

@@ -121,14 +121,6 @@ class Particle implements Frame, ISelectableLabel {
   }
   
   void updatePosition() {
-//    xyt[0] = position.x;
-//    xyt[1] = position.y;
-//    xyt[2] = position.z;
-    
-    //xyt_prime = Relativity.displayTransform(targetParticle.velocity, xyt);
-//    Vector3f target = new Vector3f();
-//    Relativity.displayTransform(lorentzMatrix, position, target);
-//    target.get(xyt_prime);
     
     headFrame.setPosition(position);
     
@@ -184,8 +176,6 @@ class Particle implements Frame, ISelectableLabel {
   
   void recordStateToPathHistory() {
     
-//    frameHist[histCount] = new DefaultFrame(headFrame.position, headFrame.velocity);
-//    frameHist[histCount].setAncestorsAge(properTimeHist[histCount]);
     frameHist[histCount] = headFrame.clone();
     
     histCount++;
@@ -226,7 +216,7 @@ class Particle implements Frame, ISelectableLabel {
 
     fill(fillColor);
 
-    triangle(0, 1, -.5, -1, .5, -1); // box(5, 5, 1);
+    triangle(0, 1, -.5, -1, .5, -1);
     popMatrix();
   }
   
@@ -272,7 +262,8 @@ class Particle implements Frame, ISelectableLabel {
     if (frameHist[0].isAbove(plane)) {
       return null;
     }
-    else if ( ! headFrame.isAbove(plane) || histCount == 1) {
+    else if ( ! headFrame.isAbove(plane)
+              || histCount == 1) {
       intersectingFrame = headFrame;
     }
     else {
@@ -309,9 +300,7 @@ class Particle implements Frame, ISelectableLabel {
       }
     }
     
-    if (frameHist[lowerIndex].isAbove(thePlane) ) {
-      highestBelow = frameHist[lowerIndex];
-    }
+    highestBelow = frameHist[lowerIndex];
     return highestBelow;
   }
   
@@ -377,7 +366,7 @@ class Particle implements Frame, ISelectableLabel {
       //emission.mass = this.emissionMomentumTotal * C;
       
       emission.addImpulse(-emissionMomentumX / emission.mass, -emissionMomentumY / emission.mass);
-      //println("emission.velocity.magnitude: " + emission.velocity.magnitude);
+      //Dbg.say("emission.velocity.magnitude: " + emission.velocity.magnitude);
       //TODO: more realistic emission velocity; also, photon emissions
       emit(emission);
     }
@@ -387,7 +376,7 @@ class Particle implements Frame, ISelectableLabel {
     
     addEmission(emission);
     millisLastEmission = millis();
-    //println("emission: millis() = " + millis());
+    //Dbg.say("emission: millis() = " + millis());
     
     //TODO: more realistic emission energy & mass
     this.mass -= emission.mass;
@@ -459,7 +448,12 @@ class Particle implements Frame, ISelectableLabel {
     return this.label;
   }
   String getName() {
-    return this.name;
+    if (this.name == "" || this.name == null) {
+      return "p." + particles.indexOf(this);
+    }
+    else {
+      return this.name;
+    }
   }
   void setName(String theName) {
     this.name = theName;
@@ -484,17 +478,51 @@ public class ParticleLabelBuilder {
     
     String theLabel = (
       "p : " + nfVec(p.getPositionVec(), 3) + "\n" +
-      "p': " + nfVec(p.getDisplayPositionVec(), 3) + "\n" +
+      //"p': " + nfVec(p.getDisplayPositionVec(), 3) + "\n" +
       //"fromTarget : " + nfVec(targetToParticle, 3) + "\n" +
       //"fromTarget': " + nfVec(targetToParticlePrime, 3) + "\n" +
       "velocity: (" + nf(p.velocity.magnitude, 0, 6) + ")\n" +
-      "mass: ("  + nf(p.mass, 0, 4) + ")\n" +
-      "age: (" + nf(p.properTime, 0, 1) + ")\n" +
+      //"mass: ("  + nf(p.mass, 0, 4) + ")\n" +
+      "age: (" + nf(p.properTime, 0, 1) + ")\n"
       
-      "headFrame.getAncestorsAge(): " + nf(p.headFrame.getAncestorsAge(), 0, 2) + "\n" +
-      "headFrame.getAge(): " + nf(p.headFrame.getAge(), 0, 2)  + "\n"
+      //"headFrame.getAncestorsAge(): " + nf(p.headFrame.getAncestorsAge(), 0, 2) + "\n" +
+      //"headFrame.getAge(): " + nf(p.headFrame.getAge(), 0, 2)  + "\n"
       );
     
     return theLabel;
+  }
+}
+
+interface ParticleDriver {
+  void drive(Particle p);
+}
+
+class SineVelocityParticleDriver implements ParticleDriver {
+  float velAmplitude;
+  float wavelength;
+  
+  SineVelocityParticleDriver(float wavelength, float velAmplitude) {
+    this.wavelength = wavelength;
+    this.velAmplitude = velAmplitude;
+  }
+  
+  void drive(Particle p) {
+    float t = p.getPositionVec().z;
+    float k = TWO_PI / wavelength;
+    float vx = sin(k*t) * velAmplitude;
+    p.velocity.setComponents(vx, 0);
+  }
+}
+
+class DrivenParticle extends Particle {
+  ParticleDriver particleDriver;
+  
+  DrivenParticle(ParticleDriver theDriver) {
+    this.particleDriver = theDriver;
+  }
+  
+  void update(float dt) {
+    particleDriver.drive(this);
+    super.update(dt);
   }
 }

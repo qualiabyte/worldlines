@@ -58,11 +58,19 @@ class DefaultControl implements Control {
   }
   
   void syncController() {
-    if (value instanceof Float && controller != null) {
+    
+    if (this.controller == null) {
+      return;
+    }
+    else if (value instanceof Float) {
       Dbg.say("syncController: " + name + ", controller: " + controller);
       
       this.controller.setValue((Float)this.value);
       Dbg.say("  sync done.");
+    }
+    else {
+      Dbg.say("syncController(): value: " + value);
+      this.controller.setValue((Float)this.value);
     }
   }
   
@@ -245,15 +253,19 @@ class ControlPanel {
 
 class ControlMap extends HashMap {
   HashMap controls;
-  ArrayList controlPanels;
+  List controlPanels;
+  
+  ControlMap(List controlPanels) {
+    this.controls = this;
+    this.controlPanels = controlPanels; //new ArrayList(Arrays.asList(controlPanels));
+    
+    for (int i=0; i < controlPanels.size(); i++) { 
+      this.putControlPanel((ControlPanel)controlPanels.get(i));
+    }
+  }
   
   ControlMap (ControlPanel[] controlPanels) {
-    this.controls = this;
-    this.controlPanels = new ArrayList(Arrays.asList(controlPanels));
-    
-    for (int i=0; i < controlPanels.length; i++) { 
-      this.putControlPanel(controlPanels[i]);
-    }
+    this(new ArrayList(Arrays.asList(controlPanels)));
   }
   
   void putControlPanel (ControlPanel panel) {
@@ -548,10 +560,15 @@ void copyControlValues(ControlMap source, ControlMap target) {
     Control sourceControl = source.getControl(name);
     Control targetControl = target.getControl(name);
     
+    println("source value for control: " + name);
+    println("source control: " + sourceControl);
+    println("target control: " + targetControl);
+    
     if (sourceControl != null) {
       Object sourceValue = sourceControl.getValue();
       Object targetValue = targetControl.getValue();
         
+      println("target value            : " + targetValue);
       if (targetControl != null && sourceValue != null) {
         targetControl.setValue(sourceValue);
         
@@ -574,6 +591,27 @@ Boolean float2Boolean(Float theFloat) {
 Boolean parseControlP5ToggleValue(Float controllerValue) {
   return float2Boolean(controllerValue);
 }
+Float boolean2Float(boolean b) {
+  return (b == true) ? 1f : 0f;
+}
 Boolean parseControlP5Toggle(Toggle t) {
   return parseControlP5ToggleValue(t.value());
+}
+
+Float parseForControlP5(Object o) {
+  
+  if (o instanceof Boolean) {
+    Boolean b = (Boolean) o;
+    return boolean2Float(b);
+  }
+  else if (o instanceof Float){
+    return (Float) o;
+  }
+  else if (o instanceof Integer) {
+    return Float.valueOf( (Integer) o );
+  }
+  else {
+    Dbg.warn("parseForControlP5: no matching type for: " + o);
+    return Float.valueOf(0);
+  }
 }

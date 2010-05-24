@@ -70,7 +70,6 @@ class DefaultFrame implements Frame {
   
   void updatePosition() {
     
-    //displayPosition = Relativity.displayTransform(targetParticle.velocity, position);
     Relativity.displayTransform(lorentzMatrix, position, displayPosition);
     
     simultaneityPlane.setPoint(position);
@@ -165,13 +164,4 @@ class DefaultFrame implements Frame {
     return "DefaultFrame@" + Integer.toHexString(hashCode())
       + " age: " + age + ", pos" + nfVec(position, 1) + "\n";
   }
-  /*
-  Vector3f getPosition(){
-    return position;
-  }
-  
-  Vector3f getDisplayPosition(){
-    return displayPosition;
-  }
-  */
 }

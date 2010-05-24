@@ -166,29 +166,6 @@ class Kamera {
     up.cross(right, look);
     up.normalize();
   }
-  /*
-  void updateUp() {
-    // Keep rotation smooth at zenith extremes, when pos gets near limit for floats
-    // Done piecewise to work around oddities of the camera up vector in processing
-    if (zenith < PI / 10.0) {
-      up.set(cos(azimuth), sin(azimuth), 0);      
-    }
-    else if((PI - zenith) < PI / 10.0) {
-      up.set(-cos(azimuth), -sin(azimuth), 0);
-    }
-    else {
-      up.set(0, 0, -1);
-    }
-    up.set()
-  }
-  //up.set(upX, upY, upZ);
-  //upX = cos(azimuth);
-  //upY = sin(azimuth);
-  //upZ = 0;
-  //upX = 0;
-  //upY = 0;
-  //upZ = -1;
-  */
   
   void commit() {
 
@@ -213,8 +190,6 @@ class Kamera {
   float radius;
   float azimuth;
   float zenith;
-  
-//  float upX, upY, upZ;
   
   Vector3f pos;
   Vector3f target;

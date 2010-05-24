@@ -111,21 +111,23 @@ public class Plane {
   }
   
   public boolean liesBelow(Vector3f thePoint) {
-    //Vector3f up = new Vector3f(0, 0, 1);
+    
     Vector3f toThePoint = new Vector3f();
     toThePoint.sub(thePoint, this.p);
     
     return (this.normal.dot(toThePoint) > 0);
   }
   
+  /* Distance along line direction l.d to intersection:
+   * t = -(A px + B py + C pz + D) / (A dx + B dy + C dz)
+   * 
+   * Alternative:
+   * t = -(n.dot(l.p) + D) / n.dot(l.d);
+   */
   public void getIntersection(Line l, Vector3f target) {
-    // t = -(A px + B py + C pz + D) / (A dx + B dy + C dz)
-    // t = (n.dot(l.p) + D) / n.dot(l.d);
     
     float t = -(A*l.p.x + B*l.p.y + C*l.p.z + D) / (A*l.d.x + B*l.d.y + C*l.d.z);
-    //float t = -(n.dot(l.p) + D) / n.dot(l.d);
-    
-    // target = lp + t * ld
+
     target.scaleAdd(t, l.d, l.p);
   }
   

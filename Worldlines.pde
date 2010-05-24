@@ -14,6 +14,10 @@ import com.sun.opengl.util.BufferUtil;
 import java.nio.ByteBuffer;
 import java.nio.Buffer;
 
+int SIZE_X = 900, SIZE_Y = 540;
+//int SIZE_X = 1280, SIZE_Y = 900;
+//int SIZE_X = 1100, SIZE_Y = 700;
+
 PGraphicsOpenGL pgl;
 GL gl;
 
@@ -26,8 +30,11 @@ Scene topScene;
 
 List scenes;
 List particles;
+List simultIntersections;
+List measurables; // particles and intersections, for now
 
-Scene myTwinParticleScene;
+Scene primaryScene;
+InfolayerScene infolayerScene;
 
 Particle targetParticle;
 AxesSettings originAxesSettings, targetAxesSettings;
@@ -35,11 +42,22 @@ AxesSettings originAxesSettings, targetAxesSettings;
 ArrayList targets;
 ArrayList emissions;
 
+// RIGID BODIES
 RigidBody targetRigidBody;
 ArrayList rigidBodies;
 
+Vector3f[] trapezoidVertices = new Vector3f[] {
+    new Vector3f(+10, +2.5, 0),
+    new Vector3f(+10, -2.5, 0),
+    new Vector3f(-10, -10, 0),
+    new Vector3f(-10, +10, 0),
+};
+
+Vector3f[] bodyVertices = trapezoidVertices;
+
 Selector particleSelector;
 Selector labelSelector;
+Selector intersectionSelector;
 
 FanSelection myFanSelection;
 
@@ -55,11 +73,28 @@ float C = 1.0;
 
 FpsTimer myFpsTimer;
 
+String PRIMARY_SCENE = "MultiTwinScene";
+
+String[] menuClassNames = new String[] {
+  "AxesScene",
+  "TwinParticleScene",
+  "MultiTwinScene",
+  "LengthContractionScene",
+  "BellsSpaceShipScene",
+  "UniformParticleScene",
+  "RandomParticleScene",
+  "PolygonParticleScene",
+  "PhotonScene"
+};
+
 // GUI Control Vars
 public int PARTICLES = 16;//49;
 
 public int TARGET_COLOR = #F01B5E;
 public int PARTICLE_COLOR = #1B83F0;
+
+public int ACTION_COLOR = 0xFF86FF74;//0xFF86FF74; //0xFF6BE359; //0xFFFF1778;
+public int ACTION_COLOR_CONTRAST = 0xFF000000;
 
 // Input Device Vars
 public boolean MOUSELOOK = false;
@@ -72,12 +107,12 @@ public boolean INPUT_DOWN;
 String PARTICLE_IMAGE = "particle.png";//_reticle.png";
 String bundledFont = "VeraMono.ttf";
 
+int FONT_SIZE = 14;
+
 ControlP5 controlP5;
 
 void setup() {
-  size(900, 540, OPENGL);
-  //size(1280, 900, OPENGL);
-  //size(1100, 700, OPENGL);
+  size(SIZE_X, SIZE_Y, OPENGL);
   
   frameRate(45);
   //hint(DISABLE_DEPTH_SORT);
@@ -122,6 +157,12 @@ public void randomize() {
   }
   setup();
 }
+/*
+public void transform_to_target_coords() {
+  
+  prefs.getControl("toggle_Spatial_Transform").setValue()
+}
+*/
 
 ControlPanel[] buildControlPanels() {
   
@@ -134,10 +175,10 @@ ControlPanel[] buildControlPanels() {
   // SETUP PANEL
   ControlPanel setupPanel = new ControlPanel("setup");
   panel = setupPanel;
-  panel.addControl(restart);
+  //panel.addControl(restart);
   panel.addControl(randomize);
   panel.putInteger("PARTICLES", PARTICLES, 0, PARTICLES*5);
-  panel.putInteger("TARGETS", 3, 1, PARTICLES); //3
+  panel.putInteger("TARGETS", 3, 1, PARTICLES);
   panel.putFloat("START_POS_DISPERSION", 2.6, 0, 4);
   panel.putFloat("START_POS_X_SCALE", 2.6, 0, 3);
   panel.putFloat("START_POS_Y_SCALE", 2.6, 0, 3);
@@ -152,33 +193,28 @@ ControlPanel[] buildControlPanels() {
   panel = mainPanel;
   panel.addControl(pause);
   panel.addControl(restart);
-  panel.addControl(randomize);
-  panel.putFloat("timestep", 8, 0, 20);
+  panel.putFloat("timestep", 10, 0, 20);
   panel.putBoolean("PROPERTIME_SCALING", true);
-  panel.putBoolean("toggle_Spatial_Transform", false);//true);
-  panel.putBoolean("toggle_Temporal_Transform", false);//true);
-  panel.putBoolean("1-D_control", false);//true);
-  panel.putBoolean("use_Emissions", false);//true);
-  panel.putBoolean("energy_Conservation", false);
+  panel.putBoolean("toggle_Spatial_Transform", false);
+  panel.putBoolean("toggle_Temporal_Transform", false);
+  panel.putBoolean("1-D_control", false);
   panel.putBoolean("show_Rigid_Bodies", true);
+  panel.putBoolean("use_Emissions", false);
   //panel.putBoolean("showAxesGrid", false);
   
   targetAxesSettings = new AxesSettings();
   originAxesSettings = new AxesSettings();
+  targetAxesSettings.setAxesLabelsVisible(true);
   
   panel.putBoolean("show_Target_Axes_Grid", true).addUpdater(
     new AxesSettingsVisibilityUpdater(targetAxesSettings));
   panel.putBoolean("show_Origin_Axes_Grid", false).addUpdater(
     new AxesSettingsVisibilityUpdater(originAxesSettings));
   panel.putBoolean("show_Particle_Clock_Ticks", true);
-  panel.putBoolean("show_Particle_Clock_Tick_Labels", true);
-  //panel.putBoolean("show_All_Axes_Grid", false);
-  //panel.putBoolean("showAllAxesLabels", false);
   
   // DEBUG PANEL
   ControlPanel debugPanel = new ControlPanel("debug");
   panel = debugPanel;
-  //panel.putBoolean("useGL", true);
   panel.putInteger("maxEmissions", 50, 0, 500);
   //panel.putFloat("fov", 60, 0, 180);
   panel.putFloat("backgroundColorHue", 0.65f);// 0.59);// 64//
@@ -186,18 +222,18 @@ ControlPanel[] buildControlPanels() {
   panel.putFloat("backgroundColorBrightness", 0.23f);//0.17f);// 0.31);// 28//
   panel.putFloat("cauchyGamma", 1, 0, 4);
   panel.putFloat("momentumNudge", 0.003, 0, 1);
+  panel.putBoolean("energy_Conservation", false);
   panel.putFloat("INPUT_RESPONSIVENESS", 0.13);
   //panel.putBoolean("brehmeDiagramCorrection", false);
-  //panel.putBoolean("useMatrixForPathTransform", true);
   //panel.putFloat("kam_units_scale", 1, 0, 8);
   
   // GRAPHICS PANEL
   ControlPanel graphicsPanel = new ControlPanel("graphics");
   panel = graphicsPanel;
-  panel.putFloat("PARTICLE_SIZE", 1.3, 0, 10);
+  panel.putFloat("PARTICLE_SIZE", 2.5, 0, 10); //1.3, 0, 10);
+  //panel.putFloat("LIGHTING_PARTICLES", 0.75);
   panel.putFloat("LIGHTING_WORLDLINES", 0.8);
   panel.putFloat("STROKE_WIDTH", 2, 0, 8);
-  //panel.putFloat("LIGHTING_PARTICLES", 0.75);
   panel.putFloat("HARMONIC_FRINGES", 3.4, 0, 16);
   panel.putFloat("HARMONIC_CONTRIBUTION", 0.5);
   
@@ -223,12 +259,12 @@ ControlMap buildPrefs(ControlPanel[] controlPanels) {
 
 ControlP5 buildControlP5(ControlMap thePrefs) {
   
-  controlP5 = new ControlP5(this);
-  controlP5.setAutoDraw(false);
+  ControlP5 theControlP5 = new ControlP5(this);
+  theControlP5.setAutoDraw(false);
   //controlP5.setColorForeground(#093967);
-  thePrefs.buildControlP5(controlP5);
+  thePrefs.buildControlP5(theControlP5);
   
-  return controlP5;
+  return theControlP5;
 }
 
 //void initScene() {
@@ -242,13 +278,13 @@ void restart() {
   
   prefs.put("particleImagePath", "particle_hard.png");//"particle_cushioned_core.png");
   prefs.put("particleClockTickImagePath", "particle_clock_tick.png");
-  
   prefs.put("selectedParticleImagePath", "particle_reticle.png");
-  
   prefs.put("startPosWeight", "cauchy");
   
+  /*
   // CONTROLP5
   controlP5 = buildControlP5(prefs);
+  */
   
   // FONT
   byte[] fontBytes = loadBytes(bundledFont);
@@ -269,7 +305,8 @@ void restart() {
   particles = new ArrayList();
   emissions = new ArrayList();
   rigidBodies = new ArrayList();
-  
+  simultIntersections = new ArrayList();
+    
   // SCENES
   scenes = new ArrayList();
   topScene = new Scene();
@@ -278,6 +315,7 @@ void restart() {
   myFanSelection = null;
   labelSelector = new Selector();
   particleSelector = new Selector(particles);
+  intersectionSelector = new Selector();
   
   // INIT LORENTZ FOR PARTICLE CREATION
   Vector3f targetPos = new Vector3f();
@@ -287,10 +325,12 @@ void restart() {
   inverseLorentzMatrix = Relativity.getInverseLorentzTransformMatrix(targetVelocity);
   
   // TARGET PARTICLES
-  //targetParticle = new Particle(targetPos, targetVelocity);
-  //targetParticle.headFrame.axesSettings = targetAxesSettings;
+  targetParticle = new Particle(targetPos, targetVelocity);
+  targetParticle.headFrame.axesSettings = targetAxesSettings;
+  //makeTargetParticle(targetParticle);
   
   // Target Scene
+  /*
   ParticleScene polyScene = new PolygonParticleScene(prefs.getInteger("TARGETS"));
   List polySceneParticles = polyScene.getParticles();
   
@@ -298,15 +338,15 @@ void restart() {
   makeTargetParticle((Particle) polySceneParticles.get(0));
   
   // RIGID BODIES
-  Vector3f[] bodyVertices = buildTrapezoidVertices();
+  bodyVertices = buildTrapezoidVertices();
   scaleVectors(bodyVertices, 10);
   
   List polyRigidBodies = buildRigidBodiesAt(bodyVertices, polySceneParticles);
   addRigidBodies(polyRigidBodies);
+  */
   
   // FRAMES
-  targetParticle.headFrame.axesSettings = targetAxesSettings;
-  targetAxesSettings.setAllVisibility(true);
+  //targetAxesSettings.setAllVisibility(true);
   
   originFrame = new DefaultFrame();
   originFrame.axesSettings = originAxesSettings;
@@ -322,34 +362,57 @@ void restart() {
   myAxes = new Axes();
   myFpsTimer = new FpsTimer();
   
-  Dbg.say("controlP5.controller(\"show_Target_Axes_Grid\"): " + controlP5.controller("show_Target_Axes_Grid"));
-  Dbg.say("  listenerSize():" + controlP5.controller("show_Target_Axes_Grid").listenerSize());
-  
-  // TODO: SELECT SCENES
-  
   // PRIMARY SCENE
-  //String primarySceneName = "multiTwinParticleScene";
-  String primarySceneName = "twinParticleScene";
-  ParticleScene primaryScene = buildPrimaryScene(primarySceneName);
-  
+  primaryScene = buildScene(PRIMARY_SCENE);
   addScene(primaryScene);
+  Dbg.say("got here");
   
+  // TODO: PRIMARY SCENE CONTROL PANEL
+  //prefs.putControlPanel(primaryScene.sceneControlPanel);
+  
+  // CONTROLP5
+  controlP5 = buildControlP5(prefs);
+  
+  // load any prefs defined by the PrimaryScene
+  for (Iterator iter=primaryScene.scenePrefs.keySet().iterator(); iter.hasNext(); ) {
+    String name = (String) iter.next();
+    Object value = primaryScene.scenePrefs.get(name);
+    
+    // If a control, just want the value represented
+    if (value instanceof Control) {
+      value = ((Control) value).getValue();
+    }
+    Dbg.say("primaryScene pref: " + name + ", value: " + value);
+    Dbg.say("   updatedControl: " + name);//prefs.getControl(name).toString());
+    
+    // Sync prefs controlmap
+    prefs.getControl(name).setValue(value);
+    
+    // Hack to sync controlP5
+    controlP5.controller(name).setValue(parseForControlP5(value));
+  }
+  
+  /*
   // SECONDARY SCENE
-  //String secondarySceneName = "randomScene";
-  String secondarySceneName = "uniformScene";
-  ParticleScene secondaryScene = buildSecondaryScene(secondarySceneName);
+  //String secondarySceneName = "RandomScene";
+  String secondarySceneName = "UniformScene";
+  ParticleScene secondaryScene = buildScene(secondarySceneName);
+  addScene(secondaryScene);
+  */
   
-  //addScene(secondaryScene);
-  //addParticles(secondaryScene.particles);
-  
-  prefs.notifyAllUpdaters();
+  // MENULAYER
+  MenuLayerScene menuLayerScene = new MenuLayerScene();
+  addScene(menuLayerScene);
   
   // INFOLAYER SCENE
-  addScene(new InfolayerScene(font));
+  infolayerScene = new InfolayerScene(font);
+  addScene(infolayerScene);
   
   // THREADING
   //particleUpdater = new ParticleUpdater(targetParticle, particles);
   //particleUpdater.start();
+  
+  prefs.notifyAllUpdaters();
 }
 
 Vector3f[] buildTrapezoidVertices() {
@@ -361,7 +424,7 @@ Vector3f[] buildTrapezoidVertices() {
   };
 }
 
-List buildRigidBodiesAt(Vector3f[] bodyVertices, List theParticles) {
+List buildRigidBodiesAt(Vector3f[] bodyVertices, Collection theParticles) {
   List theBodies = new ArrayList();
   
   for (Iterator iter=theParticles.iterator(); iter.hasNext(); ) {
@@ -382,61 +445,6 @@ List buildParticlesAt(Vector3f[] positions, Velocity theVelocity) {
   return theParticles;
 }
 
-void addMultipleTwinParticleScenes(float turnaroundTime, float minSpeed, float maxSpeed, float speedSeparation) {
-  
-  for (float speed=minSpeed; speed <= maxSpeed; speed += speedSeparation) {
-    TwinParticleScene twinScene = new TwinParticleScene(speed, turnaroundTime);
-    
-    // Hide twinA for all but the first pair; it's always at origin
-    if (speed != minSpeed) {
-      twinScene.twinParticlePair.twinA.setAllVisibility(false);
-    }
-    addScene(twinScene);
-  }
-}
-
-ParticleScene buildPrimaryScene(String name) {
-  ParticleScene scene = null;
-  
-  if (name == "twinParticleScene") {
-    float relativeSpeed = 0.9;
-    float turnaroundTime = 50;
-    scene = new TwinParticleScene(relativeSpeed, turnaroundTime);
-  }
-  else if (name == "multiTwinParticleScene") {
-    addMultipleTwinParticleScenes(50, 0.1, 0.9, 0.1);
-    //addMultipleTwinParticleScenes(50, 0.1, 0.95, 0.05);
-  }
-  return scene;
-}
-
-ParticleScene buildSecondaryScene(String secondarySceneName) {
-  ParticleScene secondaryScene = null;
-  
-  if (secondarySceneName == "randomScene") {
-    secondaryScene = new RandomParticleScene(prefs.getInteger("PARTICLES"));
-  }
-  else if (secondarySceneName == "uniformScene") {
-    secondaryScene = new UniformParticleScene(prefs.getInteger("PARTICLES"));
-  }
-  return secondaryScene;
-}
-
-float cauchyWeightedRandom(float gamma) {
-  
-  while (true) {
-    float x = random(0, gamma*20);
-    float probability = cauchyPDF(x, gamma);
-    if (probability > random(0, 1)) {
-      return x;
-    }
-  }
-}
-
-float cauchyPDF(float x, float gamma) {
-  return 1.0f / (PI*(1 + pow(x / gamma, 2.0)));
-}
-
 // MANAGEMENT - SCENE, PARTICLE, EMISSION, RIGIDBODIES
 void addScene(Scene s) {
   if (s == null) { return; }
@@ -446,10 +454,13 @@ void addScene(Scene s) {
   if (!scenes.contains(s)) {
     scenes.add(s);
   }
-  addParticles(s.getParticles());
+  
+  if (s instanceof ParticleScene) {
+    addParticles( ((ParticleScene)s).getAllParticles() );
+  }
 }
 
-void addParticles(List theParticles) {
+void addParticles(Collection theParticles) {
   if (theParticles == null) { return; }
   
   for (Iterator iter=theParticles.iterator(); iter.hasNext(); ) {
@@ -465,6 +476,10 @@ void addParticle(Particle p) {
     particles.add(p);
   }
   addSelectable(p);
+  
+  PathPlaneIntersection intersection = new PathPlaneIntersection(p, targetParticle);
+  simultIntersections.add(intersection);
+  intersectionSelector.selectables.add(intersection);
 }
 
 void addSelectable(Particle p) {
@@ -599,6 +614,8 @@ void draw() {
   
   // UPDATE SELECTORS
   particleSelector.update(kamera);
+  intersectionSelector.update(kamera);
+  
   if (myFanSelection != null) {
     myFanSelection.update();
   }
@@ -608,11 +625,11 @@ void draw() {
   
   inputDispatch.update();
   
-  // PICKER / MOUSE
-  drawMouse();
-  
   // UPDATE FPS
   myFpsTimer.update();
+  
+  // PICKER / MOUSE
+  drawMouse();
   
   // GUI LAYER
   camera();
@@ -635,14 +652,10 @@ void drawScenes() {
     
     Collection allScenes = new ArrayList();
     topScene.getAllScenes(allScenes);
-    intervalSay(45, "allScenes: " + allScenes);
+    //intervalSay(45, "allScenes: " + allScenes);
     
     for (Iterator iter=allScenes.iterator(); iter.hasNext(); ) {
       Scene scene = (Scene)iter.next();
-      
-      if (scene instanceof TwinParticleScene) {
-        //scene.showDescription();
-      }
       
       scene.draw();
     }
@@ -657,6 +670,7 @@ void drawMouse() {
   
   beginCylindricalBillboardGL(mouse.x, mouse.y, mouse.z);
     float s = 5;
+    gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
     gl.glPushMatrix();
       gl.glColor4f(1, 1, 1, 0.5);
       gl.glScalef(s, s, s);
@@ -772,45 +786,77 @@ class InputDispatch {
   
   boolean particleDragInProgress() {
     return ( dragInProgress && mouseButton == LEFT
-             && !particleSelector.isEmpty() && clickedParticle != null );
+             && !dragParticles.isEmpty() );
+             //&& !particleSelector.isEmpty() && clickedParticle != null );
+  }
+  
+  boolean holdingDragParticles() {
+    return dragParticles != null && !dragParticles.isEmpty();
+  }
+  
+  boolean shouldDropDragParticles() {
+    return holdingDragParticles() && !dragInProgress;
+  }
+  
+  void releaseDragParticles() {
+    dragParticles = null;
   }
   
   void updateParticleDragging() {
     
-    if ( particleDragInProgress() ) {
+    if ( particleDragInProgress() || holdingDragParticles() ) {
+      if (clickedParticle == null) { return; }
       
-      Vector3f dragPointerDisplayPos = kamera.screenToModel(mouseX, mouseY);
-      Vector3f dragPointerPos = Relativity.inverseDisplayTransform(targetParticle.velocity, dragPointerDisplayPos);
+      // GET INTERSECT WITH PLANE OF CLICKED DRAG PARTICLE
+      Vector3f intersect = getMouseToParticlePlaneIntersect(clickedParticle);
       
-      Vector3f kameraPos = Relativity.inverseDisplayTransform(targetParticle.velocity, kamera.pos);
+      Vector3f offset = getOffset(clickedParticle.getPositionVec(), intersect);
+      if (offset == null) { return; }
       
-      Line dragLine = new Line();
-      dragLine.defineBySegment(kameraPos, dragPointerPos);
+      // PREVIEW DROP POSITIONS FOR DRAG PARTICLES
+      for (Iterator iter=dragParticles.iterator(); iter.hasNext(); ) {
+        Particle p = (Particle) iter.next();
+        if (p == null) { continue; }
+        
+        Vector3f previewPos = new Vector3f();
+        previewPos.add(p.getPositionVec(), offset);
+        
+        // RENDER DRAGGED PARTICLE
+        drawDragParticle(previewPos, p);
+      }
       
-      Plane clickedPlane = clickedParticle.getSimultaneityPlane();
-      
-      Vector3f intersect = new Vector3f();
-      clickedPlane.getIntersection(dragLine, intersect);
-      
-      // RENDER DRAGGED PARTICLE
-      drawDragParticle(intersect, clickedParticle);
-      
-      /*
-      intervalSay(45, "kamera.pos: " + kamera.pos);
-      intervalSay(45, "kameraPos:  " + kameraPos);
-      intervalSay(45, "dragLine:   " + dragLine);
-      intervalSay(45, "clickedPlane: " + clickedPlane);
-      
-      // DEBUG MARKERS
-      HashMap debugMarkersMap = new HashMap();
-      debugMarkersMap.put("intersect", intersect);
-      debugMarkersMap.put("intersectDisplayPos", intersectDisplayPos);
-      debugMarkersMap.put("dragPointerDisplayPos", dragPointerDisplayPos);
-      //debugMarkersMap.put("dragDirMarkerDisplay", dragDirMarkerDisplay);
-      
-      drawDragDebugMarkers(debugMarkersMap);
-      */
+      // DROP IF DRAG IS OVER
+      if ( shouldDropDragParticles() ) {
+        
+        println("droppingDragParticles: offset" + offset + ", dragParticles: ");
+        offsetParticles(offset, dragParticles);
+        
+        // RELEASE DRAG PARTICLES AFTER MOVE
+        releaseDragParticles();
+        
+        // CLEAR CLICKED PARTICLE
+        clickedParticle = null;
+      }
     }
+  }
+  
+  Vector3f getMouseToParticlePlaneIntersect(Particle theParticle) {
+    if (theParticle == null) { return null; }
+    
+    Vector3f dragPointerDisplayPos = kamera.screenToModel(mouseX, mouseY);
+    Vector3f dragPointerPos = Relativity.inverseDisplayTransform(targetParticle.velocity, dragPointerDisplayPos);
+    
+    Vector3f kameraPos = Relativity.inverseDisplayTransform(targetParticle.velocity, kamera.pos);
+    
+    Line dragLine = new Line();
+    dragLine.defineBySegment(kameraPos, dragPointerPos);
+    
+    Plane clickedPlane = theParticle.getSimultaneityPlane();
+    
+    Vector3f intersect = new Vector3f();
+    clickedPlane.getIntersection(dragLine, intersect);
+    
+    return intersect;
   }
   
   void drawDragParticle(Vector3f dragPos, Particle dragParticle) {
@@ -830,24 +876,6 @@ class InputDispatch {
 
     pgl.endGL();
   }
-  /*
-  void drawDragDebugMarkers( Map labelPositionMap ) {
-    // MARKER LABELS
-    pgl = (PGraphicsOpenGL)g;
-    gl = pgl.beginGL();
-      for (Iterator iter = labelPositionMap.keySet().iterator(); iter.hasNext(); ) {
-        String label = (String) iter.next();
-        Vector3f labelPos = (Vector3f) labelPositionMap.get(label);
-        myLabelor.drawLabelGL(gl, label, labelPos, 0.5);
-      }
-    pgl.endGL();
-    
-    for (Iterator iter = labelPositionMap.values().iterator(); iter.hasNext(); ) {
-      Vector3f drawPos = (Vector3f) iter.next();
-      drawSphere(drawPos, 1f);
-    }
-  }
-  */
 }
 
 void drawSphere(Vector3f pos, float radius) {
@@ -863,17 +891,18 @@ boolean isFanSelectionOpen() {
   return labelSelector.selection.contains(myFanSelection);
 }
 
-void openFanSelection(Particle pickedParticle) {
+void openFanSelection(ISelectableLabel pickedSelectable) {//Particle pickedParticle) {
   
-  SelectableLabel[] labels = new SelectableLabel[] {
-    new SelectableLabel("makeTargetParticle", pickedParticle),
-    new SelectableLabel("menuDummy2", pickedParticle.getDisplayPositionVec()),
-    new SelectableLabel("menuDummy3", pickedParticle.getDisplayPositionVec()),
-    new SelectableLabel("menuDummy4", pickedParticle.getDisplayPositionVec()),
-//    new SelectableLabel("menuDummy5", pickedParticle.getDisplayPositionVec()),
-  };
+  List labels = new ArrayList();
   
-  myFanSelection = new FanSelection( pickedParticle, labels);
+  labels.add(new SelectableLabel("makeTargetParticle", pickedSelectable));
+  labels.add(new SelectableLabel("attachRigidBody", pickedSelectable));
+  
+  if (getSelectedMeasurables().size() == 2) {
+    labels.add(new SelectableLabel("measureDistance", pickedSelectable));
+  }
+  
+  myFanSelection = new FanSelection( pickedSelectable, labels);
   labelSelector.addToSelectables(myFanSelection.getSelectableLabels());
   labelSelector.selection.add(myFanSelection);
 }
@@ -897,6 +926,41 @@ void makeTargetParticle(Particle p) {
   }
   p.headFrame.axesSettings = targetAxesSettings;
   targetParticle = p;
+  
+  setPlaneParent(targetParticle, simultIntersections);
+}
+
+void setPlaneParent(Particle parentPlane, List theIntersections) {
+  for (int i=0; i<theIntersections.size(); i++) {
+    PathPlaneIntersection intersection = (PathPlaneIntersection) theIntersections.get(i);
+    intersection.setPlaneParent(parentPlane);
+  }
+}
+
+// SelectableLabel Actions
+void attachRigidBodies(Collection theParticleAttachTargets) {
+  
+  Dbg.say("attachRigidBodies(): attachTargets: " + theParticleAttachTargets);
+  List bodies = buildRigidBodiesAt(bodyVertices, theParticleAttachTargets);
+  addRigidBodies(bodies);
+}
+
+// SelectableLabel Actions
+void measureDistance(Collection theSelectedMeasurables) {
+  Iterator toMeasure = theSelectedMeasurables.iterator();
+  
+  ISelectableLabel from = (ISelectableLabel) toMeasure.next();
+  ISelectableLabel to = (ISelectableLabel) toMeasure.next();
+  
+  topScene.addMeasurement(new DistanceMeasurement(from, to));
+}
+
+Collection getSelectedMeasurables() {
+  
+  List theSelectedMeasurables = new ArrayList(particleSelector.selection);
+  theSelectedMeasurables.addAll(intersectionSelector.selection);
+  
+  return theSelectedMeasurables;
 }
 
 void mousePickedLabel(SelectableLabel sl) {
@@ -906,8 +970,23 @@ void mousePickedLabel(SelectableLabel sl) {
   
   Dbg.say("mousePickedLabel(): " + label + ", parentSelectable: " + parentSelectable);
   
+  Collection theSelectedMeasurables = getSelectedMeasurables();
+  
   if (label == "makeTargetParticle" && parentSelectable instanceof Particle) {
     makeTargetParticle((Particle)parentSelectable);
+  }
+  else if (label == "attachRigidBody" && parentSelectable instanceof Particle) {
+    
+    Collection attachTargets = new HashSet();
+    
+    attachTargets.addAll(particleSelector.selection);
+    attachTargets.add(parentSelectable);
+    
+    attachRigidBodies(attachTargets);
+  }
+  else if (label == "measureDistance" && theSelectedMeasurables.size() == 2) {
+    
+    measureDistance(theSelectedMeasurables);
   }
 }
 
@@ -923,9 +1002,21 @@ void mousePickedParticle(Particle pick) {
   }
 }
 
+void mousePickedIntersection(PathPlaneIntersection pick) {
+  
+  if (mouseButton == RIGHT) {
+    openFanSelection(pick);
+  }
+  else if (mouseButton == LEFT) {
+    intersectionSelector.invertSelectionStatus(pick);
+    //Dbg.say("intersectionSelector.selection:" + intersectionSelector.selection);
+  }
+}
+
 void mousePressedOnBackground() {
   if (mouseButton == LEFT) {
     particleSelector.clear();
+    intersectionSelector.clear();
   }
   else if (mouseButton == RIGHT) {
     MOUSELOOK = !MOUSELOOK;
@@ -941,17 +1032,20 @@ void mousePressedOnBackground() {
 
 void mousePressedOnScene() {
   
+  Selectable pickedIntersection = (PathPlaneIntersection) intersectionSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pickedParticle = (Particle) particleSelector.pickPoint(kamera, mouseX, mouseY);
   Selectable pickedLabel = labelSelector.pickPoint(kamera, mouseX, mouseY);
-  Selectable pick = (pickedLabel != null) ? pickedLabel : pickedParticle;
   
-  Dbg.say("pickedLabel: " + pickedLabel + ", pick: " + pick);
-  //Dbg.say("labelSelector.selectables" + labelSelector.selectables);
+  Selectable pick = (pickedLabel != null) ? pickedLabel : pickedParticle;
+  pick = (pick != null) ? pick : pickedIntersection;
+  
+  //Dbg.say("intersectionSelector.selectables" + intersectionSelector.selectables);
+  Dbg.say("pick: " + pick + ", pickedLabel: " + pickedLabel);
   
   if (isFanSelectionOpen() && pickedLabel == null) {
     closeFanSelection();
   }
-  else if (pickedParticle == null && pickedLabel == null) {
+  else if (pick == null) { //pickedParticle == null && pickedLabel == null) {
     mousePressedOnBackground();
   }
   else if (pickedLabel != null && pickedLabel instanceof SelectableLabel) {
@@ -960,12 +1054,25 @@ void mousePressedOnScene() {
   else if (pickedParticle != null) {
     mousePickedParticle((Particle)pickedParticle);
   }
+  else if (pick instanceof PathPlaneIntersection) {
+    mousePickedIntersection((PathPlaneIntersection) pickedIntersection);
+  }
 }
 
-void mousePressed() {
+void mousePressedOnPane(Infopane clickedPane) {
+  clickedPane.doClickAction();
+}
+
+void mousePressed() { //Dbg.say("mousePressed(): mouseX: " + mouseX + ", mouseY: " + mouseY);
+  
+  Infopane clickedPane = topScene.getClickedPane();
+  Dbg.say("clickedPane: " + clickedPane );
   
   if (controlP5.window(this).isMouseOver()) {
     return;
+  }
+  else if ( clickedPane != null ) {
+    mousePressedOnPane(clickedPane);
   }
   else {
     mousePressedOnScene();
@@ -977,12 +1084,33 @@ void mouseReleased() {
   dragInProgress = false;
 }
 
+Collection dragParticles;
 boolean dragInProgress;
+
+boolean isMouseOverControlP5() {
+  return controlP5.window(this).isMouseOver();
+}
+
+boolean isMouseOverClickablePane() {
+  return (topScene.getClickedPane() != null);
+}
+
+boolean isMouseOverGuiControl() {
+  return isMouseOverControlP5() || isMouseOverClickablePane();
+}
 
 void mouseDragged() {
   
-  if (!dragInProgress) {
+  if (!dragInProgress && mouseButton == LEFT && !isMouseOverGuiControl()
+      && clickedParticle != null) {
+      
       dragInProgress = true;
+      
+      println("mouseDragged(): ");
+      println("  clickedParticle: " + clickedParticle);
+      
+      particleSelector.selection.add(clickedParticle);
+      dragParticles = new HashSet(particleSelector.selection);
   }
 }
 
@@ -1010,8 +1138,11 @@ void keyPressed() {
     targetParticle = (Particle) particles.get(i);
     addTarget((Particle)particles.get(i));
   }
-  else if (key == '`') {
+  else if (key == '1') {
     particleSelector.clear();
+  }
+  else if (key == '`') {
+    infolayerScene.infobox.toggleVisible();
   }
 }
 

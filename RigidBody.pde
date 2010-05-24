@@ -9,7 +9,6 @@ class RigidBody {
     this.parentParticle = theParentParticle;
     this.bodyVertices = new ArrayList();
     this.bodyParticles = new ArrayList();
-    //this.bodyVertices = new ArrayList(Arrays.asList(bodyVertices));
     
     for (int i=0; i<theBodyVertices.length; i++) {
       this.bodyVertices.add(theBodyVertices[i]);
@@ -57,19 +56,6 @@ class RigidBody {
       }
     gl.glEnd();
   }
-  
-  /*
-  void updateTransformedHist(Matrix3f lorentzMatrix){
-    
-    Vector3f source = new Vector3f();
-    Vector3f target = new Vector3f();
-    
-    for (int i=0; i<=histCount; i++) {
-      
-      frameHist[i].updatePosition();
-    }
-  }
-  */
 }
 
 class RigidBodyParticle extends Particle {

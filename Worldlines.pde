@@ -8,14 +8,16 @@ import controlP5.*;
 import javax.vecmath.*;
 import java.util.List;
 import java.awt.geom.Rectangle2D;
+import java.awt.Font;
+import java.awt.FontFormatException;
 
 import com.sun.opengl.util.texture.*;
 import com.sun.opengl.util.BufferUtil;
 import java.nio.ByteBuffer;
 import java.nio.Buffer;
 
-int SIZE_X = 900, SIZE_Y = 540;
-//int SIZE_X = 1280, SIZE_Y = 900;
+//int SIZE_X = 900, SIZE_Y = 540;
+int SIZE_X = 1280, SIZE_Y = 900;
 //int SIZE_X = 1100, SIZE_Y = 700;
 
 PGraphicsOpenGL pgl;

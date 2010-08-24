@@ -769,7 +769,7 @@ class SceneMenuScene extends Scene {
       
       Infoline theLine = menu.addLine(className);
       theLine.setClickAction( new Action() {
-        void doAction() {
+        public void doAction() {
           PRIMARY_SCENE = className;
           restart();
         }

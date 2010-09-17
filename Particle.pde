@@ -179,6 +179,14 @@ class Particle implements Frame, ISelectableLabel {
     frameHist[histCount] = headFrame.clone();
     
     histCount++;
+    
+    if (histCount >= frameHist.length) {
+      // For now, just reset path history if out of space
+      histCount = 0;
+      recordStateToPathHistory();
+      Dbg.warn("Resetting path history for particle: " + this.getName());
+    }
+    
     frameHist[histCount] = headFrame;
     headFrame.setAncestorsAge(this.properTime);
     

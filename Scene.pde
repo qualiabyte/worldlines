@@ -50,21 +50,55 @@ class Scene {
   ControlPanel sceneControlPanel;
   
   //Infopanel infolayerPanel = new Infopanel();
-  Infopanel descriptionPanel = new Infopanel(
-    new Infopane(
+  Infopanel descriptionPanel = buildDescriptionPanel();
+  
+  Infopane buildCenterPane(){
+    return new Infopane(
       new Vector2f(width/2, height*0.9), // size
       new Vector2f( (width - width/2)/2, (height - height*0.9)/2 ) // pos
-    ));
+    );
+  }
+  
+  class OpenLinkAction extends Action {
     
+    String _path;
+    String _window;
+    
+    OpenLinkAction(String path, String window) {
+      _path = path;
+      _window = window;
+    }
+    
+    OpenLinkAction(String path) {
+      this(path, "_new");
+//      _path = path;
+//      _window = "";
+    }
+    
+    void doAction() {
+      link(_path);
+      Dbg.say("Link: " + _path);
+    }
+  }
+  
+  Infopanel buildDescriptionPanel() {
+    Infopanel descPanel = new Infopanel(buildCenterPane());
+    descPanel.addLine("Adding some description text.");
+    descPanel.addLine("See the \"Scenarios\" section in the MANUAL for more information.").setClickAction(new OpenLinkAction("http://worldlines.com/"));
+    
+    return descPanel;
+  }
+  
   Scene() {
     this.subScenes = new ArrayList();
     this.distanceMeasurements = new ArrayList();
     
     this.panels = new ArrayList();
     //this.panels.add(infolayerPanel);
-    this.panels.add(descriptionPanel);
-    
     //this.infolayerPanel.isVisible = false;
+    
+    // SCENE DESCRIPTION PANEL
+    this.panels.add(descriptionPanel);
     this.descriptionPanel.isVisible = false;
     
     this.sceneControlPanel = new ControlPanel("scene");
@@ -710,8 +744,8 @@ class MenuBarScene extends Scene {
     
     menuBar.setFlow(Infopanel.RIGHTWARD);
     
-    menuBar.addLine("(SCENE MENU) ").setClickAction(new MenuBarToggleVisibleAction(sceneMenuScene.menu));
-    menuBar.addLine("(DESCRIPTION) ").setClickAction(new MenuBarToggleVisibleAction(primaryScene.descriptionPanel));
+    menuBar.addLine("» SCENE MENU ").setClickAction(new MenuBarToggleVisibleAction(sceneMenuScene.menu));
+    menuBar.addLine("» DESCRIPTION ").setClickAction(new MenuBarToggleVisibleAction(primaryScene.descriptionPanel));
     
     this.panels.add(menuBar);
   }
@@ -758,8 +792,8 @@ class SceneMenuScene extends Scene {
     
     menu.setFlow(Infopanel.RIGHTWARD);
     
-    menu.addLine("SCENE MENU  /");
-    menu.addLine("<CLOSE>").setClickAction(new ToggleVisibleAction(menu));
+    menu.addLine("SCENE MENU  ");
+    menu.addLine("» CLOSE").setClickAction(new ToggleVisibleAction(menu));
     
     menu.setFlow(Infopanel.DOWNWARD);
     menu.addLine("");

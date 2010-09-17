@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <!-- charset must remain utf-8 to be handled properly by Processing -->
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    
+    <title>Worldlines : Built with Processing</title>
+    
+    <style type="text/css">
+      /* <![CDATA[ */
+	
+		body {
+			margin: 0px 0px 0px 0px;
+			font-family: verdana, geneva, arial, helvetica, sans-serif; 
+			background-color: #000000; 
+			text-decoration: none; 
+			font-weight: normal; 
+			line-height: normal; 
+		}
+		
+		a          { color: #56575d; }
+		a:link     { color: #56575d; text-decoration: underline; }
+		a:visited  { color: #9cacc1; text-decoration: underline; }
+		a:active   { color: #9cacc1; text-decoration: underline; }
+		a:hover    { color: #a0e39c; text-decoration: underline; }
+		
+		h1 {color: #56575d; font-size: 70px; font-weight: normal; margin: 0px 0px 0px 0px;}
+		h2 {color: #9cacc1; font-size: 35px; font-weight: normal; margin: -21px 0px 0px 30px;}
+		
+		div#page {
+			width: 1000px;
+			margin: 20px auto 0px auto;
+			padding: 10px 20px 20px 20px;
+			/*float: center;*/
+			background-color: #ffffff;
+			color: #56575d;
+		}
+		div#quick-menu {
+			margin: auto 0px auto auto;
+			text-align: right;
+			font-size: 30px;
+			font-family: monospace;
+		}
+		div#applet {
+			width: 1000px;
+			height: 580px;
+			background-color: #56575d;
+			display: none;
+		}
+		div#content {
+			font-size: 11px;
+		}
+		div#Worldlines_container {
+			/*display: none;*/
+		}
+		/* ]]> */
+    </style>
+    
+  </head>
+  <body>
+	<div id="page">
+		<h1>Worldlines</h1>
+		<h2>  visualizing special relativity</h2>
+		<div id="quick-menu">
+			<a href="Worldlines_Handbook.pdf">manual</a> /
+			<a href="worldlines-apps.zip">app</a> /
+			<a href=""></a>code /
+			source /
+			contact
+		</div>
+
+		<div id="content">
+			<div id="applet">
+			the applet goes here
+			</div>
+		</div>
+
+<!--
+			read	The manual  {Walkthrough, Manual 
+		<br>save	The app	    {Windows, Mac, Linux
+		<br>view	The code    {
+		<br>get	The source  	{
+		<br>contact	The author  {
+-->
+
+
+
+    <div id="content">
+      
+      <div id="Worldlines_container">
+	
+	<!--[if !IE]> -->
+	<object codebase="applet/"
+				classid="java:org.jdesktop.applet.util.JNLPAppletLauncher" 
+            	type="application/x-java-applet"
+            	archive="Worldlines.jar,opengl.jar,opengl.jar,controlP5.jar,vecmath.jar,commons-math-2.0.jar,opengl.jar,opengl.jar,opengl.jar,opengl.jar,core.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar"
+            	width="1000" height="580"
+            	standby="Loading Processing software..." >
+          
+	  <param name="archive" value="Worldlines.jar,opengl.jar,opengl.jar,controlP5.jar,vecmath.jar,commons-math-2.0.jar,opengl.jar,opengl.jar,opengl.jar,opengl.jar,core.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar" />
+	  <param name="jnlpNumExtensions" value="1">
+	  <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
+
+	  <param name="mayscript" value="true" />
+	  <param name="scriptable" value="true" />
+	  
+	  <param name="image" value="loading.gif" />
+	  <param name="boxmessage" value="Loading Processing software..." />
+	  <param name="boxbgcolor" value="#FFFFFF" />
+	  <param name="progressbar" value="true" />
+	  <!--<param name="noddraw.check" value="true">-->
+	  
+	  <param name="subapplet.classname" value="Worldlines" /> 
+	  <param name="subapplet.displayname" value="Worldlines" />
+	  
+	  <param name="test_string" value="outer" />
+	  <!--<![endif]-->
+	  
+	  <object classid="clsid:CAFEEFAC-0016-0000-FFFF-ABCDEFFEDCBA" 
+		  width="1000" height="580"
+		  standby="Loading Processing software..."  >
+
+	    <param name="code" 
+		   value="org.jdesktop.applet.util.JNLPAppletLauncher" />
+	    <param name="archive" value="Worldlines.jar,opengl.jar,opengl.jar,controlP5.jar,vecmath.jar,commons-math-2.0.jar,opengl.jar,opengl.jar,opengl.jar,opengl.jar,core.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar" />
+	    <param name="jnlpNumExtensions" value="1">
+	    <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
+	    
+	    <param name="mayscript" value="true" />
+	    <param name="scriptable" value="true" />
+	    
+	    <param name="image" value="loading.gif" />
+	    <param name="boxmessage" value="Loading Processing software..." />
+	    <param name="boxbgcolor" value="#FFFFFF" />
+	    <param name="progressbar" value="true" />
+	    <!--<param name="noddraw.check" value="true">-->
+
+	    <param name="subapplet.classname" value="Worldlines" /> 
+	    <param name="subapplet.displayname" value="Worldlines" />
+	    
+	    <param name="test_string" value="inner" />
+	    
+	    <p>
+	      <strong>
+		This browser does not have a Java Plug-in.
+		<br />
+		<a href="http://www.java.com/getjava" title="Download Java Plug-in">
+		  Get the latest Java Plug-in here.
+		</a>
+	      </strong>
+	    </p>
+	    
+	  </object>
+	  
+	  <!--[if !IE]> -->
+	</object>
+	<!--<![endif]-->
+	
+      </div>
+      
+      <p>
+	
+      </p>
+      
+      <p>
+	Source code: <a href="applet/Worldlines.pde">Worldlines</a> <a href="applet/Axes.pde">Axes</a> <a href="applet/Control.pde">Control</a> <a href="applet/Frame.pde">Frame</a> <a href="applet/Geom.pde">Geom</a> <a href="applet/Infobox.pde">Infobox</a> <a href="applet/Kamera.pde">Kamera</a> <a href="applet/Particle.pde">Particle</a> <a href="applet/ParticlesLayer.pde">ParticlesLayer</a> <a href="applet/Relativity.pde">Relativity</a> <a href="applet/RigidBody.pde">RigidBody</a> <a href="applet/Scene.pde">Scene</a> <a href="applet/Utils.pde">Utils</a> <a href="applet/VTextRenderer.pde">VTextRenderer</a> <a href="applet/Velocity.pde">Velocity</a> 
+      </p>
+      
+      <p>
+	Built with <a href="http://processing.org" title="Processing.org">Processing</a>
+      </p>
+    </div>
+
+
+
+
+	</div>
+	</body>
+</html>

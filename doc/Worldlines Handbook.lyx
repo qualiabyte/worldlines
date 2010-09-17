@@ -5229,11 +5229,6 @@ These graphical details could be confusing:
 \end_layout
 
 \begin_layout Enumerate
-Distance Measurement feature works on Windows and Linux, but has an unresolved
- graphical glitch on Mac OS X.
-\end_layout
-
-\begin_layout Enumerate
 Intersection clock pulses match the timing of the head particles in the
  world frame.
  The timing is physically correct for the heads, but fixing the timing for

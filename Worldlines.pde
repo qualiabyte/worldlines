@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.Buffer;
 
 //int SIZE_X = 900, SIZE_Y = 540;
-int SIZE_X = 1280, SIZE_Y = 900;
+//int SIZE_X = 1280, SIZE_Y = 900;
 //int SIZE_X = 1100, SIZE_Y = 700;
 
 PGraphicsOpenGL pgl;
@@ -75,7 +75,7 @@ float C = 1.0;
 
 FpsTimer myFpsTimer;
 
-String PRIMARY_SCENE = "MultiTwinScene";
+String PRIMARY_SCENE = "LengthContractionScene";
 
 String[] menuClassNames = new String[] {
   "AxesScene",
@@ -84,9 +84,9 @@ String[] menuClassNames = new String[] {
   "LengthContractionScene",
   "BellsSpaceShipScene",
   "UniformParticleScene",
-  "RandomParticleScene",
-  "PolygonParticleScene",
-  "PhotonScene"
+//  "RandomParticleScene",
+//  "PolygonParticleScene",
+//  "PhotonScene"
 };
 
 // GUI Control Vars
@@ -114,7 +114,9 @@ int FONT_SIZE = 14;
 ControlP5 controlP5;
 
 void setup() {
-  size(SIZE_X, SIZE_Y, OPENGL);
+//  size(SIZE_X, SIZE_Y, OPENGL);
+  //size(900, 540, OPENGL);
+  size(1000, 580, OPENGL);
   
   frameRate(45);
   //hint(DISABLE_DEPTH_SORT);
@@ -544,8 +546,6 @@ void draw() {
   pgl = (PGraphicsOpenGL)g;
   gl = pgl.beginGL();
   
-  gl.glScalef(1,1,1);
-  
   gl.glEnable(GL.GL_BLEND);
   gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
   //gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_DST_ALPHA);
@@ -560,7 +560,6 @@ void draw() {
   // SCENE PREP
   //color c =  #000020; // #3473F7;//
   //colorMode(HSB, 255); color c = color((frameCount * 0.5)%255, 100, 75, 255);
-  
   colorMode(HSB, 1.0f); 
   color c = color(
     prefs.getFloat("backgroundColorHue"),
@@ -633,15 +632,21 @@ void draw() {
   // PICKER / MOUSE
   drawMouse();
   
+  // SCENE-SPECIFIC DRAW ROUTINES
+  drawScenes();
+  
   // GUI LAYER
+  pgl = (PGraphicsOpenGL)g;
+  gl = pgl.beginGL();
+    gl.glEnable(GL.GL_BLEND);
+    gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE);
+  pgl.endGL();
+  
   camera();
   imageMode(CORNERS);
   noLights();
   perspective(PI/3.0, float(width)/float(height), 0.1, 10E7);
   controlP5.draw();
-  
-  // SCENE-SPECIFIC DRAW ROUTINES
-  drawScenes();
   
   // RESET CAMERA
   kamera.commit();

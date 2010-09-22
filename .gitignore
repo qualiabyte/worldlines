@@ -1,0 +1,20 @@
+
+# Backups #
+*~
+*.emergency
+*.bak
+
+# Processing Export Dirs #
+applet/
+application.linux/
+application.macosx/
+application.windows/
+
+# Non-Source Filetypes #
+*.tex
+
+# Build Binaries #
+doc/Worldlines Handbook (HeVeA).html
+doc/Worldlines Handbook.pdf
+web/Worldlines_Handbook.pdf
+web/worldlines-apps.zip

@@ -79,7 +79,7 @@ String PRIMARY_SCENE = "LengthContractionScene";
 
 String[] menuClassNames = new String[] {
   "AxesScene",
-  "TwinParticleScene",
+  "TwinParadoxScene",
   "MultiTwinScene",
   "LengthContractionScene",
   "BellsSpaceShipScene",

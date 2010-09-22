@@ -16,10 +16,10 @@ ParticleScene buildScene(String name) {
   if (name == "LengthContractionScene") {
     scene = new LengthContractionScene();
   }
-  else if (name == "TwinParticleScene") {
+  else if (name == "TwinParadoxScene") {
     float relativeSpeed = 0.9;
     float turnaroundTime = 50;
-    scene = new TwinParticleScene(relativeSpeed, turnaroundTime);
+    scene = new TwinParadoxScene(relativeSpeed, turnaroundTime);
   }
   else if (name == "MultiTwinScene") {
     scene = new MultiTwinScene(50, 0.1, 0.9, 0.1);
@@ -71,20 +71,38 @@ class Scene {
     
     OpenLinkAction(String path) {
       this(path, "_new");
-//      _path = path;
-//      _window = "";
     }
     
     void doAction() {
-      link(_path);
-      Dbg.say("Link: " + _path);
+      link(_path, _window);
+      Dbg.say("Link: " + _path + ", " + _window);
     }
   }
   
   Infopanel buildDescriptionPanel() {
     Infopanel descPanel = new Infopanel(buildCenterPane());
-    descPanel.addLine("Adding some description text.");
-    descPanel.addLine("See the \"Scenarios\" section in the MANUAL for more information.").setClickAction(new OpenLinkAction("http://worldlines.com/"));
+    
+    String className = this.getClass().getName();
+    String descFile = className.replaceAll(".*\\$", "") + ".txt";
+    String descPath = "scene-descriptions/";
+    
+    String[] descText = loadStrings(descPath + descFile);
+    
+    if (descText != null) {
+      
+      Dbg.say("Found description text in descFile: " + descFile);
+      
+      for (int i=0; i<descText.length; i++) {
+        descPanel.addLine(descText[i]);
+      }
+    }
+    else {
+      Dbg.say("No description text for descFile: " + descFile);
+    }
+    
+    descPanel.addLine("More Information");
+    descPanel.addLine("» See the \"Scenarios\" section in the manual.")
+             .setClickAction(new OpenLinkAction("http://worldlines.com/"));
     
     return descPanel;
   }
@@ -262,14 +280,12 @@ class MultiTwinScene extends ParticleScene {
   }
 }
 
-class TwinParticleScene extends ParticleScene {
+class TwinParadoxScene extends ParticleScene {
   
   TwinParticlePair twinParticlePair;
   Infobar ageDiffInfobar;
   
-  TwinParticleScene(float relativeSpeed, float turnaroundTime) {
-    
-    this.setDescription("Twin Particle Scene");
+  TwinParadoxScene(float relativeSpeed, float turnaroundTime) {
     
     this.twinParticlePair = new TwinParticlePair(relativeSpeed, turnaroundTime);
     
@@ -283,7 +299,7 @@ class TwinParticleScene extends ParticleScene {
     println(twinParticlePair.twinB);
     
     // AGE DIFFERENCE INFOBAR
-    FloatControl ageDiffFloatControl = new FloatControl("ageDiff", twinParticlePair.getAgeDiff());
+    FloatControl ageDiffFloatControl = new FloatControl("ageDiff = ∆τ = τ_A − τ_B", twinParticlePair.getAgeDiff());
     ageDiffFloatControl.setUnitsLabel("s");
     this.ageDiffInfobar = new Infobar(ageDiffFloatControl);
     

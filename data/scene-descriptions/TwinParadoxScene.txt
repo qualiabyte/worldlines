@@ -1,0 +1,18 @@
+Twin Paradox Scene
+
+This scene uses particles to illustrate the twin paradox.
+Twin particles "A" and "B" begin at a common starting location.
+Twin A remains at rest, while twin B departs at a constant speed.
+Twin B later turns around at time τ_turn as measured in its frame.
+
+The conundrum goes as follows:
+If, as according to time dilation, “frames in relative motion
+see each other’s clocks as advancing more slowly,” then what is
+the relationship between the ages of the two twins in this scenario?
+
+The ageDiff meter tracks their age difference in the world frame,
+where ageDiff = ∆τ = τ_A − τ_B.
+
+To replay the scene in B's frame of reference: 
+1) Click 'RESTART' 2) Right click on B 3) Select 'makeTargetParticle'
+

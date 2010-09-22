@@ -347,7 +347,7 @@ class Infobar {
   }
   
   String buildMarkerLabel(float theValue) {
-    return nf(theValue, 1, 2) + floatControl.unitsLabel;
+    return nf(theValue, 1, 2) + " " + floatControl.unitsLabel;
   }
   
   /* @param linesOffset  Float representing number of lines below label

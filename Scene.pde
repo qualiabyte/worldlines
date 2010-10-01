@@ -276,7 +276,10 @@ class MultiTwinScene extends ParticleScene {
       //this.subScenes.add(twinScene);
       count++;
     }
+    // SCENE PREFS
     this.scenePrefs.put("PROPERTIME_SCALING", Boolean.TRUE);
+    this.scenePrefs.put("toggle_Spatial_Transform", Boolean.TRUE);
+    this.scenePrefs.put("toggle_Temporal_Transform", Boolean.TRUE);
   }
 }
 
@@ -305,6 +308,10 @@ class TwinParadoxScene extends ParticleScene {
     
     // DISTANCE MEASUREMENT
     // this.addMeasurement(new DistanceMeasurement(twinParticlePair.twinA, twinParticlePair.twinB));
+    
+    // SCENE PREFS
+    this.scenePrefs.put("toggle_Spatial_Transform", Boolean.TRUE);
+    this.scenePrefs.put("toggle_Temporal_Transform", Boolean.TRUE);
   }
   
   void draw() {
@@ -351,7 +358,7 @@ class TwinParticlePair extends ParticleScene {
     }
   }
   
-  /** Returns a list containing a new pair of "twin" Particles
+  /** Constructs a new pair of "twin" Particles
     * @param relativeSpeed
     *    The relative speed between the frames of twins A and B,
     *    as a fraction of C

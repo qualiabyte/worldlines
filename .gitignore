@@ -14,7 +14,6 @@ application.windows/
 *.tex
 
 # Build Binaries #
-doc/Worldlines Handbook (HeVeA).html
 doc/Worldlines Handbook.pdf
 web/Worldlines_Handbook.pdf
 web/worldlines-apps.zip

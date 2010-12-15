@@ -1,0 +1,17 @@
+Axes Scene
+
+This scene introduces basic elements of the worldlines program,
+such as the axes grid and simultaneity plane, with a focus
+on illustrating coordinate transformation.
+
+A target particle is shown in oscillating motion relative to
+stationary particles in the world frame.  As it accelerates,
+its (x'ct') axis grid and (x'y') simultaneity plane are transformed
+within the coordinates of the world frame.
+
+To see events as in the coordinate space of the target particle's
+current frame, activate the display transformations:
+
+1) Click 'TOGGLE_SPATIAL_TRANSFORM'
+2) Click 'TOGGLE_TEMPORAL_TRANSFORM'
+

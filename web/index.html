@@ -25,15 +25,24 @@
             line-height: normal; 
         }
         
-        a          { color: #56575d; }
-        a:link     { color: #56575d; text-decoration: underline; }
-        a:visited  { color: #9cacc1; text-decoration: underline; }
-        a:active   { color: #9cacc1; text-decoration: underline; }
-        a:hover    { color: #E5B; /* #C8B; #5e5; #a0e39c; */ text-decoration: underline; }
+        a         { color: #56575d; }
+        a:link    { color: #56575d; text-decoration: underline; }
+        a:visited { color: #9cacc1; text-decoration: underline; }
+        a:active  { color: #9cacc1; text-decoration: underline; }
+        a:hover   { color: #E5B; /* #C8B; #5e5; #a0e39c; */ text-decoration: underline; }
         
-        h1#banner-title {color: #56575d; font-size: 70px; font-weight: normal; margin: 0px 0px 0px 0px;}
-        h2#banner-subtitle {color: #6BF; /*#2AF #9cacc1;*/ font-size: 35px; font-weight: normal; margin: -21px 0px 0px 30px;}
-        
+        h1#banner-title {
+            color: #56575d;
+            font-size: 70px;
+            font-weight: normal;
+            margin: 0px 0px 0px 0px;
+        }
+        h2#banner-subtitle {
+            color: #6BF; /*#2AF #9cacc1;*/
+            font-size: 35px;
+            font-weight: normal;
+            margin: -21px 0px 0px 30px;
+        }
         div#page {
             width: 1000px;
             margin: 20px auto 0px auto;
@@ -48,17 +57,17 @@
             font-size: 30px;
             font-family: Consolas, "Lucida Console", "Andale Mono", monospace;
         }
-        div#applet-placeholder {
-            width: 1000px;
-            height: 580px;
-            background-color: #56575d;
-            display: none;          /* Uncomment to test with placeholder instead of applet */
-        }
         div#content {
             font-size: 11px;
         }
         div#Worldlines_container {
         /*  display: none;  */      /* Uncomment to test without loading the applet */
+        }
+        div#applet-placeholder {
+            width: 1000px;
+            height: 580px;
+            background-color: #56575d;
+            display: none;          /* Comment to test with placeholder instead of applet */
         }
 
         div#handbook-header {
@@ -75,31 +84,30 @@
 
     <script language="javascript">
     <!--
+        var state = 'none';
 
-    var state = 'none';
+        function showhide(layer_ref) {
 
-    function showhide(layer_ref) {
+            if (state == 'block') {
+                state = 'none';
+            }
+            else {
+                state = 'block';
+            }
 
-        if (state == 'block') {
-            state = 'none';
+            if (document.all) { //IS IE 4 or 5 (or 6 beta)
+                eval( "document.all." + layer_ref + ".style.display = state");
+            }
+
+            if (document.layers) { //IS NETSCAPE 4 or below
+                document.layers[layer_ref].display = state;
+            }
+
+            if (document.getElementById &&!document.all) {
+                hza = document.getElementById(layer_ref);
+                hza.style.display = state;
+            }
         }
-        else {
-            state = 'block';
-        }
-
-        if (document.all) { //IS IE 4 or 5 (or 6 beta)
-            eval( "document.all." + layer_ref + ".style.display = state");
-        }
-
-        if (document.layers) { //IS NETSCAPE 4 or below
-            document.layers[layer_ref].display = state;
-        }
-
-        if (document.getElementById &&!document.all) {
-            hza = document.getElementById(layer_ref);
-            hza.style.display = state;
-        }
-    }
     //-->
     </script> 
 
@@ -107,33 +115,26 @@
 
   </head>
   <body>
-    <div id="page">
-        <h1 id="banner-title">Worldlines</h1>
-        <h2 id="banner-subtitle">  visualizing special relativity</h2>
-        <div id="quick-menu">
-            <a href="Worldlines_Handbook.pdf">manual</a> 
-            <!--<a href="doc/html/Worldlines Handbook (fixed).html">html</a>,-->
-            [<a href="doc/Worldlines Handbook.pdf">pdf</a>] /
-            <a href="worldlines-apps.zip">app</a> /
-            <a href=""></a>code /
-            source /
-            contact
-        </div>
+  <div id="page">
 
-        <div id="content">
-            <div id="applet-placeholder">
-            the applet goes here
-            </div>
-        </div>
-
+    <h1 id="banner-title">Worldlines</h1>
+    <h2 id="banner-subtitle">  visualizing special relativity</h2>
+    <div id="quick-menu">
+        <a href="Worldlines_Handbook.pdf">manual</a> 
+        <!--<a href="doc/html/Worldlines Handbook (fixed).html">html</a>,-->
+       [<a href="doc/Worldlines Handbook.pdf">pdf</a>] /
+        <a href="worldlines-apps.zip">app</a> /
+        code /
+        source /
+        contact
+    </div>
 <!--
-            read    The manual  {Walkthrough, Manual 
-        <br>save    The app     {Windows, Mac, Linux
-        <br>view    The code    {
-        <br>get     The source  {
-        <br>contact The author  {
+    <div id="content">
+        <div id="applet-placeholder">
+        the applet goes here
+        </div>
+    </div>
 -->
-
     <div id="content">
         
         <div id="Worldlines_container">
@@ -146,7 +147,16 @@
                     width="1000" height="580"
                     standby="Loading Processing software..." >
                 
-                <param name="archive" value="Worldlines.jar,opengl.jar,opengl.jar,controlP5.jar,vecmath.jar,commons-math-2.0.jar,opengl.jar,opengl.jar,opengl.jar,opengl.jar,core.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar" />
+                <param name="archive" 
+                       value="Worldlines.jar,
+                            opengl.jar,
+                            controlP5.jar,
+                            vecmath.jar,
+                            commons-math-2.0.jar,
+                            core.jar,
+                            http://download.java.net/media/applet-launcher/applet-launcher.jar,
+                            http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,
+                            http://download.java.net/media/gluegen/webstart/gluegen-rt.jar" />
                 <param name="jnlpNumExtensions" value="1">
                 <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
 
@@ -163,14 +173,13 @@
                 <param name="subapplet.displayname" value="Worldlines" />
                 
                 <param name="test_string" value="outer" />
-                <!--<![endif]-->
+            <!--<![endif]-->
                 
                 <object classid="clsid:CAFEEFAC-0016-0000-FFFF-ABCDEFFEDCBA" 
                         width="1000" height="580"
                         standby="Loading Processing software..."  >
 
-                <param name="code" 
-                        value="org.jdesktop.applet.util.JNLPAppletLauncher" />
+                <param name="code" value="org.jdesktop.applet.util.JNLPAppletLauncher" />
                 <param name="archive" value="Worldlines.jar,opengl.jar,opengl.jar,controlP5.jar,vecmath.jar,commons-math-2.0.jar,opengl.jar,opengl.jar,opengl.jar,opengl.jar,core.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar" />
                 <param name="jnlpNumExtensions" value="1">
                 <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
@@ -238,12 +247,12 @@
     <!-- ```` Handbook begin```````````````````````````````````````````````````````````` -->
 
     <div id="handbook-header" width="100%" onclick="showhide('handbook');">
-        <a href="../doc/html/Worldlines Handbook (fixed).xhtml">The worldlines handbook</a>
+        <a href="doc/html/Worldlines Handbook (fixed).xhtml">The worldlines handbook</a>
     </div>
 
     <object id="handbook" width="100%" height="800px" codebase="../doc/html/" data="Worldlines Handbook (fixed).xhtml">
         <!-- Backup contents if object unsupported... -->
-        <a href="../doc/Worldlines Handbook (fixed).xhtml">The worldlines handbook</a>
+        <a href="doc/html/Worldlines Handbook (fixed).xhtml">The worldlines handbook</a>
     </object>
 
     <!-- ```` Handbook end ```````````````````````````````````````````````````````` -->

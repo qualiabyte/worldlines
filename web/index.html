@@ -16,7 +16,7 @@
 
         body {
             margin: 0px 0px 0px 0px;
-            font-family: verdana, geneva, arial, helvetica, sans-serif; 
+            font-family: verdana, geneva, arial, helvetica, sans-serif;
             background-color: #000000; 
             text-decoration: none; 
             font-weight: normal; 
@@ -58,7 +58,8 @@
         div#content {
             font-size: 11px;
         }
-        div#Worldlines_container {
+        div#worldlines-container {
+            margin: 10px 0px 10px 0px;
         /*  display: none;  */      /* Uncomment to test without loading the applet */
         }
         div#handbook-header {
@@ -111,18 +112,18 @@
     <h1 id="banner-title">Worldlines</h1>
     <h2 id="banner-subtitle">  visualizing special relativity</h2>
     <div id="quick-menu">
-        <a href="Worldlines_Handbook.pdf">manual</a> 
-        <!--<a href="doc/html/Worldlines Handbook (fixed).html">html</a>,-->
-       [<a href="doc/Worldlines Handbook.pdf">pdf</a>] /
+        <a href="doc/html/worldlines-handbook.xhtml">manual</a>
+        <!--<a href="doc/html/worldlines-handbook.xhtml">html</a>/-->
+       (<a href="worldlines-handbook.pdf">pdf</a>) /
         <a href="worldlines-apps.zip">app</a> /
-        code /
-        source /
+        <a href="#source-code">code</a>
+       (<a href="https://github.com/qualiabyte/worldlines">github</a>) /
         contact
     </div>
     
     <div id="content">
     
-        <div id="Worldlines_container">
+        <div id="worldlines-container">
         
             <!--[if !IE]> -->
             <object classid="java:org.jdesktop.applet.util.JNLPAppletLauncher" 
@@ -209,7 +210,7 @@
             <![endif]-->
         </div>
         
-        <p>
+        <p id="source-code">
             Source code:
             <a href="applet/Worldlines.pde">Worldlines</a>
             <a href="applet/Axes.pde">Axes</a>
@@ -237,12 +238,12 @@
     <!-- ~~~~ Handbook begin ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
     <div id="handbook-header" width="100%" onclick="showhide('handbook');">
-        <a href="doc/html/Worldlines Handbook (fixed).xhtml">The worldlines handbook</a>
+        <a href="doc/html/worldlines-handbook.xhtml">The worldlines handbook</a>
     </div>
 
-    <object id="handbook" width="100%" height="800px" codebase="doc/html/" data="Worldlines Handbook (fixed).xhtml">
+    <object id="handbook" width="100%" height="800px" codebase="doc/html/" data="worldlines-handbook.xhtml">
         <!-- Backup contents if object unsupported... -->
-        <a href="doc/html/Worldlines Handbook (fixed).xhtml">The worldlines handbook</a>
+        <a href="doc/html/worldlines-handbook.xhtml">The worldlines handbook</a>
     </object>
 
     <!-- ~~~~ Handbook end ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->

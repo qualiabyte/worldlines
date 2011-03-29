@@ -302,7 +302,7 @@ class TwinParadoxScene extends ParticleScene {
     println(twinParticlePair.twinB);
     
     // AGE DIFFERENCE INFOBAR
-    FloatControl ageDiffFloatControl = new FloatControl("ageDiff = ∆τ = τ_A − τ_B", twinParticlePair.getAgeDiff());
+    FloatControl ageDiffFloatControl = new FloatControl("ageDiff = delta_t = t_A - t_B", twinParticlePair.getAgeDiff());
     ageDiffFloatControl.setUnitsLabel("s");
     this.ageDiffInfobar = new Infobar(ageDiffFloatControl);
     

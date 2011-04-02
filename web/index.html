@@ -16,16 +16,15 @@
 
         body {
             margin: 0px 0px 0px 0px;
-            font-family: verdana, geneva, arial, helvetica, sans-serif;
+            font: normal 14px verdana, geneva, arial, helvetica, sans-serif;
             background-color: #000000; 
-            text-decoration: none; 
-            font-weight: normal; 
+            text-decoration: none;
             line-height: normal; 
         }
         
-        a         { color: #56575d; }
-        a:link    { color: #56575d; text-decoration: underline; }
-        a:visited { color: #9cacc1; text-decoration: underline; }
+        a         { color: #333; /* #56575d; */ }
+        a:link    { color: #333; /* #56575d; */ text-decoration: underline; }
+        a:visited { color: #555; /* #9cacc1; */ text-decoration: underline; }
         a:active  { color: #9cacc1; text-decoration: underline; }
         a:hover   { color: #E5B; /* #C8B; #5e5; #a0e39c; */ text-decoration: underline; }
         
@@ -55,7 +54,18 @@
             font-size: 30px;
             font-family: Consolas, "Lucida Console", "Andale Mono", monospace;
         }
-        div#content {
+        div.menu-block {
+            display: inline-block;
+            vertical-align: top;
+        }
+        div.menu-block .top {
+            text-align: right;
+        }
+        div.menu-block .sub {
+            font-size: 0.5em;
+            text-align: right;
+        }
+        div#applet-content {
             font-size: 11px;
         }
         div#worldlines-container {
@@ -63,10 +73,11 @@
         /*  display: none;  */      /* Uncomment to test without loading the applet */
         }
         div#handbook-header {
+            font: normal 2em Georgia;
             background: #F8F8F8; /* #F0FCF0; */ /* #F8F8F8 */
             padding: 0.25em;
-            border-width: 1px;
-            border-style: none none dashed solid;
+            border-width: 5px 1px;
+            border-style: none none none solid;
             border-color: #CCCCCC;
         }
         /* ]]> */
@@ -76,7 +87,7 @@
 
     <script language="javascript">
     <!--
-        var state = 'none';
+        var state = 'block';
 
         function showhide(layer_ref) {
 
@@ -112,16 +123,44 @@
     <h1 id="banner-title">Worldlines</h1>
     <h2 id="banner-subtitle">  visualizing special relativity</h2>
     <div id="quick-menu">
-        <a href="doc/html/worldlines-handbook.xhtml">manual</a>
-        <!--<a href="doc/html/worldlines-handbook.xhtml">html</a>/-->
-       (<a href="worldlines-handbook.pdf">pdf</a>) /
-        <a href="worldlines-apps.zip">app</a> /
-        <a href="#source-code">code</a>
-       (<a href="https://github.com/qualiabyte/worldlines">github</a>) /
-        contact
+        <div class="menu-block">
+            <div class="top">
+                <a href="#handbook-content">manual</a>
+            </div>
+            <div class="sub">
+                (<a href="worldlines-handbook.pdf">pdf</a>,
+                 <a href="handbook-html/worldlines-handbook.xhtml">html</a>)
+            </div>
+        </div>
+        /<div class="menu-block">
+            <div class="top">
+                <a href="#applet-content">app</a>
+            </div>
+            <div class="sub">
+                (<a href="worldlines.windows.zip">win</a>,
+                <a href="worldlines.macosx.zip">mac</a>,
+                <a href="worldlines.linux.zip">lin</a>)
+            </div>
+        </div>
+        /<div class="menu-block">
+            <div class="top">
+                <a href="#source-code">code</a>
+            </div>
+            <div class="sub">
+                (<a href="https://github.com/qualiabyte/worldlines">github</a>,
+                <a href="#source-code">browse</a>)
+            </div>
+        </div>
+        / <div class="menu-block">
+            <div class="top">
+                contact
+            </div>
+            <div class="sub">
+            </div>
+        </div>
     </div>
     
-    <div id="content">
+    <div id="applet-content">
     
         <div id="worldlines-container">
         
@@ -236,16 +275,16 @@
     </div>
 
     <!-- ~~~~ Handbook begin ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <div id="handbook-content">
+        <div id="handbook-header" width="100%" onclick="showhide('handbook');">
+            <a href="handbook-html/worldlines-handbook.xhtml">The worldlines handbook</a>
+        </div>
 
-    <div id="handbook-header" width="100%" onclick="showhide('handbook');">
-        <a href="doc/html/worldlines-handbook.xhtml">The worldlines handbook</a>
+        <object id="handbook" width="100%" height="800px" codebase="handbook-html/" data="worldlines-handbook.xhtml">
+            <!-- Backup contents if object unsupported... -->
+            <a href="handbook-html/worldlines-handbook.xhtml">The worldlines handbook</a>
+        </object>
     </div>
-
-    <object id="handbook" width="100%" height="800px" codebase="doc/html/" data="worldlines-handbook.xhtml">
-        <!-- Backup contents if object unsupported... -->
-        <a href="doc/html/worldlines-handbook.xhtml">The worldlines handbook</a>
-    </object>
-
     <!-- ~~~~ Handbook end ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
     </div>

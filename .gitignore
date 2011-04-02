@@ -16,4 +16,5 @@ application.windows/
 # Build Binaries #
 doc/Worldlines Handbook.pdf
 web/Worldlines_Handbook.pdf
-web/worldlines-apps.zip
+web/worldlines.*.zip
+worldlines.web.zip

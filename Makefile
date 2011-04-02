@@ -4,22 +4,29 @@ HANDBOOK_LYX = Worldlines\ Handbook.lyx
 HANDBOOK_PDF = Worldlines\ Handbook.pdf
 
 HANDBOOK_SRC = $(DOC_DIR)/$(HANDBOOK_LYX)
-HANDBOOK_OUT = $(DOC_DIR)/$(HANDBOOK_PDF)
+HANDBOOK = $(DOC_DIR)/$(HANDBOOK_PDF)
+
+WEB_ZIP = worldlines.web.zip
+
+PRODUCTS = $(HANDBOOK) $(WEB_ZIP)
 
 all: doc web
 
 doc: handbook_pdf
 
-handbook_pdf: $(HANDBOOK_OUT)
+handbook_pdf: $(HANDBOOK)
 
-$(HANDBOOK_OUT): $(HANDBOOK_SRC)
+$(HANDBOOK): $(HANDBOOK_SRC)
 	(cd $(DOC_DIR); lyx --export pdf $(HANDBOOK_LYX))
 
 web: applet applet-required applications
 	@if [ -d web/applet ]; then \
 		echo "Copying additional jars for applet"; \
 		cp web/applet-required/* web/applet/; \
-	fi
+	fi; \
+	echo "Creating package: $(WEB_ZIP)"; \
+	zip --quiet -r $(WEB_ZIP) web \
+	    --exclude '*~' web/applet-required/\* web/doc/\* web/handbook-html/\*sized/\*;
 
 applet:
 	@if [ ! -d applet ]; then \
@@ -46,5 +53,5 @@ applications:
 	done
 
 clean:
-	(cd $(DOC_DIR); rm $(HANDBOOK_PDF))
+	-rm $(PRODUCTS)
 

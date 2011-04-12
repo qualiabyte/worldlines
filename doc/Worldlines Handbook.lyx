@@ -2676,19 +2676,86 @@ reference "fig:Multi-postTurn-world"
 
 \end_inset
 
- show the asymmetry in the twin paradox - from twin B's perspective, by
- the time he reaches 
+ show the asymmetry in the twin paradox
+\change_inserted 0 1302574850
+.
+
+\change_deleted 0 1302574853
+ - from twin B's perspective, 
+\change_inserted 0 1302574896
+ In the world frame (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Multi-preTurn-world"
+
+\end_inset
+
+), 
+\change_unchanged
+by the time 
+\change_inserted 0 1302574873
+twin B
+\change_deleted 0 1302573266
+he
+\change_unchanged
+ reaches 
 \begin_inset Formula $\tau_{B}=50\, s$
 \end_inset
 
+
+\change_inserted 0 1302574873
+ (that is, by his clock)
+\change_unchanged
 , twin A has already missed the opportunity to take the action which twin
  B now takes, changing his frame of reference by reversing his velocity.
- Looking at the clock tick history in the last image, we see that just after
- twin B turns, just over 
+ 
+\change_inserted 0 1302574873
+This is seen by 
+\change_deleted 0 1302573372
+L
+\change_inserted 0 1302574873
+l
+\change_unchanged
+ooking at the clock tick history in the last image
+\change_inserted 0 1302574873
+ (Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Multi-postTurn-world"
+
+\end_inset
+
+)
+\change_unchanged
+, 
+\change_inserted 0 1302574873
+where 
+\change_unchanged
+we see that just after twin B turns, just over 
 \begin_inset Formula $80\, s$
 \end_inset
 
  has elapsed for twin A.
+
+\change_inserted 0 1302574939
+ Figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Multi-preTurn-local"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Multi-postTurn-local"
+
+\end_inset
+
+ show how this turnaround looks from the frame of twin B just before and
+ after the acceleration.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Standard

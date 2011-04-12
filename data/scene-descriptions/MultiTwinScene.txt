@@ -1,0 +1,16 @@
+Multiple Twins Scene
+
+This scene is similar to the Twin Paradox Scene,
+but with multiple "B Twins" departing at different speeds.
+
+The surface of "constant time" connecting equivalent clock ticks
+between the departing twins is seen to be curved, an indication
+that time in this simulation is indeed relative (rather than absolute)
+between different frames of reference - and is velocity dependent.
+
+This scene is fascinating to watch from the perspective of the B Twins.
+(Try right-clicking any twin and select 'makeTargetParticle')
+
+If you lower the 'timestep', 'restart' and then switch to B's frame,
+you can see the see the change of reference frame at t_B = 50 s.
+

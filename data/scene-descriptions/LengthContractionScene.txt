@@ -1,0 +1,22 @@
+Length Contraction Scene
+
+This scene shows how fixed lengths in the world frame
+are contracted in the the rest frame of a moving particle.
+
+It features a field of uniform particles, and a single
+oscillating target particle. By default, events are shown
+in the reference frame of this target.
+
+As the particle accelerates, the intersections of the uniform
+particle grid with the target's x'y' simultaneity plane shows
+how the grid appears to be distributed in the moving frame.
+
+Specifically, the grid contracts along the target's direction
+of motion (here, along the x-axis). Thus, the intersections'
+x-separation becomes much smaller at high speeds.
+
+Meanwhile, events simultaneous for the target in the world
+frame are shifted 'above' or 'below' the target's simultaneity
+plane - into the future or past, depending on if they are in front
+of or behind the particle along its direction of motion.
+

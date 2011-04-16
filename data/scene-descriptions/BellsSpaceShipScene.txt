@@ -1,0 +1,19 @@
+Bell's Spaceship Paradox Scene
+
+In this fun scene, you control a fleet of ships with the W A S D
+keys. Each ship is modeled as an "idealized rigid body" (shown as
+yellow trapezoids) - as if each ship were to perfectly retain its
+shape within its rest frame while accelerating.
+
+Events in this scene are shown in the reference frame of the front
+ship in the fleet. After accelerating, each ship will retain its
+shape in this frame (since all ships are moving with the same
+velocity), but you will see that simultaneity is broken between
+fleet members.
+
+That is, moving in the x-direction, "current" events in the world
+frame for ships in the back of the fleet are shifted into "up"
+into the future of the leading ship. Additionally, though each
+ship's size and shape are retained, they become spaced further
+apart!
+

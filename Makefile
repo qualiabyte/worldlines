@@ -8,7 +8,11 @@ HANDBOOK = $(DOC_DIR)/$(HANDBOOK_PDF)
 
 WEB_ZIP = worldlines.web.zip
 
-PRODUCTS = $(HANDBOOK) $(WEB_ZIP)
+APP_ZIPS = web/worldlines.linux.zip \
+           web/worldlines.macosx.zip \
+           web/worldlines.windows.zip
+
+PRODUCTS = $(HANDBOOK) $(WEB_ZIP) $(APP_ZIPS)
 
 all: doc web
 

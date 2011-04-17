@@ -1,60 +1,79 @@
 /* Fixes and styles for Lyx's exported XHTML */
 
-/* ```` Fixes `````````````````````````````````````````````````````` */
+/* FIXES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+/* Give images a consistent height (helps align captions) */
 img {
-height: 325px;
+    height: 325px !important;
+    width: auto !important;
 }
 
-/* ```` Styles `````````````````````````````````````````````````````` */
+/* STYLES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 body {
-margin: 0px;
-width: 45em; /* 80%; 1000px; */
-font-size: 85%;
-font-family: "trebuchet MS","nimbus","helvetica","verdana","Deja Vu Sans","sans-serif" !important;
+    margin: 0px;
+    width: 45em; /* 80%; 1000px; */
+    font-size: 85%;
+    font-family: "Trebuchet MS","nimbus","helvetica","verdana","Deja Vu Sans","sans-serif" !important;
 }
 
 a {
-color: #08f;
+    color: #08f;
 }
 
 h1.title {
-font-size: large;
+    font-size: large;
 }
+
 h2.subsubsection {
 }
+
 h3.subsection {
-margin: 0.5em 1em !important;
+    margin: 0.5em 1em !important;
 }
+
 h4.subsubsection, h4.paragraph {
-margin-left: 2em;
+    margin-left: 2em;
 }
 
 div.standard /*div.abstract, h1.title*/ {
-margin: 1em 1em 1em 3em !important;
+    margin: 1em 1em 1em 3em !important;
 }
 
+/* No heavy table borders */
+table {
+    border: none !important;
+}
+
+table * td {
+    border: none !important;
+}
+
+/* Container for figure panels */
 body > div.float-figure {
-float: left;
-background: none repeat scroll 0 0 #F0F0F0; /* #EAFFD5; */
-border: 1px solid #CCCCCC;
-padding: 1ex 0.5ex;
-margin: 1.5em 2px;
-width: auto;
+    float: left;
+    background: none repeat scroll 0 0 #F0F0F0; /* #EAFFD5; */
+    border: 1px solid #CCCCCC;
+    padding: 1ex 0.5ex;
+    margin: 1.5em 2px;
+    width: auto;
 }
 
-table                    { border: none !important; }
-table * td               { border: none !important; }
-
-div.float-figure * td > div.plainlayout:only-child, td > div.float-figure {
-    /*border: 1px dashed #222222 !important;*/
-    border: 1px dashed #CCCCCC !important;
+/* Individual figure panel */
+td > div.float-figure,
+div.float-figure * td > div.plain_layout:only-child
+{
     background: white;
+    border: 1px dashed #CCCCCC !important;
     padding: 1ex;
     text-align: center;
 }
 
-div.float-caption-figure { border: none !important; }
-div.float-caption        { border: none !important; }
-/*div.float-figure         { border: 1px dashed grey !important; background: white;}*/
+/* No heavy figure borders */
+div.float-caption-figure {
+    border: none !important;
+}
+
+div.float-caption        {
+    border: none !important;
+}

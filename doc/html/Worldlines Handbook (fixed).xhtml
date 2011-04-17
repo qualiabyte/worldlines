@@ -2,12 +2,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 plus MathML 2.0//EN" "http://www.w3.org/TR/MathML2/dtd/xhtml-math11-f.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="GENERATOR" content="LyX 2.0.0alpha6" />
+<meta name="GENERATOR" content="LyX 2.0.0rc3" />
 <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
-<title>LyX Document</title>
-
-<!-- Text Class Preamble -->
-<style type="text/css">
+<title>Worldlines Handbook</title>
 
 <!-- Begin Fixes -->
 
@@ -15,6 +12,9 @@
 
 <!-- End Fixes-->
 
+
+<!-- Text Class Preamble -->
+<style type="text/css">
 div.toc { 
 margin: 2em 0em; 
 border-style: solid; 
@@ -44,7 +44,7 @@ color: #909090;
 a.tocarrow:visited { color: #C0C0C0; }
 </style>
 
-<!-- Premable Snippets -->
+<!-- Preamble Snippets -->
 <style type="text/css">
 table { border: 1px solid black; display: inline-block; }
 td { border: 1px solid black; padding: 0.5ex; }
@@ -61,7 +61,7 @@ div.standard {
 margin-bottom: 2ex;
 }
 h1.title {
-font-size: large;
+font-size: x-large;
 margin-bottom: 1ex;
 text-align: center;
 
@@ -113,7 +113,7 @@ margin-bottom: 0.5ex;
 text-align: left;
 
 }
-div.plainlayout {
+div.plain_layout {
 text-align: left;
 
 }
@@ -135,8 +135,12 @@ text-align: left;
 ol.lyxlist {
 list-style-type: none;
 }
+li.labeling_item {
+text-indent: -5em;
+margin-left: 5em;
+}
 span.lyxlist {
-margin-right: 3em;
+margin-right: 1em;
 }
 ol.enumerate {
 margin-top: 0.7ex;
@@ -145,7 +149,7 @@ margin-left: 3ex;
 text-align: left;
 
 }
-h2.section {
+h2.section_ {
 font-weight: bold;
 font-size: x-large;
 margin-top: 1.3ex;
@@ -153,7 +157,7 @@ margin-bottom: 0.7ex;
 text-align: left;
 
 }
-h1.part {
+h1.part_ {
 font-weight: bold;
 font-size: x-large;
 margin-top: 2ex;
@@ -170,7 +174,7 @@ text-decoration: underline;
 div.foot { 
 display: inline; 
 font-size: small;
-font-weight: normal;
+font-weight: medium;
 font-family: serif;
 font-variant: normal;
 font-style: normal;
@@ -200,8 +204,8 @@ margin: 1ex;
 <div style='height:0.5in'></div>
 <h1 class="title"><a id='magicparlabel-2' />
 <strong>Worldlines - An Interactive Special Relativity Visualization</strong></h1>
-<div class="address" style='text-align: center;'><a id='magicparlabel-3' />
-<img src='1_media_Elements_projects_worldlines_Worldlines___0_20100929_Worldlines_doc_images_bells_ship.png' alt='image: 1_media_Elements_projects_worldlines_Worldlines___0_20100929_Worldlines_doc_images_bells_ship.png' />
+<div class="standard" style='text-align: center;'><a id='magicparlabel-3' />
+<img style=' height:2.5in;' src='1_bells_ship.png' />
 </div>
 <div class="address" style='text-align: center;'><a id='magicparlabel-4' />
 Tyler Florez</div>
@@ -253,7 +257,11 @@ Special Relativity (SR) is fascinating because it suggests that some of the seem
 <div class="standard"><a id='magicparlabel-34' />
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
-  <mrow><mi> &gamma; </mi><mo> &equiv; </mo><mi>d</mi><mi>t</mi><mo>/</mo><mi>d</mi><mi> &tau; </mi><mtext mathvariant='normal'>&ThinSpace;,&ThinSpace;the&ThinSpace;Time&ThinSpace;Dilation&ThinSpace;Factor</mtext>
+  <mrow><mi> &gamma; </mi><mo> &equiv; </mo><mi>d</mi><mi>t</mi><mo>/</mo><mi>d</mi><mi> &tau; </mi>
+   <mstyle mathvariant='normal'>
+    <mrow>&nbsp;<mo>,</mo>&nbsp;<mi>t</mi><mi>h</mi><mi>e</mi>&nbsp;<mi>T</mi><mi>i</mi><mi>m</mi><mi>e</mi>&nbsp;<mi>D</mi><mi>i</mi><mi>l</mi><mi>a</mi><mi>t</mi><mi>i</mi><mi>o</mi><mi>n</mi>&nbsp;<mi>F</mi><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi>
+    </mrow>
+   </mstyle>
   </mrow>
  </mrow></math></div>
 
@@ -310,7 +318,11 @@ The time dilation factor is given by the Lorentz term, which is crucial in SR:</
       </mrow>
      </msqrt>
     </mrow>
-   </mfrac><mtext mathvariant='normal'>&ThinSpace;,&ThinSpace;the&ThinSpace;Lorentz&ThinSpace;Factor</mtext>
+   </mfrac>
+   <mstyle mathvariant='normal'>
+    <mrow>&nbsp;<mo>,</mo>&nbsp;<mi>t</mi><mi>h</mi><mi>e</mi>&nbsp;<mi>L</mi><mi>o</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>z</mi>&nbsp;<mi>F</mi><mi>a</mi><mi>c</mi><mi>t</mi><mi>o</mi><mi>r</mi>
+    </mrow>
+   </mstyle>
   </mrow>
  </mrow></math></div>
 
@@ -366,29 +378,45 @@ Thus, we can see how clocks at relativistic speeds are seen to advance at a redu
  </mrow></math></div>
 
 <div class="standard"><a id='magicparlabel-41' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-64' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-64' />
 <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mo> &Delta; </mo><mi>t</mi>
   </mrow>
  </mrow></math></div>
-</td><td align='left' valign='top'><div class="plainlayout"><a id='magicparlabel-67' />
+</td>
+
+<td align='left' valign='top'><div class="plain_layout"><a id='magicparlabel-67' />
 Time outside the rest frame</div>
-</td></tr><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-70' />
+</td>
+</tr>
+<tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-70' />
 <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mo> &Delta; </mo><mi> &tau; </mi>
   </mrow>
  </mrow></math></div>
-</td><td align='left' valign='top'><div class="plainlayout"><a id='magicparlabel-73' />
+</td>
+
+<td align='left' valign='top'><div class="plain_layout"><a id='magicparlabel-73' />
 Proper time measured by clock at rest</div>
-</td></tr><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-76' />
+</td>
+</tr>
+<tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-76' />
 <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow><mi> &gamma; </mi>
  </mrow></math></div>
-</td><td align='left' valign='top'><div class="plainlayout"><a id='magicparlabel-79' />
+</td>
+
+<td align='left' valign='top'><div class="plain_layout"><a id='magicparlabel-79' />
 Time dilation factor</div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 
 <div class="standard"><a id='magicparlabel-80' />
 </div>
@@ -490,7 +518,13 @@ Our inability to catch up with light is a special case of SR's contradiction of 
 
 <div class="standard"><a id='magicparlabel-87' />
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
- <mrow><mtext mathvariant='normal'>&ThinSpace;Galilean&ThinSpace;velocity&ThinSpace;addition&ThinSpace;<mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo>not&ThinSpace;generally&ThinSpace;true<mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo></mtext>
+ <mrow>
+  <mstyle mathvariant='normal'>
+   <mrow>&nbsp;<mi>G</mi><mi>a</mi><mi>l</mi><mi>i</mi><mi>l</mi><mi>e</mi><mi>a</mi><mi>n</mi>&nbsp;<mi>v</mi><mi>e</mi><mi>l</mi><mi>o</mi><mi>c</mi><mi>i</mi><mi>t</mi><mi>y</mi>&nbsp;<mi>a</mi><mi>d</mi><mi>d</mi><mi>i</mi><mi>t</mi><mi>i</mi><mi>o</mi><mi>n</mi>&nbsp;<mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo>
+    <mrow><mi>n</mi><mi>o</mi><mi>t</mi>&nbsp;<mi>g</mi><mi>e</mi><mi>n</mi><mi>e</mi><mi>r</mi><mi>a</mi><mi>l</mi><mi>l</mi><mi>y</mi>&nbsp;<mi>t</mi><mi>r</mi><mi>u</mi><mi>e</mi>
+    </mrow><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
+   </mrow>
+  </mstyle>
  </mrow></math></div>
 
 <div class="standard"><a id='magicparlabel-88' />
@@ -572,7 +606,11 @@ Our inability to catch up with light is a special case of SR's contradiction of 
       </msup>
      </mrow>
     </mrow>
-   </mfrac><mtext mathvariant='normal'>&ThinSpace;,&ThinSpace;velocity&ThinSpace;addition&ThinSpace;in&ThinSpace;SR</mtext>
+   </mfrac>
+   <mstyle mathvariant='normal'>
+    <mrow>&nbsp;<mo>,</mo>&nbsp;<mi>v</mi><mi>e</mi><mi>l</mi><mi>o</mi><mi>c</mi><mi>i</mi><mi>t</mi><mi>y</mi>&nbsp;<mi>a</mi><mi>d</mi><mi>d</mi><mi>i</mi><mi>t</mi><mi>i</mi><mi>o</mi><mi>n</mi>&nbsp;<mi>i</mi><mi>n</mi>&nbsp;<mi>S</mi><mi>R</mi>
+    </mrow>
+   </mstyle>
   </mrow>
  </mrow></math></div>
 <h4 class="subsubsection"><span class="subsubsection_label">1.2.1</span> <a id='magicparlabel-91' />
@@ -857,25 +895,39 @@ The Lorentz equations which map event coordinates <math xmlns="http://www.w3.org
 
 <div class="standard"><a id='magicparlabel-102' />
 The Lorentz transformation can be expressed using a matrix <math xmlns="http://www.w3.org/1998/Math/MathML">
- <mrow><mstyle mathvariant='bold'><mi>L</mi></mstyle>
+ <mrow>
+  <mstyle mathvariant='bold'><mi>L</mi>
+  </mstyle>
  </mrow></math> which performs an operation mapping column vectors <math xmlns="http://www.w3.org/1998/Math/MathML">
- <mrow><mstyle mathvariant='bold'><mi>x</mi></mstyle>
+ <mrow>
+  <mstyle mathvariant='bold'><mi>x</mi>
+  </mstyle>
  </mrow></math> to <math xmlns="http://www.w3.org/1998/Math/MathML">
- <mrow><mstyle mathvariant='bold'>
-  <mrow><mi>x</mi><mo>'</mo>
-  </mrow></mstyle>
+ <mrow>
+  <mstyle mathvariant='bold'>
+   <mrow><mi>x</mi><mo>'</mo>
+   </mrow>
+  </mstyle>
  </mrow></math> (mixing the space and time components in the process in a rotation-like fashion). The equation for the transformed space-time component <math xmlns="http://www.w3.org/1998/Math/MathML">
- <mrow><mstyle mathvariant='bold'>
-  <mrow><mi>x</mi><mo>'</mo>
-  </mrow></mstyle>
+ <mrow>
+  <mstyle mathvariant='bold'>
+   <mrow><mi>x</mi><mo>'</mo>
+   </mrow>
+  </mstyle>
  </mrow></math> takes the general form:</div>
 
 <div class="standard"><a id='magicparlabel-103' />
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
-  <mrow><mstyle mathvariant='bold'>
-   <mrow><mi>x</mi><mo>'</mo>
-   </mrow></mstyle><mo>=</mo><mstyle mathvariant='bold'><mi>L</mi></mstyle><mstyle mathvariant='bold'><mi>x</mi></mstyle>
+  <mrow>
+   <mstyle mathvariant='bold'>
+    <mrow><mi>x</mi><mo>'</mo>
+    </mrow>
+   </mstyle><mo>=</mo>
+   <mstyle mathvariant='bold'><mi>L</mi>
+   </mstyle>
+   <mstyle mathvariant='bold'><mi>x</mi>
+   </mstyle>
   </mrow>
  </mrow></math></div>
 
@@ -957,7 +1009,11 @@ In the Worldlines program, I've used the following explicit matrix form for the 
   </mrow>
  </mrow></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
-  <mrow><mtext mathvariant='normal'>Where:&ThinSpace;</mtext><mi> &beta; </mi><mo>=</mo><mi>v</mi><mo>/</mo><mi>c</mi>
+  <mrow>
+   <mstyle mathvariant='normal'>
+    <mrow><mi>W</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>e</mi><mo>:</mo>&nbsp;
+    </mrow>
+   </mstyle><mi> &beta; </mi><mo>=</mo><mi>v</mi><mo>/</mo><mi>c</mi>
   </mrow>
  </mrow></math></div>
 
@@ -967,19 +1023,23 @@ Similarly, the inverse Lorentz transform, which takes coordinates in the moving 
 <div class="standard"><a id='magicparlabel-107' />
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
-  <mrow><mstyle mathvariant='bold'>
-   <mrow><mi>x</mi><mo>=</mo>
-   </mrow></mstyle><mstyle mathvariant='bold'>
-   <mrow>
-    <msup>
-     <mrow><mi>L</mi>
-     </mrow>
-     <mrow>
-      <mrow><mo>-</mo><mn>1</mn>
+  <mrow>
+   <mstyle mathvariant='bold'>
+    <mrow><mi>x</mi><mo>=</mo>
+    </mrow>
+   </mstyle>
+   <mstyle mathvariant='bold'>
+    <mrow>
+     <msup>
+      <mrow><mi>L</mi>
       </mrow>
-     </mrow>
-    </msup><mi>x</mi><mo>'</mo>
-   </mrow></mstyle>
+      <mrow>
+       <mrow><mo>-</mo><mn>1</mn>
+       </mrow>
+      </mrow>
+     </msup><mi>x</mi><mo>'</mo>
+    </mrow>
+   </mstyle>
   </mrow>
  </mrow></math></div>
 
@@ -1060,7 +1120,7 @@ Where I've used the following explicit matrix form:</div>
  </mrow></math></div>
 
 <div class="standard"><a id='magicparlabel-110' />
-This is basically the standard configuration for the Lorentz transformation (but with the time coordinate listed last), in which the difference between the forward and inverse transformations is just a change in sign.<div class="foot"><span class="foot_label">1</span><div class="foot_inner"><div class="plainlayout"><a id='magicparlabel-114' />
+This is basically the standard configuration for the Lorentz transformation (but with the time coordinate listed last), in which the difference between the forward and inverse transformations is just a change in sign.<div class="foot"><span class="foot_label">1</span><div class="foot_inner"><div class="plain_layout"><a id='magicparlabel-114' />
 Since for a pair of frames with coordinate axes facing the same direction, relative velocities for the same action will have opposite sign, whether the motion is towards or away.</div>
 </div></div></div>
 <h4 class="subsubsection"><span class="subsubsection_label">1.4.1</span> <a id='magicparlabel-115' />
@@ -1277,7 +1337,11 @@ In constructing <math xmlns="http://www.w3.org/1998/Math/MathML">
 <div class="standard"><a id='magicparlabel-123' />
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
-  <mrow><mtext mathvariant='normal'>Where:&ThinSpace;</mtext>
+  <mrow>
+   <mstyle mathvariant='normal'>
+    <mrow><mi>W</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>e</mi><mo>:</mo>&nbsp;
+    </mrow>
+   </mstyle>
    <msub>
     <mrow><mi> &theta; </mi>
     </mrow>
@@ -1321,10 +1385,13 @@ Scenarios</h2>
 Axes Scene - Coordinate Transforms &amp; the Simultaneity Plane</h3>
 <div class="standard"><a id='magicparlabel-132' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-136' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-151' />
-<img src='2_media_Elements_projects_worldlines_Worldlines___es_doc_images_axesScene_sideview2_crop_less.png' alt='image: 2_media_Elements_projects_worldlines_Worldlines___es_doc_images_axesScene_sideview2_crop_less.png' />
-<div class='float-caption float-caption-figure'>Figure 1:<div class="plainlayout"><a id='magicparlabel-155' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-136' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-151' />
+<img style='width:40%;' src='2_axesScene_sideview2_crop_less.png' />
+<div class='float-caption float-caption-figure'>Figure 1:<div class="plain_layout"><a id='magicparlabel-155' />
 <a id="fig_AxesScene_Grid" />
 Target particle moving in <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow><mi>x</mi>
@@ -1342,13 +1409,18 @@ Target particle moving in <math xmlns="http://www.w3.org/1998/Math/MathML">
   </mrow>
  </mrow></math> basis vectors for each particle's frame.</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-158' />
-<img src='3_media_Elements_projects_worldlines_Worldlines___929_Worldlines_doc_images_axesScene_general.png' alt='image: 3_media_Elements_projects_worldlines_Worldlines___929_Worldlines_doc_images_axesScene_general.png' />
-<div class='float-caption float-caption-figure'>Figure 2:<div class="plainlayout"><a id='magicparlabel-162' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-158' />
+<img style='width:45%;' src='3_axesScene_general.png' />
+<div class='float-caption float-caption-figure'>Figure 2:<div class="plain_layout"><a id='magicparlabel-162' />
 <a id="fig_AxesScene_Layout" />
 The layout of the Axes Scene: multiple stationary particles and one driven, oscillating particle (targeted, with axis grid displayed). Particle clock ticks are shown as yellow dots along the particle paths.</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
@@ -1493,10 +1565,13 @@ In Figure <a href="#fig_AxesScene_GridNoCollapse">4</a>, the particle is again a
 
 <div class="standard"><a id='magicparlabel-182' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-186' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-201' />
-<img src='4_media_Elements_projects_worldlines_Worldlines___ines_doc_images_axesScene_stretch_0_95to98c.png' alt='image: 4_media_Elements_projects_worldlines_Worldlines___ines_doc_images_axesScene_stretch_0_95to98c.png' />
-<div class='float-caption float-caption-figure'>Figure 3:<div class="plainlayout"><a id='magicparlabel-205' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-186' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-201' />
+<img style='width:45%;' src='4_axesScene_stretch_0_95to98c.png' />
+<div class='float-caption float-caption-figure'>Figure 3:<div class="plain_layout"><a id='magicparlabel-205' />
 <a id="fig_AxesScene_GridCollapse" />
 In the world frame, the <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -1512,9 +1587,11 @@ In the world frame, the <math xmlns="http://www.w3.org/1998/Math/MathML">
   </mrow>
  </mrow></math>.</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-208' />
-<img src='5_media_Elements_projects_worldlines_Worldlines____doc_images_axesScene_0_95c_again_crop_axes.png' alt='image: 5_media_Elements_projects_worldlines_Worldlines____doc_images_axesScene_0_95c_again_crop_axes.png' />
-<div class='float-caption float-caption-figure'>Figure 4:<div class="plainlayout"><a id='magicparlabel-212' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-208' />
+<img style='width:45%;' src='5_axesScene_0_95c_again_crop_axes.png' />
+<div class='float-caption float-caption-figure'>Figure 4:<div class="plain_layout"><a id='magicparlabel-212' />
 <a id="fig_AxesScene_GridNoCollapse" />
 In the rest frame of the target particle, the target's coordinate space (and <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -1530,7 +1607,10 @@ In the rest frame of the target particle, the target's coordinate space (and <ma
   </mrow>
  </mrow></math> grid, stretching offscreen.</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
@@ -1542,16 +1622,21 @@ Twin Paradox Scene<a id="sub_Twin_Paradox" />
 </h3>
 <div class="standard"><a id='magicparlabel-215' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-219' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-234' />
-<img src='6_media_Elements_projects_worldlines_Worldlines___9_Worldlines_doc_images_twinScene_turn_crop.png' alt='image: 6_media_Elements_projects_worldlines_Worldlines___9_Worldlines_doc_images_twinScene_turn_crop.png' />
-<div class='float-caption float-caption-figure'>Figure 5:<div class="plainlayout"><a id='magicparlabel-238' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-219' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-234' />
+<img style='width:45%;' src='6_twinScene_turn_crop.png' />
+<div class='float-caption float-caption-figure'>Figure 5:<div class="plain_layout"><a id='magicparlabel-238' />
 <a id="fig_Twin_Return" />
 The Twin Paradox Scene in the world frame, return stage. Twin A stays at rest, while twin B departs and returns at constant velocity. The conundrum goes as follows. If, as according to time dilation, &ldquo;frames in relative motion see each other's clocks as advancing more slowly,&rdquo; then what is the relationship between the ages of the two twins in this scenario?</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-241' />
-<img src='7_media_Elements_projects_worldlines_Worldlines____Worldlines_doc_images_twinScene_start_crop.png' alt='image: 7_media_Elements_projects_worldlines_Worldlines____Worldlines_doc_images_twinScene_start_crop.png' />
-<div class='float-caption float-caption-figure'>Figure 6:<div class="plainlayout"><a id='magicparlabel-245' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-241' />
+<img style='width:45%;' src='7_twinScene_start_crop.png' />
+<div class='float-caption float-caption-figure'>Figure 6:<div class="plain_layout"><a id='magicparlabel-245' />
 <a id="fig_Twin_Depart" />
  Twin Paradox Scene, departure stage. In twin A's frame, twin B is always aging more slowly. The yellow &ldquo;ageDiff&rdquo; meter tracks their difference in age, <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -1575,7 +1660,10 @@ The Twin Paradox Scene in the world frame, return stage. Twin A stays at rest, w
   </mrow>
  </mrow></math> intervals. See Section <a href="#sub_Clock_Ticks">3.2.3</a> <em>Graphical Elements: Clock Ticks</em> for the full range of tick colors and spacings.)</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
@@ -1636,7 +1724,11 @@ If each of the twins carry clocks to record the duration of their trip to be com
     </mrow>
     <mrow><mi>B</mi>
     </mrow>
-   </msub><mtext mathvariant='normal'>&ThinSpace;,&ThinSpace;Elapsed&ThinSpace;Propertime&ThinSpace;in&ThinSpace;Twin&ThinSpace;Paradox</mtext>
+   </msub>
+   <mstyle mathvariant='normal'>
+    <mrow>&nbsp;<mo>,</mo>&nbsp;<mi>E</mi><mi>l</mi><mi>a</mi><mi>p</mi><mi>s</mi><mi>e</mi><mi>d</mi>&nbsp;<mi>P</mi><mi>r</mi><mi>o</mi><mi>p</mi><mi>e</mi><mi>r</mi><mi>t</mi><mi>i</mi><mi>m</mi><mi>e</mi>&nbsp;<mi>i</mi><mi>n</mi>&nbsp;<mi>T</mi><mi>w</mi><mi>i</mi><mi>n</mi>&nbsp;<mi>P</mi><mi>a</mi><mi>r</mi><mi>a</mi><mi>d</mi><mi>o</mi><mi>x</mi>
+    </mrow>
+   </mstyle>
   </mrow>
  </mrow></math></div>
 
@@ -1649,7 +1741,11 @@ In other words, the twins' age difference should be greater than zero:</div>
 
 <div class="standard"><a id='magicparlabel-259' />
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
- <mrow><mtext mathvariant='normal'>Age&ThinSpace;Difference&ThinSpace;in&ThinSpace;Twin&ThinSpace;Paradox:</mtext>
+ <mrow>
+  <mstyle mathvariant='normal'>
+   <mrow><mi>A</mi><mi>g</mi><mi>e</mi>&nbsp;<mi>D</mi><mi>i</mi><mi>f</mi><mi>f</mi><mi>e</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi>&nbsp;<mi>i</mi><mi>n</mi>&nbsp;<mi>T</mi><mi>w</mi><mi>i</mi><mi>n</mi>&nbsp;<mi>P</mi><mi>a</mi><mi>r</mi><mi>a</mi><mi>d</mi><mi>o</mi><mi>x</mi><mo>:</mo>
+   </mrow>
+  </mstyle>
  </mrow></math></div>
 
 <div class="standard"><a id='magicparlabel-260' />
@@ -1687,7 +1783,11 @@ The age difference in the twin paradox is a particular result of time dilation. 
 
 <div class="standard"><a id='magicparlabel-263' />
 <math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
- <mrow><mtext mathvariant='normal'>The&ThinSpace;Lorentz&ThinSpace;Invariant:</mtext>
+ <mrow>
+  <mstyle mathvariant='normal'>
+   <mrow><mi>T</mi><mi>h</mi><mi>e</mi>&nbsp;<mi>L</mi><mi>o</mi><mi>r</mi><mi>e</mi><mi>n</mi><mi>t</mi><mi>z</mi>&nbsp;<mi>I</mi><mi>n</mi><mi>v</mi><mi>a</mi><mi>r</mi><mi>i</mi><mi>a</mi><mi>n</mi><mi>t</mi><mo>:</mo>
+   </mrow>
+  </mstyle>
  </mrow></math><math display="block" xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mo>(</mo><mo> &Delta; </mo><mi>s</mi>
@@ -2130,10 +2230,13 @@ The &ldquo;paradox&rdquo; in this scenario stems from the seeming discrepancy be
 
 <div class="standard"><a id='magicparlabel-294' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-298' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-313' />
-<img src='8_media_Elements_projects_worldlines_Worldlines___29_Worldlines_doc_images_twinScene_end_crop.png' alt='image: 8_media_Elements_projects_worldlines_Worldlines___29_Worldlines_doc_images_twinScene_end_crop.png' />
-<div class='float-caption float-caption-figure'>Figure 7:<div class="plainlayout"><a id='magicparlabel-317' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-298' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-313' />
+<img style='width:45%;' src='8_twinScene_end_crop.png' />
+<div class='float-caption float-caption-figure'>Figure 7:<div class="plain_layout"><a id='magicparlabel-317' />
 <a id="fig_Twin_Conclusion" />
 Conclusion of the Twin Paradox Scene, where twin B meets A. Twin A's age is <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2169,9 +2272,11 @@ Conclusion of the Twin Paradox Scene, where twin B meets A. Twin A's age is <mat
   </mrow>
  </mrow></math>.)</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-320' />
-<img src='9_media_Elements_projects_worldlines_Worldlines___9_Worldlines_doc_images_multiTwin_half_crop.png' alt='image: 9_media_Elements_projects_worldlines_Worldlines___9_Worldlines_doc_images_multiTwin_half_crop.png' />
-<div class='float-caption float-caption-figure'>Figure 8:<div class="plainlayout"><a id='magicparlabel-324' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-320' />
+<img style='width:45%;' src='9_multiTwin_half_crop.png' />
+<div class='float-caption float-caption-figure'>Figure 8:<div class="plain_layout"><a id='magicparlabel-324' />
 <a id="fig_Multi_Twin_Layout" />
 Layout of the Multiple Twins Scene. Here, a series of eight twin B's (named B.1 through B.8, with velocities from <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2199,7 +2304,10 @@ Layout of the Multiple Twins Scene. Here, a series of eight twin B's (named B.1 
   </mrow>
  </mrow></math> and is still departing.</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 <h3 class="subsection"><span class="subsection_label">2.3</span> <a id='magicparlabel-325' />
@@ -2251,7 +2359,7 @@ Looking in Figure <a href="#fig_Multi_Twin_Layout">8</a> at the curves formed by
 <h4 class="subsubsection"><span class="subsubsection_label">2.3.2</span> <a id='magicparlabel-334' />
 The Asymmetry of the Turnaround (Resolving the Paradox)</h4>
 <div class="standard"><a id='magicparlabel-335' />
-Figures <a href="#fig_Multi_preTurn_world">a</a> through <a href="#fig_Multi_postTurn_world">d</a> show the asymmetry in the twin paradox - from twin B's perspective, by the time he reaches <math xmlns="http://www.w3.org/1998/Math/MathML">
+Figures <a href="#fig_Multi_preTurn_world">a</a> through <a href="#fig_Multi_postTurn_world">d</a> show the asymmetry in the twin paradox. In the world frame (Figure <a href="#fig_Multi_preTurn_world">a</a>), by the time twin B reaches <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow>
    <msub>
@@ -2261,11 +2369,11 @@ Figures <a href="#fig_Multi_preTurn_world">a</a> through <a href="#fig_Multi_pos
     </mrow>
    </msub><mo>=</mo><mn>50</mn><mspace width="6px" /><mi>s</mi>
   </mrow>
- </mrow></math>, twin A has already missed the opportunity to take the action which twin B now takes, changing his frame of reference by reversing his velocity. Looking at the clock tick history in the last image, we see that just after twin B turns, just over <math xmlns="http://www.w3.org/1998/Math/MathML">
+ </mrow></math> (that is, by his clock), twin A has already missed the opportunity to take the action which twin B now takes, changing his frame of reference by reversing his velocity. This is seen by looking at the clock tick history in the last image (Figure <a href="#fig_Multi_postTurn_world">d</a>), where we see that just after twin B turns, just over <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>80</mn><mspace width="6px" /><mi>s</mi>
   </mrow>
- </mrow></math> has elapsed for twin A.</div>
+ </mrow></math> has elapsed for twin A. Figures <a href="#fig_Multi_preTurn_local">b</a> and <a href="#fig_Multi_postTurn_local">c</a> show how this turnaround looks from the frame of twin B just before and after the acceleration.</div>
 
 <div class="standard"><a id='magicparlabel-336' />
 </div>
@@ -2274,15 +2382,18 @@ Figures <a href="#fig_Multi_preTurn_world">a</a> through <a href="#fig_Multi_pos
 </div>
 <div class='float float-figure'><h4 class="subsubsection"><span class="subsubsection_label">2.3.3</span> <a id='magicparlabel-345' />
 Visualizing Twin B Before and After Turnaround</h4>
-<div class="plainlayout"><a id='magicparlabel-346' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-365' />
+<div class="plain_layout"><a id='magicparlabel-346' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-365' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-369' />
-<img src='10_media_Elements_projects_worldlines_Worldline___rldlines_doc_images_multiTwin_twin8_preTurn.png' alt='image: 10_media_Elements_projects_worldlines_Worldline___rldlines_doc_images_multiTwin_twin8_preTurn.png' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-369' />
+<img style='width:40%;' src='10_multiTwin_twin8_preTurn.png' />
 </div>
 
-<div class="plainlayout"><a id='magicparlabel-370' />
-<div class='float-caption float-caption-figure'>Sub-Figure a:<div class="plainlayout"><a id='magicparlabel-374' />
+<div class="plain_layout"><a id='magicparlabel-370' />
+<div class='float-caption float-caption-figure'>Sub-Figure a:<div class="plain_layout"><a id='magicparlabel-374' />
 <a id="fig_Multi_preTurn_world" />
 <strong>Twin B.8: pre-turnaround, world frame.</strong> In the world frame, <em>twin A is older than twin B.8. </em>The clock ticks and particle infotext here show the age difference is nearly a factor of two (<math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2316,14 +2427,16 @@ Visualizing Twin B Before and After Turnaround</h4>
 </div></div>
 </div>
 
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-377' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-377' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-381' />
-<img src='11_media_Elements_projects_worldlines_Worldline____images_multiTwin_twin8_preTurn_transformOn.png' alt='image: 11_media_Elements_projects_worldlines_Worldline____images_multiTwin_twin8_preTurn_transformOn.png' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-381' />
+<img style='width:40%;' src='11_multiTwin_twin8_preTurn_transformOn.png' />
 </div>
 
-<div class="plainlayout"><a id='magicparlabel-382' />
-<div class='float-caption float-caption-figure'>Sub-Figure b:<div class="plainlayout"><a id='magicparlabel-386' />
+<div class="plain_layout"><a id='magicparlabel-382' />
+<div class='float-caption float-caption-figure'>Sub-Figure b:<div class="plain_layout"><a id='magicparlabel-386' />
 <a id="fig_Multi_preTurn_local" />
 <strong>Twin B.8: pre-turnaround, frame of B.8.</strong> In B.8's frame, we see the moment just before B.8's turn at <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2393,27 +2506,34 @@ Visualizing Twin B Before and After Turnaround</h4>
 </div></div>
 </div>
 
-</td></tr><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-389' />
+</td>
+</tr>
+<tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-389' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-393' />
-<img src='12_media_Elements_projects_worldlines_Worldline___images_multiTwin_twin8_postTurn_transformOn.png' alt='image: 12_media_Elements_projects_worldlines_Worldline___images_multiTwin_twin8_postTurn_transformOn.png' />
-<div class='float-caption float-caption-figure'>Sub-Figure c:<div class="plainlayout"><a id='magicparlabel-397' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-393' />
+<img style='width:40%;' src='12_multiTwin_twin8_postTurn_transformOn.png' />
+<div class='float-caption float-caption-figure'>Sub-Figure c:<div class="plain_layout"><a id='magicparlabel-397' />
 <a id="fig_Multi_postTurn_local" />
 <strong>Twin B.8: post-turnaround, frame of B.8. </strong>In B.8's return frame, the simultaneity plane is above the particles in the current simulation step. Inhabitants of this new frame would say that twin A missed the chance for a symetric turn long ago. Note however, that at B.8's distant location, he couldn't possibly yet know if A made such a turn (as even a lightspeed signal would not have yet reached him), or remained in place in accordance with the twin paradox scenario. Furthermore, with B.8's change of reference frame, <em>the &ldquo;current&rdquo; relative age of twin A has shifted from younger to older</em>. And if B.8 maintains this course, so it shall be when they meet.</div>
 </div></div>
 </div>
 
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-400' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-400' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-404' />
-<img src='13_media_Elements_projects_worldlines_Worldline___mages_multiTwin_twin8_postTurn_transformOff.png' alt='image: 13_media_Elements_projects_worldlines_Worldline___mages_multiTwin_twin8_postTurn_transformOff.png' />
-<div class='float-caption float-caption-figure'>Sub-Figure d:<div class="plainlayout"><a id='magicparlabel-408' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-404' />
+<img style='width:40%;' src='13_multiTwin_twin8_postTurn_transformOff.png' />
+<div class='float-caption float-caption-figure'>Sub-Figure d:<div class="plain_layout"><a id='magicparlabel-408' />
 <a id="fig_Multi_postTurn_world" />
 <strong>Twin B.8: post-turnaround, world frame.</strong> Back in twin A's frame, we see that not much has changed before and after B.8's turnaround, apart from the reversal of B.8's heading and a shift in which events are considered simultaneous for B.8 in its current rest frame. B.8 continues to age more slowly than twin A even after the turn, just as before, and so from twin A's perspective, <em>twin A has consistently been the older all along</em>.</div>
 </div></div>
 </div>
 
-</td></tr></tbody></table><div class='float-caption float-caption-figure'>Figure 9:<div class="plainlayout"><a id='magicparlabel-412' />
+</td>
+</tr></tbody>
+</table>
+<div class='float-caption float-caption-figure'>Figure 9:<div class="plain_layout"><a id='magicparlabel-412' />
 <a id="fig_Visualizing_Twin_B_8" />
 Visualizing Twin B.8 before and after the turnaround.</div>
 </div></div>
@@ -2425,16 +2545,24 @@ Length Contraction Scene</h3>
 Length Contraction Scene Layout</h4>
 <div class="standard"><a id='magicparlabel-415' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-419' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-434' />
-<img src='14_media_Elements_projects_worldlines_Worldline___es_doc_images_lengthContraction_layout_crop.png' alt='image: 14_media_Elements_projects_worldlines_Worldline___es_doc_images_lengthContraction_layout_crop.png' />
-<div class='float-caption float-caption-figure'>Figure 10:<div class="plainlayout"><a id='magicparlabel-438' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-419' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-434' />
+<img style='width:45%;' src='14_lengthContraction_layout_crop.png' />
+<div class='float-caption float-caption-figure'>Figure 10:<div class="plain_layout"><a id='magicparlabel-438' />
 <a id="fig_length_contraction_layout" />
 Layout of the Length Contraction Scene (as seen in the world frame). A single target particle oscillates through a uniform grid of particles. The path intersections of the uniform particles with the target's simultaneity plane are represented by the blue orbs seen at an angle above the field.</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-441' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-441' />
 </div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
@@ -2469,15 +2597,18 @@ To emphasize the contraction effect, the target particle in this scene undergoes
 Visualizing Lorentz Contraction</h4>
 <div class="standard"><a id='magicparlabel-455' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-459' />
-<table><tbody><tr><td align='left' valign='top'><div class="plainlayout"><a id='magicparlabel-478' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-459' />
+
+
+
+<table><tbody><tr><td align='left' valign='top'><div class="plain_layout"><a id='magicparlabel-478' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-482' />
-<img src='15_media_Elements_projects_worldlines_Worldline___ldlines_doc_images_lengthContraction_0_030c.png' alt='image: 15_media_Elements_projects_worldlines_Worldline___ldlines_doc_images_lengthContraction_0_030c.png' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-482' />
+<img style='width:39%;' src='15_lengthContraction_0_030c.png' />
 </div>
 
-<div class="plainlayout"><a id='magicparlabel-483' />
-<div class='float-caption float-caption-figure'>Sub-Figure a:<div class="plainlayout"><a id='magicparlabel-487' />
+<div class="plain_layout"><a id='magicparlabel-483' />
+<div class='float-caption float-caption-figure'>Sub-Figure a:<div class="plain_layout"><a id='magicparlabel-487' />
 <a id="fig_length_contract_0_038c" />
 Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2491,14 +2622,16 @@ Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
 </div></div>
 </div>
 
-</td><td align='left' valign='top'><div class="plainlayout"><a id='magicparlabel-490' />
+</td>
+
+<td align='left' valign='top'><div class="plain_layout"><a id='magicparlabel-490' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-494' />
-<img src='16_media_Elements_projects_worldlines_Worldline___ldlines_doc_images_lengthContraction_0_708c.png' alt='image: 16_media_Elements_projects_worldlines_Worldline___ldlines_doc_images_lengthContraction_0_708c.png' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-494' />
+<img style='width:39%;' src='16_lengthContraction_0_708c.png' />
 </div>
 
-<div class="plainlayout"><a id='magicparlabel-495' />
-<div class='float-caption float-caption-figure'>Sub-Figure b:<div class="plainlayout"><a id='magicparlabel-499' />
+<div class="plain_layout"><a id='magicparlabel-495' />
+<div class='float-caption float-caption-figure'>Sub-Figure b:<div class="plain_layout"><a id='magicparlabel-499' />
 <a id="fig_length_contract_0_708c" />
 Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2508,11 +2641,13 @@ Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
 </div></div>
 </div>
 
-</td></tr><tr><td align='left' valign='top'><div class="plainlayout"><a id='magicparlabel-502' />
+</td>
+</tr>
+<tr><td align='left' valign='top'><div class="plain_layout"><a id='magicparlabel-502' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-506' />
-<img src='17_media_Elements_projects_worldlines_Worldline___ldlines_doc_images_lengthContraction_0_885c.png' alt='image: 17_media_Elements_projects_worldlines_Worldline___ldlines_doc_images_lengthContraction_0_885c.png' />
-<div class='float-caption float-caption-figure'>Sub-Figure c:<div class="plainlayout"><a id='magicparlabel-510' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-506' />
+<img style='width:39%;' src='17_lengthContraction_0_885c.png' />
+<div class='float-caption float-caption-figure'>Sub-Figure c:<div class="plain_layout"><a id='magicparlabel-510' />
 <a id="fig_length_contract_0_8846c" />
 Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2526,11 +2661,13 @@ Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
 </div></div>
 </div>
 
-</td><td align='left' valign='top'><div class="plainlayout"><a id='magicparlabel-513' />
+</td>
+
+<td align='left' valign='top'><div class="plain_layout"><a id='magicparlabel-513' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-517' />
-<img src='18_media_Elements_projects_worldlines_Worldline___dlines_doc_images_lengthContraction_0_9889c.png' alt='image: 18_media_Elements_projects_worldlines_Worldline___dlines_doc_images_lengthContraction_0_9889c.png' />
-<div class='float-caption float-caption-figure'>Sub-Figure d:<div class="plainlayout"><a id='magicparlabel-521' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-517' />
+<img style='width:39%;' src='18_lengthContraction_0_9889c.png' />
+<div class='float-caption float-caption-figure'>Sub-Figure d:<div class="plain_layout"><a id='magicparlabel-521' />
 <a id="fig_length_contract_0_9889c" />
 Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2548,7 +2685,10 @@ Length contraction at <math xmlns="http://www.w3.org/1998/Math/MathML">
 </div></div>
 </div>
 
-</td></tr></tbody></table><div class='float-caption float-caption-figure'>Figure 11:<div class="plainlayout"><a id='magicparlabel-525' />
+</td>
+</tr></tbody>
+</table>
+<div class='float-caption float-caption-figure'>Figure 11:<div class="plain_layout"><a id='magicparlabel-525' />
 Length contraction of a field of particles (uniformly spaced in the world frame) as measured in the rest frame of a target particle accelerating from <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>0.0306</mn><mspace width="6px" /><mi>c</mi>
@@ -2569,10 +2709,13 @@ Making a Distance Measurement<a id="sub_Making_a_Distance_Measurement" />
 </h4>
 <div class="standard"><a id='magicparlabel-528' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-532' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-551' />
-<img src='19_media_Elements_projects_worldlines_Worldline___doc_images_lengthContraction_world_100apart.png' alt='image: 19_media_Elements_projects_worldlines_Worldline___doc_images_lengthContraction_world_100apart.png' />
-<div class='float-caption float-caption-figure'>Figure 12:<div class="plainlayout"><a id='magicparlabel-555' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-532' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-551' />
+<img style='width:44%;' src='19_lengthContraction_world_100apart.png' />
+<div class='float-caption float-caption-figure'>Figure 12:<div class="plain_layout"><a id='magicparlabel-555' />
 <a id="fig_measure_select" />
 Let's try measuring how much the lengths contracted in a case like the one we just saw. The uniform particles in this scene are spaced <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2592,34 +2735,46 @@ Let's try measuring how much the lengths contracted in a case like the one we ju
   </mrow><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
  </mrow></math> in the world frame.</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-558' />
-<img src='20_media_Elements_projects_worldlines_Worldline___images_lengthContraction_transform_100apart.png' alt='image: 20_media_Elements_projects_worldlines_Worldline___images_lengthContraction_transform_100apart.png' />
-<div class='float-caption float-caption-figure'>Figure 13:<div class="plainlayout"><a id='magicparlabel-562' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-558' />
+<img style='width:44%;' src='20_lengthContraction_transform_100apart.png' />
+<div class='float-caption float-caption-figure'>Figure 13:<div class="plain_layout"><a id='magicparlabel-562' />
 <a id="fig_measure_select_rest" />
  Here are the same particles again as seen in the rest frame of the driven particle, which has started taking off again. The particles are labeled Particle(1) and Particle(51).</div>
 </div></div>
-</td></tr><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-565' />
-<img src='21_media_Elements_projects_worldlines_Worldline___doc_images_lengthContraction_measure_select.png' alt='image: 21_media_Elements_projects_worldlines_Worldline___doc_images_lengthContraction_measure_select.png' />
-<div class='float-caption float-caption-figure'>Figure 14:<div class="plainlayout"><a id='magicparlabel-569' />
+</td>
+</tr>
+<tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-565' />
+<img style='width:44%;' src='21_lengthContraction_measure_select.png' />
+<div class='float-caption float-caption-figure'>Figure 14:<div class="plain_layout"><a id='magicparlabel-569' />
 <a id="fig_measure_intersections" />
 To make this interesting, we'll measure the intersections of the particles rather than the particles themselves. Here we've clicked the intersections between the simultaneity plane of the driven particle (Particle 0) the paths of particles 1 and 51 (pausing the program or reducing the timestep makes selection easier).</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-572' />
-<img src='22_media_Elements_projects_worldlines_Worldline___images_lengthContraction_measure_rightClick.png' alt='image: 22_media_Elements_projects_worldlines_Worldline___images_lengthContraction_measure_rightClick.png' />
-<div class='float-caption float-caption-figure'>Figure 15:<div class="plainlayout"><a id='magicparlabel-576' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-572' />
+<img style='width:43%;' src='22_lengthContraction_measure_rightClick.png' />
+<div class='float-caption float-caption-figure'>Figure 15:<div class="plain_layout"><a id='magicparlabel-576' />
 <a id="fig_measure_menu" />
  Right clicking on a selected particle brings up a menu of actions which can be applied to it. If <em>two</em> objects are selected (any mix of particles or intersections), then an additional action, &ldquo;measureDistance&rdquo; is available.</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
 <div class="standard"><a id='magicparlabel-577' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-581' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-596' />
-<img src='23_media_Elements_projects_worldlines_Worldline___dlines_doc_images_lengthContraction_measure.png' alt='image: 23_media_Elements_projects_worldlines_Worldline___dlines_doc_images_lengthContraction_measure.png' />
-<div class='float-caption float-caption-figure'>Figure 16:<div class="plainlayout"><a id='magicparlabel-600' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-581' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-596' />
+<img style='width:45%;' src='23_lengthContraction_measure.png' />
+<div class='float-caption float-caption-figure'>Figure 16:<div class="plain_layout"><a id='magicparlabel-600' />
 <a id="fig_measure_displayed" />
 Here is the resulting distance measurement we get by right clicking, which tells us which interval is measured, and the distance components <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow><mo form='prefix' fence='true' stretchy='true' symmetric='true'>(</mo>
@@ -2627,9 +2782,11 @@ Here is the resulting distance measurement we get by right clicking, which tells
   </mrow><mo form='postfix' fence='true' stretchy='true' symmetric='true'>)</mo>
  </mrow></math> in both the world frame and the target frame.</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-603' />
-<img src='24_media_Elements_projects_worldlines_Worldline___ges_lengthContraction_measure_098995c_angle.png' alt='image: 24_media_Elements_projects_worldlines_Worldline___ges_lengthContraction_measure_098995c_angle.png' />
-<div class='float-caption float-caption-figure'>Figure 17:<div class="plainlayout"><a id='magicparlabel-607' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-603' />
+<img style='width:45%;' src='24_lengthContraction_measure_098995c_angle.png' />
+<div class='float-caption float-caption-figure'>Figure 17:<div class="plain_layout"><a id='magicparlabel-607' />
 <a id="fig_measure_result" />
  With the program paused at a point we're interested in, and the driven particle selected, we can see that at <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2665,7 +2822,10 @@ Here is the resulting distance measurement we get by right clicking, which tells
   </mrow>
  </mrow></math> in the driven target's frame.</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
@@ -2759,16 +2919,21 @@ From this, we see our measurement of <math xmlns="http://www.w3.org/1998/Math/Ma
 Bell's Spaceship Paradox Scene</h3>
 <div class="standard"><a id='magicparlabel-624' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-628' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-643' />
-<img src='1_media_Elements_projects_worldlines_Worldlines___0_20100929_Worldlines_doc_images_bells_ship.png' alt='image: 1_media_Elements_projects_worldlines_Worldlines___0_20100929_Worldlines_doc_images_bells_ship.png' />
-<div class='float-caption float-caption-figure'>Figure 18:<div class="plainlayout"><a id='magicparlabel-647' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-628' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-643' />
+<img style='width:45%;' src='1_bells_ship.png' />
+<div class='float-caption float-caption-figure'>Figure 18:<div class="plain_layout"><a id='magicparlabel-647' />
 <a id="fig_bells_spaceship" />
 Layout of Bell's Spaceship Paradox Scene. A fleet of six controllable target particles (shown as red orbs), each with an attached idealized rigid body (yellow trapezoids). Particles with random position and velocity surround the fleet for a sense of reference (blue orbs). The fleet here is at rest in the world frame, so the fleet bodies sit flatly in the world frame; they share the same concept of simultaneity.</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-650' />
-<img src='25_media_Elements_projects_worldlines_Worldline___rldlines_doc_images_bells_ship_motion_world.png' alt='image: 25_media_Elements_projects_worldlines_Worldline___rldlines_doc_images_bells_ship_motion_world.png' />
-<div class='float-caption float-caption-figure'>Figure 19:<div class="plainlayout"><a id='magicparlabel-654' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-650' />
+<img style='width:45%;' src='25_bells_ship_motion_world.png' />
+<div class='float-caption float-caption-figure'>Figure 19:<div class="plain_layout"><a id='magicparlabel-654' />
 <a id="fig_bells_uniform_accel" />
 The fleet after accelerating out of the world frame in the <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2776,7 +2941,10 @@ The fleet after accelerating out of the world frame in the <math xmlns="http://w
   </mrow>
  </mrow></math> direction (as seen in world frame coordinates). The ideal rigid bodies are defined by fixed points in the rest frame of the attached particle. So when each particle accelerates, causing its rest coordinates transform within the world frame, the attached ideal body is transformed as well. In the lower half of the image, the ideal bodies are seen to tilt and stretch along with the simultaneity plane of their attached particle during acceleration.</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
@@ -2790,12 +2958,12 @@ This is a fun scene (Figure <a href="#fig_bells_spaceship">18</a>) in which you 
 You can accelerate the fleet in synchronization by pressing the arrow keys or the W, A, S, D keys, as demonstrated in Figures <a href="#fig_bells_uniform_accel">19</a> and <a href="#fig_bells_spaceship_rest">20</a> (which show the results of the same acceleration sequence from the perspective of the world frame and the fleet's rest frame).</div>
 
 <div class="standard"><a id='magicparlabel-662' />
-The paradox<div class="foot"><span class="foot_label">2</span><div class="foot_inner"><div class="plainlayout"><a id='magicparlabel-666' />
+The paradox<div class="foot"><span class="foot_label">2</span><div class="foot_inner"><div class="plain_layout"><a id='magicparlabel-666' />
 See <em>Bell's Spaceship Paradox, </em>Wikipedia (<a href='#WP-Bells-spaceship-paradox'>4</a>).</div>
 </div></div> is that each ship receives the same boost in the world frame - so the relative position of each ship in the fleet is preserved; their relative acceleration is 'uniform' by definition. Similarly, the internals of any particular ship appears preserved to its inhabitants, who are in its rest frame, so the acceleration appears 'uniform' to them as well.</div>
 
 <div class="standard"><a id='magicparlabel-667' />
-Back in the world frame, the length of each moving ship contracts - which would intuitively seem to indicate the distance between the ships increases in their frame. But if the distance between the ships is increasing, what happened to the 'uniformity' of the acceleration observed within each ship?<div class="foot"><span class="foot_label">3</span><div class="foot_inner"><div class="plainlayout"><a id='magicparlabel-671' />
+Back in the world frame, the length of each moving ship contracts - which would intuitively seem to indicate the distance between the ships increases in their frame. But if the distance between the ships is increasing, what happened to the 'uniformity' of the acceleration observed within each ship?<div class="foot"><span class="foot_label">3</span><div class="foot_inner"><div class="plain_layout"><a id='magicparlabel-671' />
 Further, if the relative distances within the fleet are preserved in the world frame, length contraction would seem to demand that this spacing would contract in the frame of the ships moving relative to those measurements. This seems to be resolved by the relativity of simultaneity, though; while those world frame measurement event coordinates are contracted in the ship's new frame, they're no longer simultaneous in the fleet's new frame. We still have to address the rigidity though.</div>
 </div></div></div>
 
@@ -2803,7 +2971,7 @@ Further, if the relative distances within the fleet are preserved in the world f
 This preservation of internal distances hinges on how well our idealized rigid bodies holds up. The idea of preservation of distances in the rest frame is known as Born rigidity. Where this rigidity is and is not preserved seems to be at the crux of the paradox. A resolution to the paradox seems to be simply that it's possible to imagine cases where the rigidity is and is not preserved.</div>
 
 <div class="standard"><a id='magicparlabel-673' />
-If one considers the fleet of ships as an entity, then Born rigidity is not preserved - though their positions are preserved in the world frame, Born rigidity is defined as preservation in the rest frame. In Figure <a href="#fig_bells_broken_rigidity">21</a>,  we see the target moving towards the fleet. Holding this velocity, we see from the path intersections that their locations in this frame are vastly stretched, confirming our expectation that the Born rigidity of the fleet is broken.<div class="foot"><span class="foot_label">4</span><div class="foot_inner"><div class="plainlayout"><a id='magicparlabel-677' />
+If one considers the fleet of ships as an entity, then Born rigidity is not preserved - though their positions are preserved in the world frame, Born rigidity is defined as preservation in the rest frame. In Figure <a href="#fig_bells_broken_rigidity">21</a>,  we see the target moving towards the fleet. Holding this velocity, we see from the path intersections that their locations in this frame are vastly stretched, confirming our expectation that the Born rigidity of the fleet is broken.<div class="foot"><span class="foot_label">4</span><div class="foot_inner"><div class="plain_layout"><a id='magicparlabel-677' />
  Intership distance perceived by the fleet is actually <em>stretched</em> along the direction of motion, as <em>both</em> the fleet's worldline paths and simultaneity planes become more nearly parallel in the world frame, approaching the surface of the light cone.</div>
 </div></div></div>
 
@@ -2815,10 +2983,13 @@ On the other hand, it seems theoretically plausible that a solidly bound entity 
 
 <div class="standard"><a id='magicparlabel-684' />
 </div>
-<div class='float float-figure'><div class="plainlayout"><a id='magicparlabel-688' />
-<table><tbody><tr><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-703' />
-<img src='26_media_Elements_projects_worldlines_Worldline___ines_doc_images_bells_ship_motion_transform.png' alt='image: 26_media_Elements_projects_worldlines_Worldline___ines_doc_images_bells_ship_motion_transform.png' />
-<div class='float-caption float-caption-figure'>Figure 20:<div class="plainlayout"><a id='magicparlabel-707' />
+<div class='float float-figure'><div class="plain_layout"><a id='magicparlabel-688' />
+
+
+
+<table><tbody><tr><td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-703' />
+<img style='width:45%;' src='26_bells_ship_motion_transform.png' />
+<div class='float-caption float-caption-figure'>Figure 20:<div class="plain_layout"><a id='magicparlabel-707' />
 <a id="fig_bells_spaceship_rest" />
 The fleet after accelerating out of the world frame in the <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2826,9 +2997,11 @@ The fleet after accelerating out of the world frame in the <math xmlns="http://w
   </mrow>
  </mrow></math> direction (as seen in the rest frame of the fleet). Here we see that in each ship's current rest frame, its internal structure is preserved after acceleration. Also, simultaneity is uniform <em>within</em> each ship. However, the concept of simultaneity which was shared <em>between </em>ships at the start is now distorted. Here, we see that in the frame of a ship in the front of the fleet's heading, <em>equivalent proper time moments for ships towards the rear occur further away, and in the future</em>.</div>
 </div></div>
-</td><td align='center' valign='top'><div class="plainlayout"><a id='magicparlabel-714' />
-<img src='27_media_Elements_projects_worldlines_Worldline___lines_doc_images_bells_born_rigidity_broken.png' alt='image: 27_media_Elements_projects_worldlines_Worldline___lines_doc_images_bells_born_rigidity_broken.png' />
-<div class='float-caption float-caption-figure'>Figure 21:<div class="plainlayout"><a id='magicparlabel-718' />
+</td>
+
+<td align='center' valign='top'><div class="plain_layout"><a id='magicparlabel-714' />
+<img style='width:45%;' src='27_bells_born_rigidity_broken.png' />
+<div class='float-caption float-caption-figure'>Figure 21:<div class="plain_layout"><a id='magicparlabel-718' />
 <a id="fig_bells_broken_rigidity" />
 The broken Born rigidity of the fleet, while heading in the <math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
@@ -2844,7 +3017,10 @@ The broken Born rigidity of the fleet, while heading in the <math xmlns="http://
   </mrow>
  </mrow></math>, as can be confirmed by adding a Distance Measurement (as in Sections <a href="#sub_Making_a_Distance_Measurement">2.4.3</a> and <a href="#sub_Add_a_Distance_Measurement">3.1.8</a>).</div>
 </div></div>
-</td></tr></tbody></table></div>
+</td>
+</tr></tbody>
+</table>
+</div>
 </div>
 
 
@@ -2922,7 +3098,7 @@ Colored ticks are displayed along each particles path, spaced at even intervals 
  <mrow><mi>n</mi>
  </mrow></math> is an integer which controls the tick spacing along each path, incrementing when 20 ticks are reached (to reduce screen clutter and increase performance). The tick size visually increases slightly with each exponent change, accompanied by a shift in color. The corresponding colors for each tick spacing interval are:</div>
 
-<ol class='lyxlist'><li class="list_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
+<ol class='lyxlist'><li class="labeling_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>1</mn>
    <msup>
@@ -2935,7 +3111,7 @@ Colored ticks are displayed along each particles path, spaced at even intervals 
  </mrow></math></span>
 <a id='magicparlabel-755' />
  red</li>
-<li class="list_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
+<li class="labeling_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>1</mn>
    <msup>
@@ -2948,7 +3124,7 @@ Colored ticks are displayed along each particles path, spaced at even intervals 
  </mrow></math></span>
 <a id='magicparlabel-756' />
  yellow</li>
-<li class="list_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
+<li class="labeling_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>1</mn>
    <msup>
@@ -2961,7 +3137,7 @@ Colored ticks are displayed along each particles path, spaced at even intervals 
  </mrow></math></span>
 <a id='magicparlabel-757' />
  orange </li>
-<li class="list_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
+<li class="labeling_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>1</mn>
    <msup>
@@ -2974,7 +3150,7 @@ Colored ticks are displayed along each particles path, spaced at even intervals 
  </mrow></math></span>
 <a id='magicparlabel-758' />
  green</li>
-<li class="list_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
+<li class="labeling_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>1</mn>
    <msup>
@@ -2987,7 +3163,7 @@ Colored ticks are displayed along each particles path, spaced at even intervals 
  </mrow></math></span>
 <a id='magicparlabel-759' />
  blue</li>
-<li class="list_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
+<li class="labeling_item"><span class='lyxlist'><math xmlns="http://www.w3.org/1998/Math/MathML">
  <mrow>
   <mrow><mn>1</mn>
    <msup>
@@ -3101,7 +3277,7 @@ These graphical details could be confusing:</div>
 Intersection clock pulses match the timing of the head particles in the world frame. The timing is physically correct for the heads, but fixing the timing for the intersections needs an additional calculation. (Ie, just the elapsed propertime before the head catches up to the intersection for particles on straight paths; divide the head to intersection distance in the world frame by the length of the head's (2+1) 3-velocity).<a id="enu_Intersection_clock_pulses_bug" />
 </li>
 </ol>
-<h2 class="section"><a id='magicparlabel-799' />
+<h2 class="section_"><a id='magicparlabel-799' />
 Works Cited</h2>
 <div class="standard"><a id='magicparlabel-800' />
 <h2 class='bibtex'>References</h2><div class='bibtex'><div class='bibtexentry'><a id='Kogut' />
@@ -3113,7 +3289,7 @@ Works Cited</h2>
 <div class='bibtexentry'><a id='WP-Bells-spaceship-paradox' />
 <span class='bibtexlabel'>4</span><span class='bibtexinfo'>Wikipedia, "Bell's Spaceship Paradox" (2010).</span></div>
 </div></div>
-<h2 class="section"><a id='magicparlabel-801' />
+<h2 class="section_"><a id='magicparlabel-801' />
 Additional Sources</h2>
 <div class="standard"><a id='magicparlabel-802' />
 <h2 class='bibtex'>References</h2><div class='bibtex'><div class='bibtexentry'><a id='Kogut' />
@@ -3128,7 +3304,7 @@ Additional Sources</h2>
 
 <div class="standard"><a id='magicparlabel-803' />
 </div>
-<h1 class="part"><a id='magicparlabel-812' />
+<h1 class="part_"><a id='magicparlabel-812' />
 Appendix</h1>
 <h2 class="section"><span class="section_label">A</span> <a id='magicparlabel-813' />
 Source Notes</h2>

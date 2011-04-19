@@ -6,10 +6,6 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     
     <title>Worldlines: Visualizing Special Relativity (Built with Processing)</title>
-
-    <!-- ~~~~ Begin presentation page CSS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
-    <!-- <link rel="stylesheet" href="applet-presentation.css" type="text/css" />  -->
-    <!-- ~~~~ End   presentation page CSS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     
     <style type="text/css">
       /* <![CDATA[ */
@@ -49,7 +45,7 @@
             color: #56575d;
         }
         div#quick-menu {
-            margin: auto 0px auto auto;
+            margin: auto 0px 10px auto;
             text-align: right;
             font-size: 30px;
             font-family: Consolas, "Lucida Console", "Andale Mono", monospace;
@@ -72,9 +68,10 @@
             margin: 10px 0px 10px 0px;
         /*  display: none;  */      /* Uncomment to test without loading the applet */
         }
-        div#handbook-header {
-            font: normal 2em Georgia;
+        div.header {
+            font: normal 22px Georgia;
             background: #F8F8F8; /* #F0FCF0; */ /* #F8F8F8 */
+            margin-top: 10px;
             padding: 0.25em;
             border-width: 5px 1px;
             border-style: none none none solid;
@@ -125,7 +122,7 @@
     <div id="quick-menu">
         <div class="menu-block">
             <div class="top">
-                <a href="#handbook-content">manual</a>
+                <a href="#handbook-content">handbook</a>
             </div>
             <div class="sub">
                 (<a href="worldlines-handbook.pdf">pdf</a>,
@@ -161,7 +158,9 @@
     </div>
     
     <div id="applet-content">
-    
+        <div class="header">
+            The Worldlines Program
+        </div>
         <div id="worldlines-container">
         
             <!--[if !IE]> -->
@@ -248,36 +247,13 @@
             </object>
             <![endif]-->
         </div>
-        
-        <p id="source-code">
-            Source code:
-            <a href="applet/Worldlines.pde">Worldlines</a>
-            <a href="applet/Axes.pde">Axes</a>
-            <a href="applet/Control.pde">Control</a>
-            <a href="applet/Frame.pde">Frame</a>
-            <a href="applet/Geom.pde">Geom</a>
-            <a href="applet/Infobox.pde">Infobox</a>
-            <a href="applet/Kamera.pde">Kamera</a>
-            <a href="applet/Particle.pde">Particle</a>
-            <a href="applet/ParticlesLayer.pde">ParticlesLayer</a>
-            <a href="applet/Relativity.pde">Relativity</a>
-            <a href="applet/RigidBody.pde">RigidBody</a>
-            <a href="applet/Scene.pde">Scene</a>
-            <a href="applet/Utils.pde">Utils</a>
-            <a href="applet/VTextRenderer.pde">VTextRenderer</a>
-            <a href="applet/Velocity.pde">Velocity</a> 
-        </p>
-        
-        <p>
-            Built with <a href="http://processing.org" title="Processing.org">Processing</a>
-        </p>
 
     </div>
 
     <!-- ~~~~ Handbook begin ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <div id="handbook-content">
-        <div id="handbook-header" width="100%" onclick="showhide('handbook');">
-            <a href="handbook-html/worldlines-handbook.xhtml">The worldlines handbook</a>
+        <div id="handbook-header" class="header" width="100%" onclick="showhide('handbook');">
+            <a href="handbook-html/worldlines-handbook.xhtml">The Worldlines Handbook</a>
         </div>
 
         <object id="handbook" width="100%" height="800px" codebase="handbook-html/" data="worldlines-handbook.xhtml">
@@ -287,6 +263,30 @@
     </div>
     <!-- ~~~~ Handbook end ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
+    <div class="header">
+        Source Code (also on <a href="https://github.com/qualiabyte/worldlines">GitHub</a>)
+    </div>
+    <p id="source-code">
+        <a href="applet/Worldlines.pde">Worldlines</a>
+        <a href="applet/Axes.pde">Axes</a>
+        <a href="applet/Control.pde">Control</a>
+        <a href="applet/Frame.pde">Frame</a>
+        <a href="applet/Geom.pde">Geom</a>
+        <a href="applet/Infobox.pde">Infobox</a>
+        <a href="applet/Kamera.pde">Kamera</a>
+        <a href="applet/Particle.pde">Particle</a>
+        <a href="applet/ParticlesLayer.pde">ParticlesLayer</a>
+        <a href="applet/Relativity.pde">Relativity</a>
+        <a href="applet/RigidBody.pde">RigidBody</a>
+        <a href="applet/Scene.pde">Scene</a>
+        <a href="applet/Utils.pde">Utils</a>
+        <a href="applet/VTextRenderer.pde">VTextRenderer</a>
+        <a href="applet/Velocity.pde">Velocity</a>
+    </p>
+
+    <p>
+        Built with <a href="http://processing.org" title="Processing.org">Processing</a>
+    </p>
     </div>
     </body>
 </html>

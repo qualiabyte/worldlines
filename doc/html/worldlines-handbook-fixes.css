@@ -13,8 +13,12 @@ img {
 body {
     margin: 0px;
     width: 45em; /* 80%; 1000px; */
-    font-size: 85%;
+/*     font-size: 85%; */
     font-family: "Trebuchet MS","nimbus","helvetica","verdana","Deja Vu Sans","sans-serif" !important;
+}
+
+div.abstract_item {
+    font-size: medium !important;
 }
 
 a {

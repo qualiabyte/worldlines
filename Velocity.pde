@@ -76,7 +76,7 @@ public class Velocity {
   void updateBasis() {
     
     for (int i=0; i<3; i++) {
-      basisInverse[i] = Relativity.inverseTransform(this, basis[i]);
+      basisInverse[i] = Relativity.inverseLorentzTransform(this, basis[i]);
     }
 
     threeVelocity.set(basisInverse[2]);
@@ -90,14 +90,5 @@ public class Velocity {
   String toString() {
     return super.toString() + " vx: " + vx + ", vy: " + vy;
   }
-  /*
-  Vector3f[] getInverseDisplayBasis() {
-    
-    for (int i=0; i<3; i++) {
-      Relativity.selectInverseDisplayComponents(basis[i], basisInverse[i], displayBasis[i]);
-    }
-    return displayBasis;
-  }
-  */
 }
 

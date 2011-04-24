@@ -3,29 +3,21 @@
 
 static class Relativity {
   
-  static Velocity v;
-  
   // TRANSFORM MODE
   public static boolean TOGGLE_SPATIAL_TRANSFORM;
   public static boolean TOGGLE_TEMPORAL_TRANSFORM;
   
   static float C = 1.0f;
   
+  // Get relativistic gamma for a given velocity magnitude, as a fraction of c.
   public static float gamma(float v) {
-    return //( abs(v-1) < 1E-9) ? 99E31 :
-           1.0f / (float) Math.sqrt(1 - v*v);
+    
+    return 1.0f / (float) Math.sqrt(1 - v*v);
   }
   
-  public static void loadVelocity(Velocity velocity) {
-    v = velocity;
-  }
-
-  public static void loadFrame(Frame f) {
-    loadVelocity(f.getVelocity());
-  }
-  
-  
-  public static Matrix3f getLorentzMatrix() {
+  // Get the 1-dimensional Lorentz Matrix for a given Velocity.
+  // For the 2-D case, which is more useful, see getLorentzTransformMatrix().
+  public static Matrix3f getLorentzMatrix1D(Velocity v) {
     
     return new Matrix3f(
       v.gamma,              0,    -v.magnitude*v.gamma, // X
@@ -34,7 +26,10 @@ static class Relativity {
     );    
   }
   
-  public static Matrix3f getLorentzInverseMatrix() {
+  // Get the 1-dimensional Inverse Lorentz Matrix for a given Velocity.
+  // This inverse matrix effectively "undoes" the 1D Lorentz transform.
+  // For the 2-D case, which is more useful, see getInverseLorentzTransformMatrix().
+  public static Matrix3f getInverseLorentzMatrix1D(Velocity v) {
     
     return new Matrix3f(
       v.gamma,             0,    v.magnitude*v.gamma, // X
@@ -43,6 +38,8 @@ static class Relativity {
     );
   }
   
+  // Get the matrix for an axis-angle rotation in 3-dimensions.
+  // Formula courtesy of the OpenGL docs.
   public static Matrix3f getRotationMatrix(float a, float x, float y, float z) {
     
     float c = cos(a);
@@ -57,84 +54,136 @@ static class Relativity {
     return M;
   }
   
-  public static Matrix3f getInverseLorentzTransformMatrix(Velocity vel) {
-    loadVelocity(vel);
+  // Rotate a matrix operation in the direction of a given velocity.
+  // Returns a new matrix operation by wrapping the original within a rotation along a velocity's heading.
+  public static Matrix3f rotationWrapForHeading(Matrix3f toWrap, Velocity vel) {
     
-    Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
-    Matrix3f inverseLorentz = getLorentzInverseMatrix();
-    Matrix3f rotHeading = getRotationMatrix(v.direction, 0, 0, 1);
+    Matrix3f rotHeadingInverse = getRotationMatrix(-vel.direction, 0, 0, 1);
+    Matrix3f rotHeading = getRotationMatrix(vel.direction, 0, 0, 1);
     
     Matrix3f M = new Matrix3f();
     M.set(rotHeading);
-    M.mul(inverseLorentz);
+    M.mul(toWrap);
     M.mul(rotHeadingInverse);
     
     return M;
   }
   
+  // Get Lorentz Transform matrix for a velocity in 2 spatial dimensions
   public static Matrix3f getLorentzTransformMatrix(Velocity vel) {
-    loadVelocity(vel);
     
-    Matrix3f rotHeadingInverse = getRotationMatrix(-v.direction, 0, 0, 1);
-    Matrix3f lorentz = getLorentzMatrix();
-    Matrix3f rotHeading = getRotationMatrix(v.direction, 0, 0, 1);
+    Matrix3f lorentz1D = getLorentzMatrix1D(vel);
+    Matrix3f lorentz2D = rotationWrapForHeading( lorentz1D, vel );
     
-    Matrix3f M = new Matrix3f();
-    M.set(rotHeading);
-    M.mul(lorentz);
-    M.mul(rotHeadingInverse);
-    
-    return M;
+    return lorentz2D;
   }
   
-  public static Vector3f inverseTransform(Velocity vel, Vector3f v) {
+  // Get Inverse Lorentz Transform Matrix for a velocity in 2 spatial dimensions
+  public static Matrix3f getInverseLorentzTransformMatrix(Velocity vel) {
     
-    Vector3f v_prime = new Vector3f();
+    Matrix3f inverseLorentz1D = getInverseLorentzMatrix1D(vel);
+    Matrix3f inverseLorentz2D = rotationWrapForHeading( inverseLorentz1D, vel );
     
-    Matrix3f M = getInverseLorentzTransformMatrix(vel);    
-    
-    M.transform(v, v_prime);
-    
-    return v_prime;
+    return inverseLorentz2D;
   }
   
-  public static Vector3f inverseDisplayTransform(Velocity vel, Vector3f v_display) {
-    
-    Vector3f v_inverse = inverseTransform(vel, v_display);
-    
-    v_inverse.set(
-      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.x : v_display.x,
-      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.y : v_display.y,
-      TOGGLE_TEMPORAL_TRANSFORM ? v_inverse.z : v_display.z
-    );
-    return v_inverse;
-  }
-  
-  public static void selectInverseDisplayComponents(Vector3f v_inverse, Vector3f v_display, Vector3f target) {
-  
-    target.set(
-      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.x : v_display.x,
-      TOGGLE_SPATIAL_TRANSFORM ? v_inverse.y : v_display.y,
-      TOGGLE_TEMPORAL_TRANSFORM ? v_inverse.z : v_display.z
-    );
-  }
-  
+  // Apply lorentz transform to a source vector, and store the result in a target vector
   public static void lorentzTransform(Velocity vel, Vector3f source, Vector3f target){
     
     Matrix3f M = getLorentzTransformMatrix(vel);
-    
     M.transform(source, target);
   }
   
-  public static Vector3f displayTransform(Velocity vel, Vector3f v) {
+  // Apply inverse lorentz transform to a source vector, and store the result in a target vector
+  public static void inverseLorentzTransform(Velocity vel, Vector3f source, Vector3f target){
+    
+    Matrix3f M = getInverseLorentzTransformMatrix(vel);
+    M.transform(source, target);
+  }
+  
+  // Apply the inverse lorentz transform for a velocity with 2 spatial dimensions to a (2+1) vector.
+  // Returns a new vector for convenience.
+  public static Vector3f inverseLorentzTransform(Velocity vel, Vector3f v) {
+    
     Vector3f v_prime = new Vector3f();
-    
-    lorentzTransform(vel, v, v_prime);
-    selectDisplayComponents(v, v_prime, v_prime);
-    
+    inverseLorentzTransform(vel, v, v_prime);
     return v_prime;
   }
+  
+  // Get a matrix to reverse the display transform for a given velocity.
+  // This is analogous to the inverse Lorentz matrix for motion in 1D,
+  // but with the notion in mind that only certain components of the transform
+  // were applied for the "display transform".
+  public static Matrix3f getInverseDisplayTransformMatrix1D(Velocity vel) {
 
+    /*  Inverting a display transform is a tricky case;
+     *  Getting the right inverse matrix depends on if the display transform
+     *  was applied to just the time coordinates, just the spatial coordinates,
+     *  both space and time (ie, a regular Lorentz transform was applied),
+     *  or neither (ie, no transform was applied).
+     */
+
+    Matrix3f m;
+
+    if (TOGGLE_TEMPORAL_TRANSFORM && ! TOGGLE_SPATIAL_TRANSFORM) {
+      m = new Matrix3f(
+        1,                  0,              0,
+        0,                  1,              0,
+        vel.magnitude,      0,              1.0f / vel.gamma
+      );
+    }
+    else if (TOGGLE_SPATIAL_TRANSFORM && ! TOGGLE_TEMPORAL_TRANSFORM) {
+      m = new Matrix3f(
+        1.0f / vel.gamma,   0,              vel.magnitude,
+        0,                  1,              0,
+        0,                  0,              1
+      );
+    }
+    else if(TOGGLE_SPATIAL_TRANSFORM && TOGGLE_TEMPORAL_TRANSFORM) {
+      m = getInverseLorentzMatrix1D(vel);
+    }
+    else {
+      m = new Matrix3f(
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+      );
+    }
+    return m;
+  }
+  
+  // Inverse a display transformation applied to a vector,
+  // given the velocity which generated the Lorentz matrix used in the original transform
+  // and the vector which resulted from the display transform.
+  // Returns the original vector (ie, before the display transform was applied).
+  public static Vector3f inverseDisplayTransform(Velocity vel, Vector3f v_display) {
+    
+    Vector3f v_inverse = new Vector3f();
+    
+    Matrix3f inverseDisplay1D = getInverseDisplayTransformMatrix1D(vel);
+    Matrix3f inverseDisplay2D = rotationWrapForHeading( inverseDisplay1D, vel );
+    
+    inverseDisplay2D.transform(v_display, v_inverse);
+    
+    return v_inverse;
+  }
+  
+  // Apply a display transform to a vector for a given velocity.
+  // For convenience, the Lorentz matrix is generated from the velocity
+  // and a new (display transformed) vector is returned.
+  public static Vector3f displayTransform(Velocity vel, Vector3f v) {
+    
+    Vector3f v_prime = new Vector3f();
+    Matrix3f mLorentz = getLorentzTransformMatrix(vel);
+    
+    displayTransform(mLorentz, v, v_prime);
+
+    return v_prime;
+  }
+  
+  // Apply a display transform to a vector for a given Lorentz matrix
+  // In a "display transform", the transformation is only actually applied to the enabled components
+  // That is, the spatial and temporal parts of the transform may be shown separately, together, or both off
   public static void displayTransform(Matrix3f theLorentzMatrix, Vector3f source, Vector3f target) {
     float sx = source.x;
     float sy = source.y;
@@ -148,14 +197,10 @@ static class Relativity {
       TOGGLE_TEMPORAL_TRANSFORM ? target.z : sz );
   }
   
-  public static void selectDisplayComponents(Vector3f v, Vector3f v_display, Vector3f v_target){
-    v_target.set(
-      TOGGLE_SPATIAL_TRANSFORM ? v_display.x : v.x,
-      TOGGLE_SPATIAL_TRANSFORM ? v_display.y : v.y,
-      TOGGLE_TEMPORAL_TRANSFORM ? v_display.z : v.z
-    );
-  }
-  
+  // This convenience function is just a batch operation which applies
+  // a display transform for a given matrix to a "bundle" of vectors.
+  // The bundle is just a source array of arbitrary vectors.
+  // Results are stored in the destination array.
   public static void displayTransformBundle(Matrix3f m, Vector3f[] src, Vector3f[] dst) {
     for (int i=0; i<src.length; i++) {
       Relativity.displayTransform(m, src[i], dst[i]);

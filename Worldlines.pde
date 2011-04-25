@@ -114,14 +114,13 @@ int FONT_SIZE = 14;
 ControlP5 controlP5;
 
 void setup() {
-//  size(SIZE_X, SIZE_Y, OPENGL);
-  //size(900, 540, OPENGL);
+  
   size(1000, 580, OPENGL);
-  
   frameRate(45);
-  //hint(DISABLE_DEPTH_SORT);
   
-  restart(); //initScene();
+  runTests();
+  
+  restart();
 }
 
 VTextRenderer myVTextRenderer, infobarVTextRenderer;
@@ -271,7 +270,6 @@ ControlP5 buildControlP5(ControlMap thePrefs) {
   return theControlP5;
 }
 
-//void initScene() {
 void restart() {
   
   // BUILD CONTROL PANELS

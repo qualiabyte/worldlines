@@ -12,8 +12,8 @@ velocity), but you will see that simultaneity is broken between
 fleet members.
 
 That is, moving in the x-direction, "current" events in the world
-frame for ships in the back of the fleet are shifted into "up"
-into the future of the leading ship. Additionally, though each
+frame for ships in the back of the fleet are shifted "up" into
+the future of the leading ship. Additionally, though each
 ship's size and shape are retained, they become spaced further
 apart!
 

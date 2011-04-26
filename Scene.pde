@@ -625,7 +625,7 @@ class BellsSpaceShipScene extends ParticleScene {
       Vector3f groupOffsetVec = new Vector3f(-i*groupSpacing, 0, 0);
       offsetParticles(groupOffsetVec, groupScene.particles);
       
-      List shipBodies = buildRigidBodiesAt(trapezoidVertices, groupScene.particles);
+      List shipBodies = buildRigidBodiesAt(buildTrapezoidVertices(), groupScene.particles);
       addRigidBodies(shipBodies);
       
       addTargets(groupScene.particles);

@@ -5447,6 +5447,22 @@ Info
 
 \begin_layout Standard
 Draws gui panels and console layer.
+\change_inserted 0 1303841989
+
+\end_layout
+
+\begin_layout Subsection
+
+\change_inserted 0 1303841991
+Input
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 0 1303841991
+Handles the user's mouse & keyboard input by dispatching to program actions.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsection
@@ -5525,6 +5541,21 @@ Scene
 
 \begin_layout Standard
 Models the main scenes, which can be composites of other scenes.
+\change_inserted 0 1303841974
+
+\end_layout
+
+\begin_layout Subsection
+
+\change_inserted 0 1303841977
+Tests
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted 0 1303841977
+A light testing framework and a few essential tests (checking basic relativistic
+ calculations and transforms).
 \end_layout
 
 \begin_layout Subsection

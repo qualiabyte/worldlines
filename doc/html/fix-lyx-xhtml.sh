@@ -28,7 +28,7 @@ if [[ $# -eq 2 ]]; then
         cp "$INFILE" "$TMPFILE"
 
         # Simplify image names produced by LYX
-        perl -p -i -e 's/media_Elements.*(ima)?ges_(.*.png)/$2/' "${TMPFILE}"
+        perl -p -i -e "s/(<img[^>]*src='\d+_).*(?:ima)?ges_(.*.png')/\$1\$2/" "${TMPFILE}"
 
         # Fix title
         perl -p -i -e 's#(<title>.*</title>)#<title>Worldlines Handbook</title>#' "$TMPFILE"

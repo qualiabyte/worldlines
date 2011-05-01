@@ -36,6 +36,9 @@ if [[ $# -eq 2 ]]; then
         # Add Css fixes after title
         perl -p -i -e "s#(<title>.*</title>)#\$1\n${CSS_INCLUDE}#" "$TMPFILE"
 
+        # Remove source code listing at end
+        perl -p -i -e 'print($_ . "</body></html>") and exit 0 if m|Main program.</div>|' "$TMPFILE"
+
         # Move tmpfile to outfile
         mv "$TMPFILE" "$OUTFILE"
 

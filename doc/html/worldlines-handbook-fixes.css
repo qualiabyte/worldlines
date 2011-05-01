@@ -1,47 +1,32 @@
 /* Fixes and styles for Lyx's exported XHTML */
 
-/* FIXES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
-/* Give images a consistent height (helps align captions) */
+/* Give images a consistent height (also aligns captions) */
 img {
     height: 325px !important;
     width: auto !important;
 }
 
-/* STYLES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-
 body {
-    margin: 0px;
-    width: 45em; /* 80%; 1000px; */
-/*     font-size: 85%; */
-    font-family: "Trebuchet MS","nimbus","helvetica","verdana","Deja Vu Sans","sans-serif" !important;
+    margin: 10px;
+    width: 45em !important;
 }
 
-div.abstract_item {
-    font-size: medium !important;
+body, div.abstract, div.abstract_item {
+    text-align: justify;
+    font-size: 12pt !important;
+    font-family: "Trebuchet MS","nimbus","helvetica","verdana","Deja Vu Sans","sans-serif" !important;
 }
 
 a {
     color: #08f;
 }
 
-h1.title {
-    font-size: large;
+h1, h2, h3, h4 {
+    margin: 1.1em 10px !important;
 }
 
-h2.subsubsection {
-}
-
-h3.subsection {
-    margin: 0.5em 1em !important;
-}
-
-h4.subsubsection, h4.paragraph {
-    margin-left: 2em;
-}
-
-div.standard /*div.abstract, h1.title*/ {
-    margin: 1em 1em 1em 3em !important;
+div.standard, div.abstract {
+    margin: 1.1em 30px !important;
 }
 
 /* No heavy table borders */
@@ -60,6 +45,7 @@ body > div.float-figure {
     border: 1px solid #CCCCCC;
     padding: 1ex 0.5ex;
     margin: 1.5em 2px;
+    margin-left: -5px;
     width: auto;
 }
 

@@ -28,17 +28,24 @@ HANDBOOK_PRODUCTS = doc/$(HANDBOOK_PDF) \
 	doc/html/$(HANDBOOK_XHTML) \
 	doc/html/$(HANDBOOK_XHTML_FIXED)
 
+# Processing .pde files we trust feeding to javadoc
+JAVADOC_SOURCES = Particle.java \
+		  Relativity.java
+
+JAVADOC_DIR = javadoc
+
 WEB_ZIP = worldlines.web.zip
 
 APP_ZIPS = web/worldlines.linux.zip \
            web/worldlines.macosx.zip \
            web/worldlines.windows.zip
 
-PRODUCTS = $(HANDBOOK_PRODUCTS) $(WEB_ZIP) $(APP_ZIPS)
+# Will be removed on 'make clean'
+PRODUCTS = $(HANDBOOK_PRODUCTS) $(JAVADOC_DIR) $(WEB_ZIP) $(APP_ZIPS)
 
 all: doc web
 
-doc: handbook_pdf handbook_xhtml
+doc: handbook_pdf handbook_xhtml javadoc
 
 handbook_pdf: $(HANDBOOK)
 
@@ -61,6 +68,13 @@ handbook_xhtml: $(HANDBOOK_SRC)
 	else \
 		echo "!!  Missing: $$LYX"; \
 	fi;
+
+.PHONY: javadoc
+javadoc:
+	mkdir $(JAVADOC_DIR); \
+	cd $(JAVADOC_DIR); \
+	for f in ../*.pde; do ln -s "$${f}" "$$(basename $${f%.pde}).java"; done; \
+	javadoc -d docs $(JAVADOC_SOURCES);
 
 web: applet applet-required applications
 	@if [ -d web/applet ]; then \

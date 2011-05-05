@@ -1,7 +1,7 @@
 // Particle
 // tflorez
 
-class Particle implements Frame, ISelectableLabel {
+public class Particle implements Frame, ISelectableLabel {
   
   // PHYSICAL STATE
   Vector3f position = new Vector3f();
@@ -35,7 +35,7 @@ class Particle implements Frame, ISelectableLabel {
   
   ParticleLabelBuilder labelBuilder;
   
-  color fillColor = #1B83F0;
+  color fillColor = 0xFF1B83F0;
 
   float pathColorR, pathColorG, pathColorB, pathColorA;
   color pathColor;
@@ -43,25 +43,25 @@ class Particle implements Frame, ISelectableLabel {
   // FRAME INTERFACE BEGIN
   DefaultFrame headFrame = new DefaultFrame();
   
-  float[] getPosition(){
+  public float[] getPosition(){
     //return xyt;
     return headFrame.getPosition();
   }
   
-  Velocity getVelocity(){
+  public Velocity getVelocity(){
     //return velocity;
     return headFrame.getVelocity();
   }
   
-  Vector3f getPositionVec() {
+  public Vector3f getPositionVec() {
     return headFrame.position;
   }
   
-  Vector3f getDisplayPositionVec() {
+  public Vector3f getDisplayPositionVec() {
     return headFrame.displayPosition;
   }
   
-  float[] getDisplayPosition() {
+  public float[] getDisplayPosition() {
     //return xyt_prime;
     //return Relativity.displayTransform(targetParticle.velocity, xyt);
     //return Relativity.selectDisplayComponents(xyt, xyt_prime);
@@ -69,20 +69,20 @@ class Particle implements Frame, ISelectableLabel {
     return headFrame.getDisplayPosition();
   }
   
-  Plane getSimultaneityPlane(){
+  public Plane getSimultaneityPlane(){
     return headFrame.getSimultaneityPlane();
   }
   
-  float getAge() {
+  public float getAge() {
     return headFrame.getAge() + headFrame.getAncestorsAge();
     //return headFrame.getAge();
   }
   
-  float getAncestorsAge() {
+  public float getAncestorsAge() {
     return headFrame.getAncestorsAge();
   }
   
-  AxesSettings getAxesSettings() {
+  public AxesSettings getAxesSettings() {
     return this.headFrame.axesSettings;
   }
   // FRAME INTERFACE END
@@ -92,7 +92,7 @@ class Particle implements Frame, ISelectableLabel {
     setPathColor(color(0,0.8,0.8,prefs.getFloat("LIGHTING_WORLDLINES")));
   }
   
-  Particle( Vector3f pos, Vector3f vel ){
+  public Particle( Vector3f pos, Vector3f vel ){
     
     this.labelBuilder = new ParticleLabelBuilder();
     
@@ -103,41 +103,41 @@ class Particle implements Frame, ISelectableLabel {
     setPosition(pos);
   }
   
-  Particle( Vector3f pos, Velocity vel) {
+  public Particle( Vector3f pos, Velocity vel) {
     this( pos, new Vector3f(vel.vx, vel.vy, 0) );
   }
   
-  Particle () {
+  public Particle () {
     this(new Vector3f(1E-7,0,0), new Vector3f(0,0,0));
   }
   
-  void setPosition(Vector3f v){
+  public void setPosition(Vector3f v){
     setPosition(v.x, v.y, v.z);
   }
   
-  void setPosition(float x, float y, float z){
+  public void setPosition(float x, float y, float z){
     position.set(x, y, z);
     updatePosition();
   }
   
-  void updatePosition() {
+  public void updatePosition() {
     
     headFrame.setPosition(position);
     
     updateHistory();
   }
   
-  void setAllVisibility(boolean b) {
+  public void setAllVisibility(boolean b) {
     this.isVisible = b;
     this.headFrame.axesSettings.setAllVisibility(b);
   }
   
-  void setVelocity(float x, float y){
+  public void setVelocity(float x, float y){
     velocity.setComponents(x, y);
     headFrame.setVelocity(x, y);
   }
   
-  void update(float dt){
+  public void update(float dt){
     
     updateImpulse();
     
@@ -152,14 +152,14 @@ class Particle implements Frame, ISelectableLabel {
     updateLabel();
   }
   
-  void setProperTime(float time) {
+  public void setProperTime(float time) {
     this.properTime = time;
     properTimeHist[histCount] = properTime;
     
     headFrame.setAge(this.properTime - frameHist[histCount].getAncestorsAge());
   }
   
-  void updateHistory() {
+  public void updateHistory() {
     
     Velocity velLast = frameHist[histCount-1].getVelocity();
     
@@ -174,7 +174,7 @@ class Particle implements Frame, ISelectableLabel {
     }
   }
   
-  void recordStateToPathHistory() {
+  private void recordStateToPathHistory() {
     
     frameHist[histCount] = headFrame.clone();
     
@@ -193,7 +193,7 @@ class Particle implements Frame, ISelectableLabel {
     frameCountLastHistUpdate = frameCount;
   }
   
-  void updateTransformedHist(Matrix3f lorentzMatrix){
+  public void updateTransformedHist(Matrix3f lorentzMatrix){
     
     Vector3f source = new Vector3f();
     Vector3f target = new Vector3f();
@@ -204,17 +204,17 @@ class Particle implements Frame, ISelectableLabel {
     }
   }
   
-  void drawGL(GL gl){
+  public void drawGL(GL gl){
     //drawHeadGL(gl);
     drawPathGL(gl);
   }
   
-  void drawHead(){
+  public void drawHead(){
     float[] displayPos = this.getDisplayPosition();
     drawHead(displayPos[0], displayPos[1], displayPos[2]);
   }
   
-  void drawHead(float x, float y, float z) {
+  public void drawHead(float x, float y, float z) {
     if (! this.isVisible) { return; }
     
     pushMatrix();
@@ -228,21 +228,21 @@ class Particle implements Frame, ISelectableLabel {
     popMatrix();
   }
   
-  void drawHeadGL(GL gl, float[] pos) {
+  public void drawHeadGL(GL gl, float[] pos) {
     if (! this.isVisible) { return; }
     drawHeadGL(gl, pos[0], pos[1], pos[2]);
   }
   
-  void drawHeadGL(GL gl){
+  public void drawHeadGL(GL gl){
     float[] displayPos = this.getDisplayPosition();
     drawHeadGL(gl, displayPos);
   }
   
-  void drawHeadGL(GL gl, Vector3f V){
+  public void drawHeadGL(GL gl, Vector3f V){
     drawHeadGL(gl, V.x, V.y, V.z);
   }
   
-  void drawHeadGL(GL gl, float x, float y, float z) {
+  public void drawHeadGL(GL gl, float x, float y, float z) {
     gl.glPushMatrix();
     
     glColorGL(gl, fillColor);
@@ -259,7 +259,7 @@ class Particle implements Frame, ISelectableLabel {
     gl.glPopMatrix();
   }
 
-  Vector3f getIntersection(Frame f) {
+  public Vector3f getIntersection(Frame f) {
     Vector3f theIntersection = new Vector3f();
     
     Plane plane = f.getSimultaneityPlane();
@@ -289,7 +289,7 @@ class Particle implements Frame, ISelectableLabel {
     return theIntersection;
   }
   
-  DefaultFrame findHighestFrameBelow(Plane thePlane) {
+  public DefaultFrame findHighestFrameBelow(Plane thePlane) {
     DefaultFrame highestBelow = null;
     
     // Bounds on where the intersect lies in this particles frame history
@@ -312,13 +312,13 @@ class Particle implements Frame, ISelectableLabel {
     return highestBelow;
   }
   
-  void drawIntersectionGL(GL gl, Frame f){
+  public void drawIntersectionGL(GL gl, Frame f){
     
     drawHeadGL(gl, getIntersection(f));
   }
   
   // A variation on drawPath using glBegin() and glVertex()
-  void drawPathGL(GL gl){
+  public void drawPathGL(GL gl){
     
     gl.glBegin(GL.GL_LINE_STRIP);
     
@@ -346,7 +346,7 @@ class Particle implements Frame, ISelectableLabel {
     gl.glEnd();
   }
   
-  void propelSelf(float momentumDeltaX, float momentumDeltaY) {
+  public void propelSelf(float momentumDeltaX, float momentumDeltaY) {
     //TODO
     addImpulse(momentumDeltaX, momentumDeltaY);
     
@@ -355,12 +355,12 @@ class Particle implements Frame, ISelectableLabel {
     emissionMomentumTotal = abs(emissionMomentumX) + abs(emissionMomentumY);
   }
   
-  void addImpulse(float dp_x, float dp_y) {
+  private void addImpulse(float dp_x, float dp_y) {
     impulseX += dp_x;
     impulseY += dp_y;
   }
   
-  void updateEmission() {
+  private void updateEmission() {
     
     int emissionGenerationDelay = 500;
     
@@ -380,7 +380,7 @@ class Particle implements Frame, ISelectableLabel {
     }
   }
   
-  void emit(Particle emission) {
+  private void emit(Particle emission) {
     
     addEmission(emission);
     millisLastEmission = millis();
@@ -393,7 +393,7 @@ class Particle implements Frame, ISelectableLabel {
   }
   
   // TODO: this emulates photon emissions for now, but this needs its own class
-  void emitEnergy(float massEnergy, float direction) {
+  public void emitEnergy(float massEnergy, float direction) {
     
     float theMass = massEnergy / C*C;
     
@@ -410,7 +410,7 @@ class Particle implements Frame, ISelectableLabel {
     addImpulse(-cos(direction)*impulseMomentum, -sin(direction)*impulseMomentum);
   }
 
-  void updateImpulse() {
+  private void updateImpulse() {
     
     updateEmission();
     
@@ -439,11 +439,11 @@ class Particle implements Frame, ISelectableLabel {
     setVelocity( cos(heading_final) * v_mag_final, sin(heading_final) * v_mag_final );
   }
   
-  void setFillColor(color c) {
+  public void setFillColor(color c) {
     this.fillColor = c;
   }
 
-  void setPathColor(color c) {
+  public void setPathColor(color c) {
     colorMode(RGB,1.0f);
     pathColor = c;
     pathColorR = red(c);
@@ -452,10 +452,13 @@ class Particle implements Frame, ISelectableLabel {
     pathColorA = alpha(c);
   }
   
-  String getLabel() {
+  // Selectable Label Interface Functions
+  
+  public String getLabel() {
     return this.label;
   }
-  String getName() {
+  
+  public String getName() {
     if (this.name == "" || this.name == null) {
       return "p." + particles.indexOf(this);
     }
@@ -463,13 +466,16 @@ class Particle implements Frame, ISelectableLabel {
       return this.name;
     }
   }
-  void setName(String theName) {
+  
+  public void setName(String theName) {
     this.name = theName;
   }
-  void setLabel(String theLabel) {
+  
+  public void setLabel(String theLabel) {
     this.label = theLabel;
   }
-  void updateLabel() {
+  
+  public void updateLabel() {
     setLabel(
       this.name + "\n" + 
       labelBuilder.buildLabel(this)
@@ -479,10 +485,10 @@ class Particle implements Frame, ISelectableLabel {
 
 public class ParticleLabelBuilder {
   
-  ParticleLabelBuilder() {
+  public ParticleLabelBuilder() {
   }
   
-  String buildLabel(Particle p) {
+  public String buildLabel(Particle p) {
     
     String theLabel = (
       "p : " + nfVec(p.getPositionVec(), 3) + "\n" +
@@ -490,7 +496,7 @@ public class ParticleLabelBuilder {
       //"fromTarget : " + nfVec(targetToParticle, 3) + "\n" +
       //"fromTarget': " + nfVec(targetToParticlePrime, 3) + "\n" +
       "velocity: (" + nf(p.velocity.magnitude, 0, 6) + ")\n" +
-      //"mass: ("  + nf(p.mass, 0, 4) + ")\n" +
+      "mass: ("  + nf(p.mass, 0, 4) + ")\n" +
       "age: (" + nf(p.properTime, 0, 1) + ")\n"
       
       //"headFrame.getAncestorsAge(): " + nf(p.headFrame.getAncestorsAge(), 0, 2) + "\n" +
@@ -501,20 +507,20 @@ public class ParticleLabelBuilder {
   }
 }
 
-interface ParticleDriver {
-  void drive(Particle p);
+public interface ParticleDriver {
+  public void drive(Particle p);
 }
 
-class SineVelocityParticleDriver implements ParticleDriver {
-  float velAmplitude;
-  float wavelength;
+public class SineVelocityParticleDriver implements ParticleDriver {
+  public float velAmplitude;
+  public float wavelength;
   
-  SineVelocityParticleDriver(float wavelength, float velAmplitude) {
+  public SineVelocityParticleDriver(float wavelength, float velAmplitude) {
     this.wavelength = wavelength;
     this.velAmplitude = velAmplitude;
   }
   
-  void drive(Particle p) {
+  public void drive(Particle p) {
     float t = p.getPositionVec().z;
     float k = TWO_PI / wavelength;
     float vx = sin(k*t) * velAmplitude;
@@ -522,14 +528,14 @@ class SineVelocityParticleDriver implements ParticleDriver {
   }
 }
 
-class DrivenParticle extends Particle {
+public class DrivenParticle extends Particle {
   ParticleDriver particleDriver;
   
-  DrivenParticle(ParticleDriver theDriver) {
+  public DrivenParticle(ParticleDriver theDriver) {
     this.particleDriver = theDriver;
   }
   
-  void update(float dt) {
+  public void update(float dt) {
     particleDriver.drive(this);
     super.update(dt);
   }

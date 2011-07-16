@@ -92,8 +92,9 @@ ControlP5 controlP5;
 
 void setup() {
   
-  size(1000, 580, OPENGL);
+  //size(800, 480, OPENGL);
   //size(900, 540, OPENGL);
+  size(1000, 580, OPENGL);
   //size(1280, 900, OPENGL);
   
   frameRate(45);
@@ -194,7 +195,7 @@ ControlPanel[] buildControlPanels() {
   panel = debugPanel;
   panel.putInteger("maxEmissions", 50, 0, 500);
   panel.putFloat("backgroundColorHue", 0.65f);         // 0.59 - 0.65
-  panel.putFloat("backgroundColorSaturation", 0.48f);  // 0.48 - 0.70
+  panel.putFloat("backgroundColorSaturation", 0.60f);  // 0.48 - 0.70
   panel.putFloat("backgroundColorBrightness", 0.23f);  // 0.17 - 0.28
   panel.putFloat("cauchyGamma", 1, 0, 4);
   panel.putFloat("momentumNudge", 0.003, 0, 1);
@@ -454,6 +455,26 @@ void addTarget(Particle p) {
     targets.add(p);
   }
   p.setFillColor(TARGET_COLOR);
+}
+
+/** Target a different particle instead of one which is currently targeted. */
+void swapTargetStatus(Particle targeted, Particle toTarget) {
+  
+  if (targets.contains(targeted)) {
+    targets.remove(targeted);
+    targets.add(toTarget);
+  }
+  
+  if (targeted == targetParticle) {
+    makeTargetParticle(toTarget);
+  }
+}
+
+void swapSelectionStatus(Particle selected, Particle toSelect) {
+  if (particleSelector.contains(selected)) {
+    particleSelector.remove(selected);
+    particleSelector.add(toSelect);
+  }
 }
 
 void addEmission(Particle e) {

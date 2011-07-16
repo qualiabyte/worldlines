@@ -4,7 +4,62 @@
 import java.util.ArrayList;
 
 void runTests() {
+  runRelativityTests();
+  runParticleTests();
+}
 
+void runParticleTests() {
+  
+  Tester tester = new Tester("ParticleTests", 1);
+  tester.verbose = true;
+  
+  // Use position of (x, y) = (100, 100) in ls
+  Vector3f pos = new Vector3f(100, 100, 0);
+  
+  // Use velocity of 0.9 c in the y-direction
+  Velocity vel = new Velocity(0, 0.9f);
+  
+  // Init Lorentz matrix for particle creation
+  lorentzMatrix = Relativity.getLorentzTransformMatrix(vel);
+  inverseLorentzMatrix = Relativity.getInverseLorentzTransformMatrix(vel);
+  
+  // Create test particle with mass of 100 kg
+  Particle p = new Particle(100, pos, vel);
+  
+  
+  // Particle Decay
+  
+  double mass = Math.random() * 1000;
+  Particle decayParticle = new Particle(mass, new Vector3f(), new Velocity(0, 0));
+  
+  double m1 = Math.random() * mass;
+  double m2 = Math.random() * (mass - m1);
+  double angle = Math.random() * TWO_PI;
+  
+  List decayProducts = decayParticle.simulateSplitDecay(m1, m2, angle);
+  
+  Particle p1 = (Particle) decayProducts.get(0);
+  Particle p2 = (Particle) decayProducts.get(1);
+  
+  tester.ok(percentDiff(p1.getMomentum(), p2.getMomentum()) < 0.1,
+            "Momenta in split decay should be equal and opposite in rest frame.");
+  
+  print(tester.getResultSummary());
+}
+
+/**
+ *  Find the absolute percent difference between two values:
+ *  percentDiff = | 100 * (diff / average) |
+ */
+double percentDiff(double a, double b) {
+  
+  double avg = (a + b) / 2.0;
+  double diff = b - a;
+  
+  return Math.abs(100.0 * diff / avg);
+}
+
+void runRelativityTests() {
   Tester tester = new Tester("RelativityTests", 7);
   tester.verbose = false;
   

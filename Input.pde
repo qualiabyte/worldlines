@@ -47,7 +47,7 @@ class InputDispatch {
       for (int i=0; i < targets.size(); i++) {
         
         if (prefs.getBoolean("energy_Conservation")) {
-          energyNudge((Particle)targets.get(i), direction);
+          decayNudge((Particle)targets.get(i), direction);
         }
         else {
           nudge((Particle)targets.get(i), direction, buttonPressure); 
@@ -61,11 +61,19 @@ class InputDispatch {
     updateParticleDragging();
   }
   
-  void energyNudge(Particle particle, float theta) {
-    float energyAmt = (float) (0.01*particle.mass*C*C);
-    particle.emitEnergy(energyAmt, theta+PI);
+  // TODO: LIMIT THE RATE EMISSIONS ARE ADDED TO SCENE
+  
+  void decayNudge(Particle particle, float theta) {
+  
+    double M = particle.mass;
+    double delta_M = 0.01 * M;
     
-    intervalSay(45, "energyNudge(): energyAmt: " + energyAmt);
+    double m1 = 0.99 * (particle.mass - delta_M);
+    double m2 = particle.mass - delta_M - m1;
+    
+    List createdParticles = particle.splitDecay(m1, m2, theta + Math.PI);
+    
+    addEmission((Particle) createdParticles.get(1));
   }
   
   void nudge(Particle particle, float theta, float amt) {
@@ -76,9 +84,6 @@ class InputDispatch {
       float v_mag = particle.velocity.magnitude;
       
       float p = (float) particle.getMomentum();
-      
-      float vx = targetParticle.velocity.vx;
-      float vy = targetParticle.velocity.vy;
       
       float heading_initial = particle.velocity.direction;
       

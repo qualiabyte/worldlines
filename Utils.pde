@@ -621,6 +621,33 @@ void offsetParticles(Vector3f theOffset, Collection theParticles) {
 }
 
 // MATH
+
+/**
+ * Find the remainder left from m divided by n, after an offset,
+ * thus restricting the result to range (offset, offset + n).
+ * 
+ * Example:
+ *
+ * Some trig functions require the angle to be within a certain range,
+ * such as (-PI, PI).
+ *
+ * An angle of unknown value and sign can be sanitized as follows:
+ *   safeAngle = modulus(angle, TWO_PI, -PI);
+ * 
+ * @return    the remainder, a value from (offset) to (offset + n):
+ *                (m > offset)  : offset + (m - offset) % n
+ *                (m <= offset) : offset + (m - offset) % n + n
+ */
+double modulus(double m, double n, double offset) {
+
+  if (m > offset) {
+    return offset + (m - offset) % n;
+  }
+  else {
+    return offset + n + (m - offset) % n;
+  }
+}
+
 float logBase10(float value) {
   return (log(value) / log(10));
 }

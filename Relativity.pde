@@ -237,5 +237,36 @@ public static class Relativity {
       Relativity.displayTransform(m, src[i], dst[i]);
     }
   }
+  
+  /**
+   * Find the amount of proper time which elapses for a body traveling on a straight, timelike path
+   * between two points in spacetime.
+   * 
+   * @return    The elapsed proper time for the body between {@code fromPos} and {@code toPos}.<br>
+   *            If {@code toPos} occurs before {@code fromPos}, the value will be negative.<br>
+   *            If {@code toPos} is outside the light cone of {@code fromPos}, returns {@code NaN}.
+   */
+  static public double getProperTimeBetween(Vector3f fromPos, Vector3f toPos) {
+  
+    double properTime;
+    
+    double dx = (toPos.x - fromPos.x);
+    double dy = (toPos.y - fromPos.y);
+    double dt = (toPos.z - fromPos.z);
+    
+    double spacetimeInterval = dx*dx + dy*dy - dt*dt;
+    
+    // Do calculation if interval is timelike (negative) or trivial (nearly zero)
+    if (spacetimeInterval < 1e-1) {
+      
+      int offsetSign = (toPos.z > fromPos.z) ? +1 : -1;
+      properTime = offsetSign * Math.sqrt(Math.abs(spacetimeInterval));
+      
+      return properTime;
+    }
+    else {
+      return Double.NaN;
+    }
+  }
 }
 

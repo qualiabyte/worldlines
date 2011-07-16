@@ -62,7 +62,7 @@ class InputDispatch {
   }
   
   void energyNudge(Particle particle, float theta) {
-    float energyAmt = 0.01*particle.mass*C*C;
+    float energyAmt = (float) (0.01*particle.mass*C*C);
     particle.emitEnergy(energyAmt, theta+PI);
     
     intervalSay(45, "energyNudge(): energyAmt: " + energyAmt);
@@ -75,7 +75,7 @@ class InputDispatch {
       
       float v_mag = particle.velocity.magnitude;
       
-      float p = particle.mass * particle.velocity.gamma * v_mag;
+      float p = (float) particle.getMomentum();
       
       float vx = targetParticle.velocity.vx;
       float vy = targetParticle.velocity.vy;

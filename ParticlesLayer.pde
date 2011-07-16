@@ -312,30 +312,26 @@ class ParticlesLayer {
     particleTexture.disable();
   }
   
+  /**
+   * Draw a representation of the intersection between a particle's worldline
+   * and a simultaneity plane.
+   *
+   * @param theDisplayPos      The precalculated display position of this intersection.
+   * @param theParentParticle  The particle whose worldline creates this intersection.
+   */
   void drawIntersectionGL(Vector3f theDisplayPos, Particle theParentParticle) {
 
     if (theDisplayPos == null) {
       return;
     }
     
+    Vector3f parentPos = theParentParticle.getPositionVec();
     Vector3f intersectPos = Relativity.inverseDisplayTransform(targetParticle.getVelocity(), theDisplayPos);
     
-    // Distance (in world frame) from intersection to current simulation step
-    // of the parent particle whose worldline path corresponds to this intersection
-    float distToParent = getDistance(intersectPos, theParentParticle.getPositionVec());
+    float properTimeOffset = (float) Relativity.getProperTimeBetween(parentPos, intersectPos);
     
-    // Length (in world frame) of path parent's 2+1 velocity
-    float parentThreeVelLength = theParentParticle.getVelocity().getThreeVelocity().length();
-
-    // Time offset for path parent particle between the current simulation step and this path-plane intersection
-    float properTimeOffset = distToParent / parentThreeVelLength;
-    
-    // Is the intersection in the path parent's future or past?
-    int offsetSign = (intersectPos.z > theParentParticle.getPositionVec().z) ? +1 : -1;
-    
-    // Propertime the path parent partice would have when passing through intersection,
-    // assuming the velocity it has on its current route
-    float intersectionProperTime = theParentParticle.properTime + properTimeOffset * offsetSign;
+    // Propertime of parent particle at the intersection, given its current heading
+    float intersectionProperTime = theParentParticle.properTime + properTimeOffset;
     
     // Distance (in display coordinates) from kamera to the intersection being drawn
     float distKameraToDisplayPos = getDistance(theDisplayPos, kamera.pos);
@@ -469,13 +465,6 @@ class ParticlesLayer {
     }
     
     label += p.label;
-    
-    /*
-    targetToParticle.sub(p.getPositionVec(), targetParticle.getPositionVec());
-    //Relativity.displayTransform(lorentzMatrix, targetToParticle, targetToParticlePrime);
-    
-    lorentzMatrix.transform(targetToParticle, targetToParticlePrime);
-    */
     
     return label;
   }

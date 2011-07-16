@@ -52,7 +52,7 @@ public class Velocity {
   
   void setDirection(float direction) {
 
-    this.direction = direction;
+    this.direction = (float) modulus(direction, TWO_PI, 0);
     updateComponents();
   }
   
@@ -84,11 +84,28 @@ public class Velocity {
   }
   
   Vector3f getThreeVelocity() {
-    return threeVelocity;
+    return (Vector3f) threeVelocity.clone();
   }
   
   String toString() {
-    return super.toString() + " vx: " + vx + ", vy: " + vy;
+    return super.toString() + " vx: " + vx + ", vy: " + vy
+           + ", direction: " + direction + ", magnitude:" + magnitude;
+  }
+  
+  /**
+   * Find the value of this velocity outside of its current frame of measurement.
+   *
+   * @param vFrom    The velocity of the frame "containing" (currently measuring) this velocity,
+   *                 relative to the desired perspective.
+   */
+  Velocity mapFrom(Velocity vFrom) {
+    
+    // Find the three-vel in the target frame (equivalent to four-vel in 3+1 spacetime)
+    Vector3f newThreeVel = Relativity.inverseLorentzTransform(vFrom, this.getThreeVelocity());
+    float newGamma = newThreeVel.z;
+
+    Velocity newVelocity = new Velocity(newThreeVel.x / newGamma, newThreeVel.y / newGamma);
+    return newVelocity;
   }
 }
 

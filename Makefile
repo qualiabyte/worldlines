@@ -5,7 +5,7 @@
 # Set this if you have lyx 2.0+ in a non-default location
 # (If your default lyx is above 2.0, just leave this unset)
 #
-# LYX_2 = /home/qualiabyte/apps/lyx-2.0.0rc3/src/lyx
+#LYX_2 = /home/qualiabyte/apps/lyx-2.0.0/src/lyx
 
 ifdef LYX_2
   LYX = $(LYX_2)
@@ -62,7 +62,7 @@ handbook_xhtml: $(HANDBOOK_SRC)
 		cd $(DOC_DIR); \
 		$$LYX --export xhtml $(HANDBOOK_LYX); \
 		mv $(HANDBOOK_XHTML) html/; \
-		rm *.png; \
+		-rm *.png; \
 		cd html; \
 		./fix-lyx-xhtml.sh $(HANDBOOK_XHTML) $(HANDBOOK_XHTML_FIXED); \
 	else \
@@ -94,7 +94,7 @@ applet:
 applet-required:
 
 applications:
-	@for os in "linux" "macosx" "windows"; do \
+	@for os in "linux32" "macosx" "windows32"; do \
 		appdir="application.$$os"; \
 		if [ -d $$appdir ]; then \
 			pkg="web/worldlines.$$os.zip"; \
@@ -110,7 +110,7 @@ applications:
 	done
 
 clean: clean_pngs
-	-rm $(PRODUCTS);
+	-rm -fr $(PRODUCTS);
 
 clean_pngs:
 	-rm doc/*.png;

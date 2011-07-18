@@ -251,6 +251,7 @@ void restart() {
   prefs = buildPrefs(controlPanels);
   
   // NON-GUI PREFS
+  prefs.put("handbookUrl", "http://worldlines.sourceforge.net/worldlines-handbook.pdf");
   prefs.put("particleImagePath", "particle_hard.png");
   prefs.put("particleClockTickImagePath", "particle_clock_tick.png");
   prefs.put("selectedParticleImagePath", "particle_reticle.png");

@@ -102,7 +102,7 @@ class Scene {
     
     descPanel.addLine("More Information");
     descPanel.addLine("» See the \"Scenarios\" section in the manual.")
-             .setClickAction(new OpenLinkAction("http://worldlines.com/"));
+             .setClickAction(new OpenLinkAction(prefs.getString("handbookUrl")));
     
     return descPanel;
   }

@@ -36,9 +36,9 @@ JAVADOC_DIR = javadoc
 
 WEB_ZIP = worldlines.web.zip
 
-APP_ZIPS = web/worldlines.linux.zip \
+APP_ZIPS = web/worldlines.linux32.zip \
            web/worldlines.macosx.zip \
-           web/worldlines.windows.zip
+           web/worldlines.windows32.zip
 
 # Will be removed on 'make clean'
 PRODUCTS = $(HANDBOOK_PRODUCTS) $(JAVADOC_DIR) $(WEB_ZIP) $(APP_ZIPS)

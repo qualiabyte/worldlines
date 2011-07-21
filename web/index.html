@@ -24,6 +24,10 @@
         a:active  { color: #9cacc1; text-decoration: underline; }
         a:hover   { color: #E5B; /* #C8B; #5e5; #a0e39c; */ text-decoration: underline; }
         
+        img {
+            border: none;
+        }
+
         h1#banner-title {
             color: #56575d;
             font-size: 70px;
@@ -61,12 +65,15 @@
             font-size: 0.5em;
             text-align: right;
         }
+        div#teaser {
+            text-align:center;
+        }
         div#applet-content {
             font-size: 11px;
         }
         div#worldlines-container {
             margin: 10px 0px 10px 0px;
-        /*  display: none;  */      /* Uncomment to test without loading the applet */
+            display: none;          /* Uncomment to test without loading the applet */
         }
         div.header {
             font: normal 22px "Trebuchet MS","nimbus","helvetica","verdana","Deja Vu Sans","sans-serif";
@@ -134,9 +141,9 @@
                 <a href="#applet-content">app</a>
             </div>
             <div class="sub">
-                (<a href="worldlines.windows32.zip">win</a>,
-                <a href="worldlines.macosx.zip">mac</a>,
-                <a href="worldlines.linux32.zip">lin</a>)
+                (<a href="http://sourceforge.net/projects/worldlines/files/worldlines.windows32.zip/download">win</a>,
+                <a href="http://sourceforge.net/projects/worldlines/files/worldlines.macosx.zip/download">mac</a>,
+                <a href="http://sourceforge.net/projects/worldlines/files/worldlines.linux32.zip/download">lin</a>)
             </div>
         </div>
         /<div class="menu-block">
@@ -158,83 +165,13 @@
             </div>
         </div>
     </div>
-    
-    <div id="applet-content">
-        <div class="header">
-            The Worldlines Program
-        </div>
-        <div id="worldlines-container">
-        
-            <!--[if !IE]> -->
-            <object classid="java:org.jdesktop.applet.util.JNLPAppletLauncher" 
-                        type="application/x-java-applet"
-                        archive="Worldlines.jar,opengl.jar,controlP5.jar,core.jar,commons-math-2.0.jar,vecmath.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar"
-                        width="1000" height="580"
-                        standby="Loading Processing software..." >
-                  
-              <param name="codebase" value="applet/" />
-              <param name="archive" value="Worldlines.jar,opengl.jar,controlP5.jar,core.jar,commons-math-2.0.jar,vecmath.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar" />
-              <param name="jnlpNumExtensions" value="1">
-              <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
 
-              <param name="mayscript" value="true" />
-              <param name="scriptable" value="true" />
-              
-              <param name="image" value="loading.gif" />
-              <param name="boxmessage" value="Loading Processing software..." />
-              <param name="boxbgcolor" value="#FFFFFF" />
-              <param name="progressbar" value="true" />
-              <!--<param name="noddraw.check" value="true">-->
-              
-              <param name="subapplet.classname" value="Worldlines" /> 
-              <param name="subapplet.displayname" value="Worldlines" />
-              
-              <param name="test_string" value="outer" />
-              <!--<![endif]-->
-              
-              <object classid="clsid:CAFEEFAC-0016-0000-FFFF-ABCDEFFEDCBA" 
-                  width="1000" height="580"
-                  standby="Loading Processing software..."  >
-
-                <param name="codebase" value="applet/" />
-                <param name="code" value="org.jdesktop.applet.util.JNLPAppletLauncher" />
-                <param name="archive" value="Worldlines.jar,opengl.jar,controlP5.jar,core.jar,commons-math-2.0.jar,vecmath.jar,http://download.java.net/media/applet-launcher/applet-launcher.jar,http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,http://download.java.net/media/gluegen/webstart/gluegen-rt.jar" />
-                <param name="jnlpNumExtensions" value="1">
-                <param name="jnlpExtension1" value="http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jnlp">
-                
-                <param name="mayscript" value="true" />
-                <param name="scriptable" value="true" />
-                
-                <param name="image" value="loading.gif" />
-                <param name="boxmessage" value="Loading Processing software..." />
-                <param name="boxbgcolor" value="#FFFFFF" />
-                <param name="progressbar" value="true" />
-                <!--<param name="noddraw.check" value="true">-->
-
-                <param name="subapplet.classname" value="Worldlines" /> 
-                <param name="subapplet.displayname" value="Worldlines" />
-                
-                <param name="test_string" value="inner" />
-                
-                <p>
-                  <strong>
-                This browser does not have a Java Plug-in.
-                <br />
-                <a href="http://www.java.com/getjava" title="Download Java Plug-in">
-                  Get the latest Java Plug-in here.
-                </a>
-                  </strong>
-                </p>
-                
-              </object>
-              
-              <!--[if !IE]> -->
-            </object>
-            <!--<![endif]-->
-        </div>
-
+    <div id="teaser">
+        <a href="http://sourceforge.net/projects/worldlines/files">
+            <img src="images/worldlines-teaser.png" alt="Worldlines (for win, mac, and linux)" width="90%" />
+        </a>
     </div>
-
+    
     <!-- ~~~~ Handbook begin ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <div id="handbook-content">
         <div id="handbook-header" class="header" width="100%" onclick="showhide('handbook');">

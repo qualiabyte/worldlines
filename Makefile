@@ -62,7 +62,7 @@ handbook_xhtml: $(HANDBOOK_SRC)
 		cd $(DOC_DIR); \
 		$$LYX --export xhtml $(HANDBOOK_LYX); \
 		mv $(HANDBOOK_XHTML) html/; \
-		-rm *.png; \
+		rm -f *.png; \
 		cd html; \
 		./fix-lyx-xhtml.sh $(HANDBOOK_XHTML) $(HANDBOOK_XHTML_FIXED); \
 	else \

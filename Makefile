@@ -77,14 +77,11 @@ javadoc:
 	javadoc -d docs $(JAVADOC_SOURCES);
 
 web: applet applet-required applications
-	@if [ -d web/applet ]; then \
-		echo "Copying additional jars for applet"; \
-		cp web/applet-required/* web/applet/; \
-	fi; \
-	echo "Creating package: $(WEB_ZIP)"; \
+	@echo "Creating package: $(WEB_ZIP)"; \
 	zip --quiet -r $(WEB_ZIP) web \
 	    --exclude '*~' web/applet-required/\* web/doc/\* web/handbook-html/\*sized/\*;
 
+.PHONY: applet applet-required applications
 applet:
 	@if [ ! -d applet ]; then \
 		echo "!!  Missing 'applet'"; \
@@ -92,6 +89,10 @@ applet:
 	fi
 
 applet-required:
+	@if [ -d web/applet ]; then \
+		echo "Copying additional jars for applet"; \
+		cp web/applet-required/* web/applet/; \
+	fi;
 
 applications:
 	@for os in "linux32" "macosx" "windows32"; do \
@@ -113,5 +114,5 @@ clean: clean_pngs
 	-rm -fr $(PRODUCTS);
 
 clean_pngs:
-	-rm doc/*.png;
+	-rm -f doc/*.png;
 

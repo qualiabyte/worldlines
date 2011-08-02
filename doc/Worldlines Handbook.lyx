@@ -88,7 +88,6 @@
 \html_math_output 0
 \html_css_as_file 0
 \html_be_strict false
-\author 1 "qualiabyte,,," 
 \end_header
 
 \begin_body
@@ -175,31 +174,21 @@ March 15, 2010
 
 \size small
 © 2010 Tyler Florez
-\change_inserted 1 1281882895
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1281882902
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
 
-\change_inserted 1 1281882966
-
 
 \backslash
 thispagestyle{empty}
-\change_unchanged
-
 \end_layout
 
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -212,15 +201,11 @@ thispagestyle{empty}
 
 \begin_layout Standard
 
-\change_inserted 1 1281890413
-
 \lang ngerman
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 1 1281883010
 
 
 \backslash
@@ -560,13 +545,7 @@ Time dilation factor
 \end_layout
 
 \begin_layout Standard
-This gives the relation between the 
-\change_deleted 1 1282179482
-propertime
-\change_inserted 1 1282179482
-proper time
-\change_unchanged
-
+This gives the relation between the proper time
 \family roman
 \series medium
 \shape up
@@ -716,10 +695,6 @@ the velocity of frame A as measured in B.
 \end_layout
 
 \begin_layout Standard
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula 
 \[
 u_{B}=\frac{u_{A}+v_{A,B}}{1+u_{A}v_{A,B}/c^{2}}\text{ , velocity addition in SR}
@@ -740,22 +715,12 @@ For example, if
 \end_inset
 
  represents the speed of a light particle, and frame A moves away from B
- at half of 
-\change_deleted 1 1282179579
-lightspeed
-\change_inserted 1 1282179579
-light speed
-\change_unchanged
-, then
-\change_inserted 1 1274056219
- using geometrized natural units (here defining the unit velocity as the
- speed of light, with 
+ at half of light speed, then using geometrized natural units (here defining
+ the unit velocity as the speed of light, with 
 \begin_inset Formula $c=1$
 \end_inset
 
-)
-\change_unchanged
- we have: 
+) we have: 
 \begin_inset Formula $u_{photon,A}=c=1$
 \end_inset
 
@@ -1155,18 +1120,12 @@ end{multicols}
 \end_inset
 
 
-\change_inserted 1 1281952047
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1281952060
 \begin_inset Newpage pagebreak
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -1217,17 +1176,8 @@ Target particle moving in
 \begin_inset Formula $x$
 \end_inset
 
- direction relative to the world rest frame
-\change_inserted 1 1277696154
- away from a stationary particle
-\change_unchanged
-, with stretched (inverse 
-\change_deleted 1 1277264192
-l
-\change_inserted 1 1277696152
-L
-\change_unchanged
-orentz transformed) 
+ direction relative to the world rest frame away from a stationary particle,
+ with stretched (inverse Lorentz transformed) 
 \begin_inset Formula $x'\, ct'$
 \end_inset
 
@@ -1236,14 +1186,10 @@ orentz transformed)
 \begin_inset Formula $x'$
 \end_inset
 
-
-\change_inserted 1 1277696152
  and 
 \begin_inset Formula $y'$
 \end_inset
 
-
-\change_unchanged
  basis vectors for each particle's frame.
 \end_layout
 
@@ -1277,19 +1223,7 @@ name "fig:AxesScene-Layout"
 
 The layout of the Axes Scene: multiple stationary particles and one driven,
  oscillating particle (targeted, with axis grid displayed).
- Particle clock ticks 
-\change_deleted 1 1277697942
-given
-\change_inserted 1 1277700323
-are shown as
-\change_deleted 1 1277697946
- by
-\change_unchanged
- yellow dots
-\change_inserted 1 1277700396
- along the particle paths
-\change_unchanged
-.
+ Particle clock ticks are shown as yellow dots along the particle paths.
 \end_layout
 
 \end_inset
@@ -1345,17 +1279,7 @@ world frame
 \begin_inset Quotes erd
 \end_inset
 
- - 
-\change_inserted 1 1278774836
-with
-\change_unchanged
-in which the first particle 
-\change_deleted 1 1278774765
-as
-\change_inserted 1 1278774766
-is
-\change_unchanged
- moving.
+ - within which the first particle is moving.
  The basis vectors for the world frame are labeled 
 \begin_inset Formula $(x,y,ct)$
 \end_inset
@@ -1372,12 +1296,8 @@ The vector
 \begin_inset Formula $ct'$
 \end_inset
 
- represents the particle's 3-velocity
-\change_inserted 1 1282145295
- -
-\change_unchanged
- here through the (2+1) Minkowski space, analogous to the 4-velocity in
- real-world 4D spacetime.
+ represents the particle's 3-velocity - here through the (2+1) Minkowski
+ space, analogous to the 4-velocity in real-world 4D spacetime.
  The point is that 
 \begin_inset Formula $ct'$
 \end_inset
@@ -1396,16 +1316,9 @@ not
 \begin_inset Formula $x'y'$
 \end_inset
 
-
-\change_inserted 1 1277695485
- 
-\change_unchanged
-plane in all frames of reference.
- That is, space and time between different frames are mixed - motion 
-\change_deleted 1 1278775075
-along 
-\change_unchanged
-only along time (parallel to 
+ plane in all frames of reference.
+ That is, space and time between different frames are mixed - motion only
+ along time (parallel to 
 \begin_inset Formula $ct'$
 \end_inset
 
@@ -1421,19 +1334,13 @@ only along time (parallel to
 \begin_inset Formula $x$
 \end_inset
 
- in 
-\change_inserted 1 1277695712
-Figure 
+ in Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:AxesScene-Grid"
 
 \end_inset
 
-
-\change_deleted 1 1277695634
-the above picture
-\change_unchanged
 ).
 \end_layout
 
@@ -1450,38 +1357,22 @@ For any frame
  for observers within the frame.
  The phenomena of relativity of simultaneity refers to the fact that given
  events A, B, and C such that A and B are simultaneous in frame 
-\change_deleted 1 1277699703
-S
-\change_inserted 1 1277699703
-
 \begin_inset Formula $S$
 \end_inset
 
-
-\change_unchanged
 , and B and C are simultaneous frame 
 \begin_inset Formula $S'$
 \end_inset
 
 , events A and C will generally not be simultaneous in either frame 
-\change_deleted 1 1277699707
-S
-\change_inserted 1 1277699707
-
 \begin_inset Formula $S$
 \end_inset
 
-
-\change_unchanged
  or 
 \begin_inset Formula $S'$
 \end_inset
 
 .
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Standard
@@ -1535,10 +1426,6 @@ target particle
 \end_layout
 
 \begin_layout Standard
-
-\end_layout
-
-\begin_layout Standard
 Clicking on the particle selects it, showing its identification and some
  information about its state.
  In Figure 
@@ -1548,11 +1435,7 @@ reference "fig:AxesScene-GridCollapse"
 
 \end_inset
 
-
-\change_inserted 1 1282178151
- for example
-\change_unchanged
-, we see an already dramatically stretched axes at 
+ for example, we see an already dramatically stretched axes at 
 \begin_inset Formula $0.95\, c$
 \end_inset
 
@@ -1568,12 +1451,6 @@ reference "fig:AxesScene-GridCollapse"
 \end_layout
 
 \begin_layout Standard
-
-\end_layout
-
-\begin_layout Standard
-
-\change_inserted 1 1277264983
 In Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -1581,13 +1458,7 @@ reference "fig:AxesScene-GridNoCollapse"
 
 \end_inset
 
-, 
-\change_deleted 1 1277264983
-T
-\change_inserted 1 1277264984
-t
-\change_unchanged
-he particle is again at 
+, the particle is again at 
 \begin_inset Formula $0.95\, c$
 \end_inset
 
@@ -1611,14 +1482,7 @@ he particle is again at
 \begin_inset Formula $x$
 \end_inset
 
- basis have been skewed in the opposite directions, stretching off-screen
-\change_inserted 1 1277265337
-.
-
-\change_deleted 1 1277700218
- in the image above.
-\change_unchanged
-
+ basis have been skewed in the opposite directions, stretching off-screen.
 \end_layout
 
 \begin_layout Standard
@@ -1673,20 +1537,14 @@ name "fig:AxesScene-GridCollapse"
 \end_inset
 
 In the world frame, the 
-\change_inserted 1 1277263867
-
 \begin_inset Formula $x'\, ct'$
 \end_inset
 
- 
-\change_unchanged
-axes grid of target particle collapses as the particle approaches 
+ axes grid of target particle collapses as the particle approaches 
 \begin_inset Formula $c$
 \end_inset
 
 .
-
-\change_inserted 1 1277263691
  Here the velocity increases from 
 \begin_inset Formula $0.9509$
 \end_inset
@@ -1696,8 +1554,6 @@ axes grid of target particle collapses as the particle approaches
 \end_inset
 
 .
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -1733,9 +1589,7 @@ In the rest frame of the target particle, the target's coordinate space
 \begin_inset Formula $x'\, ct'$
 \end_inset
 
- axes grid) is undisturbed, even at high velocities
-\change_inserted 1 1278775515
-, while the 
+ axes grid) is undisturbed, even at high velocities, while the 
 \begin_inset Formula $x\, ct$
 \end_inset
 
@@ -1744,10 +1598,6 @@ In the rest frame of the target particle, the target's coordinate space
 \end_inset
 
  grid, stretching offscreen.
-\change_deleted 1 1277265120
-.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -1823,14 +1673,8 @@ name "fig:Twin-Return"
 
 \end_inset
 
-The Twin Paradox Scene
-\change_inserted 1 1278775974
- in the world frame
-\change_unchanged
-, return stage.
+The Twin Paradox Scene in the world frame, return stage.
  Twin A stays at rest, while twin B departs and returns at constant velocity.
-
-\change_inserted 1 1279977927
  The conundrum goes as follows.
  If, as according to time dilation, 
 \begin_inset Quotes eld
@@ -1842,8 +1686,6 @@ frames in relative motion see each other's clocks as advancing more slowly,
 
  then what is the relationship between the ages of the two twins in this
  scenario?
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -1876,9 +1718,7 @@ name "fig:Twin-Depart"
 
  Twin Paradox Scene, departure stage.
  In twin A's frame, twin B is always aging more slowly.
- The
-\change_inserted 1 1278776837
- yellow 
+ The yellow 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1886,19 +1726,11 @@ ageDiff
 \begin_inset Quotes erd
 \end_inset
 
-
-\change_unchanged
  meter tracks their difference in age, 
 \begin_inset Formula $\Delta\tau_{A-B}$
 \end_inset
 
-
-\change_inserted 1 1278777564
-, for the current simulation step as seen in the world frame
-\change_unchanged
-.
-
-\change_inserted 1 1278776665
+, for the current simulation step as seen in the world frame.
  (Red clock ticks are spaced at 
 \begin_inset Formula $1\ s$
 \end_inset
@@ -1920,8 +1752,6 @@ reference "sub:Clock-Ticks"
 Graphical Elements: Clock Ticks
 \emph default
  for the full range of tick colors and spacings.)
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -1962,10 +1792,6 @@ begin{multicols}{2}
 
 \begin_layout Subsubsection
 The Scenario
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Standard
@@ -2013,18 +1839,12 @@ If each of the twins carry clocks to record the duration of their trip to
 \end_inset
 
 
-\change_inserted 1 1282154170
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1282154171
 \begin_inset VSpace medskip
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -2069,12 +1889,6 @@ In other words, the twins' age difference should be greater than zero:
 
 \end_inset
 
-
-\change_deleted 1 1282145754
-
-\end_layout
-
-\begin_layout Standard
 
 \end_layout
 
@@ -2123,11 +1937,7 @@ The age difference in the twin paradox is a particular result of time dilation.
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1280869717
 Kogut p.49 
-\change_unchanged
-
 \begin_inset CommandInset citation
 LatexCommand citep
 key "Kogut"
@@ -2135,25 +1945,11 @@ key "Kogut"
 \end_inset
 
 
-\change_deleted 1 1282154161
-
-\begin_inset VSpace medskip
-\end_inset
-
-
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
 This startling effect becomes more noticeable at very high (i.e.
- relativistic) speeds; see the Multiple Twins scenario in 
-\change_deleted 1 1278783440
-s
-\change_inserted 1 1278783442
-S
-\change_unchanged
-ection 
+ relativistic) speeds; see the Multiple Twins scenario in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sub:Multiple-Twins"
@@ -2161,18 +1957,12 @@ reference "sub:Multiple-Twins"
 \end_inset
 
  for a bit more on this.
-\change_inserted 1 1282146046
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1282146056
 \begin_inset Newpage pagebreak
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -2386,11 +2176,8 @@ Twin A is selected, so its age is displayed beneath it.
 
 \begin_layout Standard
 For convenience, the meter at the bottom shows the currently accumulated
- age difference between the twin
-\change_deleted 1 1278791292
-'
-\change_unchanged
-s at each step in the simulation, where 
+ age difference between the twins at each step in the simulation, where
+ 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2442,18 +2229,14 @@ paradox
  in this scenario stems from the seeming discrepancy between the symmetry
  of relative motion between the twins, and the asymmetry between the effect
  on their rate of temporal experience (and thus, age).
- See 
-\change_inserted 1 1279979034
-Figure 
+ See Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Visualizing-Twin-B.8"
 
 \end_inset
 
- in 
-\change_unchanged
-Section 
+ in Section 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "sub:Multiple-Twins"
@@ -2515,13 +2298,7 @@ name "fig:Twin-Conclusion"
 
 \end_inset
 
-Conclusion of the Twin Paradox Scene
-\change_inserted 1 1278791961
-, where twin B meets A
-\change_unchanged
-.
-
-\change_inserted 1 1278799916
+Conclusion of the Twin Paradox Scene, where twin B meets A.
  Twin A's age is 
 \begin_inset Formula $229.6\ s$
 \end_inset
@@ -2557,8 +2334,6 @@ Conclusion of the Twin Paradox Scene
 \end_inset
 
 .)
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -2590,8 +2365,6 @@ name "fig:Multi-Twin-Layout"
 \end_inset
 
 Layout of the Multiple Twins Scene.
-
-\change_inserted 1 1278978058
  Here, a series of eight twin B's (named B.1 through B.8, with velocities
  from 
 \begin_inset Formula $0.1\ c$
@@ -2620,8 +2393,6 @@ Layout of the Multiple Twins Scene.
 \end_inset
 
  and is still departing.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -2677,8 +2448,6 @@ Scene Layout and Invariant Surfaces
 
 \begin_layout Standard
 The Multiple Twins Scene shows multiple 
-\change_inserted 1 1278802241
-
 \begin_inset Quotes eld
 \end_inset
 
@@ -2686,11 +2455,7 @@ B twins
 \begin_inset Quotes erd
 \end_inset
 
- 
-\change_deleted 1 1278802185
-twin B's 
-\change_unchanged
-departing at the same time from a single twin A.
+ departing at the same time from a single twin A.
  Twins B.1 through B.8 have velocities spaced 
 \begin_inset Formula $0.1\, c$
 \end_inset
@@ -2761,13 +2526,7 @@ reference "fig:Multi-postTurn-world"
 
 \end_inset
 
- show the asymmetry in the twin paradox
-\change_inserted 1 1302574850
-.
-
-\change_deleted 1 1302574853
- - from twin B's perspective, 
-\change_inserted 1 1302574896
+ show the asymmetry in the twin paradox.
  In the world frame (Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -2775,54 +2534,26 @@ reference "fig:Multi-preTurn-world"
 
 \end_inset
 
-), 
-\change_unchanged
-by the time 
-\change_inserted 1 1302574873
-twin B
-\change_deleted 1 1302573266
-he
-\change_unchanged
- reaches 
+), by the time twin B reaches 
 \begin_inset Formula $\tau_{B}=50\, s$
 \end_inset
 
-
-\change_inserted 1 1302574873
- (that is, by his clock)
-\change_unchanged
-, twin A has already missed the opportunity to take the action which twin
- B now takes, changing his frame of reference by reversing his velocity.
+ (that is, by his clock), twin A has already missed the opportunity to take
+ the action which twin B now takes, changing his frame of reference by reversing
+ his velocity.
+ This is seen by looking at the clock tick history in the last image (Figure
  
-\change_inserted 1 1302574873
-This is seen by 
-\change_deleted 1 1302573372
-L
-\change_inserted 1 1302574873
-l
-\change_unchanged
-ooking at the clock tick history in the last image
-\change_inserted 1 1302574873
- (Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:Multi-postTurn-world"
 
 \end_inset
 
-)
-\change_unchanged
-, 
-\change_inserted 1 1302574873
-where 
-\change_unchanged
-we see that just after twin B turns, just over 
+), where we see that just after twin B turns, just over 
 \begin_inset Formula $80\, s$
 \end_inset
 
  has elapsed for twin A.
-
-\change_inserted 1 1302574939
  Figures 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -2839,8 +2570,6 @@ reference "fig:Multi-postTurn-local"
 
  show how this turnaround looks from the frame of twin B just before and
  after the acceleration.
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
@@ -2857,8 +2586,6 @@ end{multicols}
 \end_inset
 
 
-\change_inserted 1 1280712055
-
 \end_layout
 
 \begin_layout Standard
@@ -2869,11 +2596,7 @@ sideways false
 status open
 
 \begin_layout Subsubsection
-
-\change_inserted 1 1281896096
 Visualizing Twin B Before and After Turnaround
-\change_unchanged
-
 \end_layout
 
 \begin_layout Plain Layout
@@ -2916,8 +2639,6 @@ name "fig:Multi-preTurn-world"
 
 \series bold
 Twin B.8: pre-turnaround, world frame.
-
-\change_inserted 1 1279872397
 
 \series default
  In the world frame, 
@@ -2965,8 +2686,6 @@ reference "fig:Multi-preTurn-local"
 \end_inset
 
 .
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3013,9 +2732,7 @@ name "fig:Multi-preTurn-local"
 
 
 \series bold
-Twin B.8: pre-turnaround, frame of B.8
-\change_inserted 1 1279978139
-.
+Twin B.8: pre-turnaround, frame of B.8.
 
 \series default
  In B.8's frame, we see the moment just before B.8's turn at 
@@ -3051,8 +2768,6 @@ twin A is here the younger.
 \end_inset
 
 ).
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3099,8 +2814,6 @@ name "fig:Multi-postTurn-local"
 
 \series bold
 Twin B.8: post-turnaround, frame of B.8.
-
-\change_inserted 1 1279976827
  
 \series default
 In B.8's return frame, the simultaneity plane is above the particles in the
@@ -3124,8 +2837,6 @@ current
 \emph default
 .
  And if B.8 maintains this course, so it shall be when they meet.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3171,8 +2882,6 @@ name "fig:Multi-postTurn-world"
 \series bold
 Twin B.8: post-turnaround, world frame.
 
-\change_inserted 1 1282180595
-
 \series default
  Back in twin A's frame, we see that not much has changed before and after
  B.8's turnaround, apart from the reversal of B.8's heading and a shift in
@@ -3183,8 +2892,6 @@ Twin B.8: post-turnaround, world frame.
 twin A has consistently been the older all along
 \emph default
 .
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3219,8 +2926,6 @@ Visualizing Twin B.8 before and after the turnaround.
 
 \end_inset
 
-
-\change_inserted 1 1280712015
 
 \end_layout
 
@@ -3272,18 +2977,10 @@ name "fig:length-contraction-layout"
 
 \end_inset
 
-Layout of the Length Contraction Scene
-\change_inserted 1 1282243745
- (as seen in the world frame)
-\change_unchanged
-.
-
-\change_inserted 1 1282243883
+Layout of the Length Contraction Scene (as seen in the world frame).
  A single target particle oscillates through a uniform grid of particles.
  The path intersections of the uniform particles with the target's simultaneity
  plane are represented by the blue orbs seen at an angle above the field.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3332,14 +3029,10 @@ begin{multicols}{2}
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1280871504
 The goal of the Length Contraction Scene is to show how fixed lengths measured
  in the world frame are contracted in the rest frame of a particle at relativist
 ic speeds.
- 
-\change_unchanged
-Figure 
+ Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:length-contraction-layout"
@@ -3359,19 +3052,11 @@ reference "fig:length-contraction-layout"
 \begin_inset Formula $200\, s$
 \end_inset
 
-), uniform
-\change_inserted 1 1279983078
- grid of
-\change_unchanged
- particles at rest, and their intersections with the target's surface of
- simultaneity.
-\change_inserted 1 1280517327
-
+), uniform grid of particles at rest, and their intersections with the target's
+ surface of simultaneity.
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1280715198
 To emphasize the contraction effect, the target particle in this scene undergoes
  dramatic, oscillating acceleration.
  The simple, dense spacing of the particle field is chosen in hope of leveraging
@@ -3383,8 +3068,6 @@ To emphasize the contraction effect, the target particle in this scene undergoes
 simultaneous for the moving particle
 \emph default
  are contracted in its frame of reference.
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
@@ -3456,8 +3139,6 @@ Length contraction at
 \end_inset
 
 .
-
-\change_inserted 1 1279987231
  The target particle is nearly at rest in the world frame, so the coordinates
  in the target frame are nearly identical and the spacing of the particle
  field remains uniform.
@@ -3466,8 +3147,6 @@ Length contraction at
 \end_inset
 
  direction, which is to the left in this series of images.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3477,8 +3156,6 @@ Length contraction at
 
 \end_inset
 
-
-\change_inserted 1 1279986999
 
 \end_layout
 
@@ -3519,16 +3196,12 @@ Length contraction at
 \end_inset
 
 .
-
-\change_inserted 1 1279987236
  The target has accelerated significantly, so the events seen as simultaneous
  in its current frame (shown here as the blue path intersections mostly
  above the current simulation step) differ from current events in the world
  frame.
  Even so, the length contraction presented at this stage is hardly visually
  apparent.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3538,8 +3211,6 @@ Length contraction at
 
 \end_inset
 
-
-\change_inserted 1 1279987078
 
 \end_layout
 
@@ -3579,8 +3250,6 @@ Length contraction at
 \end_inset
 
 .
-
-\change_inserted 1 1279984610
  The target has accelerated in the world frame by less than 
 \begin_inset Formula $0.2\ c$
 \end_inset
@@ -3596,8 +3265,6 @@ current
  events for the target is becoming visually apparent, as the grid of intersectio
 ns contracts in along the direction of motion (mostly left-right in the
  image).
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3644,8 +3311,6 @@ Length contraction at
 \end_inset
 
 .
-
-\change_inserted 1 1282181046
  Above 
 \begin_inset Formula $98\%$
 \end_inset
@@ -3661,8 +3326,6 @@ Length contraction at
 
  direction, perpendicular to the motion, has remained constant throughout
  the acceleration in this series of images.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3686,17 +3349,8 @@ Length contraction at
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Length contraction of a field of 
-\change_deleted 1 1279985476
-uniformly spaced 
-\change_unchanged
-particles
-\change_inserted 1 1280037249
- (uniformly spaced in the world frame) as measured in the rest frame of
- a target particle accelerating
-\change_deleted 1 1279983290
-,
-\change_unchanged
+Length contraction of a field of particles (uniformly spaced in the world
+ frame) as measured in the rest frame of a target particle accelerating
  from 
 \begin_inset Formula $0.0306\, c$
 \end_inset
@@ -3706,12 +3360,8 @@ particles
 \end_inset
 
 .
-
-\change_inserted 1 1279985616
  Distances contract along the direction of motion, while perpendicular distances
  remain unaffected.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -3721,47 +3371,17 @@ particles
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted 1 1279985624
-Figures 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:length-contract-0.038c"
-
-\end_inset
-
- through 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:length-contract-0.9889c"
-
-\end_inset
-
- show how the distances between the particles (uniformly spaced in the world
- frame) would be measured in the rest frame of the driven target particle
- after changes in its velocity.
- That is, the distances contract along the direction of motion, while perpendicu
-lar distances remain unaffected.
-\change_unchanged
 
 \end_layout
 
 \begin_layout Subsubsection
 Making a Distance Measurement
-\change_inserted 1 1281524178
-
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:Making-a-Distance-Measurement"
 
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -4212,8 +3832,6 @@ name "fig:bells-spaceship"
 
 \end_inset
 
-
-\change_inserted 1 1280061189
 Layout of Bell's Spaceship Paradox Scene.
  A fleet of six controllable target particles (shown as red orbs), each
  with an attached idealized rigid body (yellow trapezoids).
@@ -4221,8 +3839,6 @@ Layout of Bell's Spaceship Paradox Scene.
  of reference (blue orbs).
  The fleet here is at rest in the world frame, so the fleet bodies sit flatly
  in the world frame; they share the same concept of simultaneity.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -4253,8 +3869,6 @@ name "fig:bells-uniform-accel"
 
 \end_inset
 
-
-\change_inserted 1 1281407415
 The fleet after accelerating out of the world frame in the 
 \begin_inset Formula $+x$
 \end_inset
@@ -4267,8 +3881,6 @@ The fleet after accelerating out of the world frame in the
  In the lower half of the image, the ideal bodies are seen to tilt and stretch
  along with the simultaneity plane of their attached particle during acceleratio
 n.
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -4308,18 +3920,14 @@ begin{multicols}{2}
 \end_layout
 
 \begin_layout Standard
-This is a fun scene
-\change_inserted 1 1280060607
- (Figure 
+This is a fun scene (Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:bells-spaceship"
 
 \end_inset
 
-)
-\change_unchanged
- in which you can control a fleet of ships, which are modeled as idealized
+) in which you can control a fleet of ships, which are modeled as idealized
  rigid bodies.
  The bodies are 
 \begin_inset Quotes eld
@@ -4333,34 +3941,13 @@ attached
  rest frame, which are then mapped by an inverse Lorentz transform to the
  world frame (followed by any active display transforms).
  Finally, the body is drawn as yellow lines between each body vertex every
- time the particle's frame changes due to acceleration
-\change_inserted 1 1281527127
- (along with the body at the current simulation step)
-\change_unchanged
-.
+ time the particle's frame changes due to acceleration (along with the body
+ at the current simulation step).
 \end_layout
 
 \begin_layout Standard
 You can accelerate the fleet in synchronization by pressing the arrow keys
- or
-\change_inserted 1 1280061482
- the
-\change_unchanged
- W,
-\change_inserted 1 1280061450
- 
-\change_unchanged
-A,
-\change_inserted 1 1280061451
- 
-\change_unchanged
-S,
-\change_inserted 1 1280061452
- 
-\change_unchanged
-D keys
-\change_inserted 1 1281527803
-, as demonstrated in Figures 
+ or the W, A, S, D keys, as demonstrated in Figures 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:bells-uniform-accel"
@@ -4376,22 +3963,14 @@ reference "fig:bells-spaceship-rest"
 
  (which show the results of the same acceleration sequence from the perspective
  of the world frame and the fleet's rest frame).
-\change_deleted 1 1280060698
-:
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
 The paradox
-\change_inserted 1 1280677219
-
 \begin_inset Foot
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 1 1280807820
 See 
 \emph on
 Bell's Spaceship Paradox, 
@@ -4404,21 +3983,13 @@ key "WP-Bells-spaceship-paradox"
 \end_inset
 
 .
-\change_unchanged
-
 \end_layout
 
 \end_inset
 
-
-\change_unchanged
  is that each ship receives the same boost in the world frame - so the relative
- position
-\change_deleted 1 1280232482
-s
-\change_unchanged
- of each ship in the fleet is preserved; their relative acceleration is
- 'uniform' by definition.
+ position of each ship in the fleet is preserved; their relative acceleration
+ is 'uniform' by definition.
  Similarly, the internals of any particular ship appears preserved to its
  inhabitants, who are in its rest frame, so the acceleration appears 'uniform'
  to them as well.
@@ -4437,20 +4008,9 @@ status open
 Further, if the relative distances within the fleet are preserved in the
  world frame, length contraction would seem to demand that this spacing
  would contract in the frame of the ships moving relative to those measurements.
- This seems to be resolved by the relativity of simultaneity, though; 
-\change_inserted 1 1281902016
-while 
-\change_unchanged
-those world frame measurement event coordinates are contracted in the ship's
- new frame, 
-\change_deleted 1 1281902069
-although 
-\change_unchanged
-they're no longer simultaneous
-\change_inserted 1 1281902058
- in the fleet's new frame
-\change_unchanged
-.
+ This seems to be resolved by the relativity of simultaneity, though; while
+ those world frame measurement event coordinates are contracted in the ship's
+ new frame, they're no longer simultaneous in the fleet's new frame.
  We still have to address the rigidity though.
 \end_layout
 
@@ -4474,35 +4034,21 @@ This preservation of internal distances hinges on how well our idealized
 If one considers the fleet of ships as an entity, then Born rigidity is
  not preserved - though their positions are preserved in the world frame,
  Born rigidity is defined as preservation in the rest frame.
- In 
-\change_inserted 1 1280235775
-Figure 
+ In Figure 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "fig:bells-broken-rigidity"
 
 \end_inset
 
-, 
-\change_deleted 1 1280235800
-the image below, the
-\change_unchanged
- we see the target moving towards the fleet.
+, we see the target moving towards the fleet.
  Holding this velocity, we see from the path intersections that their locations
- in 
-\change_inserted 1 1280523390
-t
-\change_unchanged
-his frame are vastly stretched, confirming our expectation that the Born
- rigidity of the fleet is broken.
-\change_inserted 1 1281951621
-
+ in this frame are vastly stretched, confirming our expectation that the
+ Born rigidity of the fleet is broken.
 \begin_inset Foot
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 1 1282181848
  Intership distance perceived by the fleet is actually 
 \emph on
 stretched
@@ -4518,20 +4064,15 @@ both
 \end_inset
 
 
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
 On the other hand, it seems theoretically plausible that a solidly bound
  entity like a particular ship (rather than an unconnected fleet) moving
- at relativistic speeds could have it
-\change_deleted 1 1280710495
-'
-\change_unchanged
-s Born rigidity essentially preserved, perhaps by the application of an
- external force, or perhaps by the interior attraction between parts of
- the ship's body, restoring the rigidity once the acceleration ceases.
+ at relativistic speeds could have its Born rigidity essentially preserved,
+ perhaps by the application of an external force, or perhaps by the interior
+ attraction between parts of the ship's body, restoring the rigidity once
+ the acceleration ceases.
 \end_layout
 
 \begin_layout Standard
@@ -4585,8 +4126,6 @@ name "fig:bells-spaceship-rest"
 
 \end_inset
 
-
-\change_inserted 1 1281407385
 The fleet after accelerating out of the world frame in the 
 \begin_inset Formula $+x$
 \end_inset
@@ -4616,8 +4155,6 @@ status open
 
 \begin_layout Plain Layout
 
-\change_inserted 1 1280241790
-
 
 \backslash
 setcounter{footnote}{
@@ -4631,8 +4168,6 @@ footnotemark
 
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -4664,13 +4199,7 @@ name "fig:bells-broken-rigidity"
 
 \end_inset
 
-
-\change_inserted 1 1280235959
-The broken Born rigidity of the
-\change_unchanged
- 
-\change_inserted 1 1281524460
-fleet, while heading in the 
+The broken Born rigidity of the fleet, while heading in the 
 \begin_inset Formula $-x$
 \end_inset
 
@@ -4715,8 +4244,6 @@ reference "sub:Add-a-Distance-Measurement"
 \end_inset
 
 ).
-\change_unchanged
-
 \end_layout
 
 \end_inset
@@ -4740,14 +4267,10 @@ reference "sub:Add-a-Distance-Measurement"
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1280240934
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
-
-\change_inserted 1 1280242400
 
 
 \backslash
@@ -4762,20 +4285,14 @@ footnotetext{Note that careful observation while accelerating the fleet
  no causal paradoxes are introduced.
  In this way, SR can be seen as offering different views of concrete situations,
  which together form a coherent whole.}
-\change_unchanged
-
 \end_layout
 
 \end_inset
 
 
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1281878160
 \begin_inset Newpage pagebreak
 \end_inset
 
@@ -4813,11 +4330,8 @@ Selecting Particles and Intersections
 \begin_layout Standard
 Left click to select particles and intersections.
  The object's name and state is shown, and a selection reticle is added.
- Any menu actions
-\change_inserted 1 1280123964
- later
-\change_unchanged
- selected will be applied to the currently selected particles.
+ Any menu actions later selected will be applied to the currently selected
+ particles.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4851,23 +4365,7 @@ Accelerate the target particle
 \end_layout
 
 \begin_layout Standard
-Use the arrow keys or 
-\change_inserted 1 1280523441
-the 
-\change_unchanged
-W,
-\change_inserted 1 1280523432
- 
-\change_unchanged
-A,
-\change_inserted 1 1280523433
- 
-\change_unchanged
-S,
-\change_inserted 1 1280523434
- 
-\change_unchanged
-D keys to boost the particle.
+Use the arrow keys or the W, A, S, D keys to boost the particle.
  Note: it's no use trying to accelerate driven particles - if a driven particle
  is the only target, try right clicking another particle in the scene, and
  make that the target.
@@ -4901,8 +4399,6 @@ attachRigidBodies
 
 \begin_layout Subsubsection
 Add a Distance Measurement
-\change_inserted 1 1281524253
-
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:Add-a-Distance-Measurement"
@@ -4910,18 +4406,12 @@ name "sub:Add-a-Distance-Measurement"
 \end_inset
 
 
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
 Select two objects, right click one, and select 
 \emph on
-addDistanceMeasurement
-\change_inserted 1 1280528182
-.
-\change_unchanged
-
+addDistanceMeasurement.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4941,11 +4431,8 @@ Worldlines
 \end_layout
 
 \begin_layout Standard
-The particle paths through the 2+1 Minkowski space are shown in 3D
-\change_inserted 1 1280523250
- as lines tracing the particle's history up to the current simulation step
-\change_unchanged
-.
+The particle paths through the 2+1 Minkowski space are shown in 3D as lines
+ tracing the particle's history up to the current simulation step.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4953,19 +4440,9 @@ Pulsing particle clocks
 \end_layout
 
 \begin_layout Standard
-A bright
-\change_inserted 1 1280523280
- glowing orb
-\change_deleted 1 1280523282
- light 
-\change_inserted 1 1280523314
- located at each particle's current simulation step 
-\change_unchanged
-pulses with a frequency proportional to the rate 
-\change_deleted 1 1280523597
-of 
-\change_unchanged
-proper time currently elapses for it in the simulation.
+A bright glowing orb located at each particle's current simulation step
+ pulses with a frequency proportional to the rate proper time currently
+ elapses for it in the simulation.
 \end_layout
 
 \begin_layout Subsubsection
@@ -4980,15 +4457,8 @@ name "sub:Clock-Ticks"
 \end_layout
 
 \begin_layout Standard
-Colored ticks are displayed 
-\change_deleted 1 1280526408
-at even proper time intervals 
-\change_unchanged
-along each particles path
-\change_inserted 1 1280526686
-, spaced at even intervals of proper time
-\change_unchanged
-.
+Colored ticks are displayed along each particles path, spaced at even intervals
+ of proper time.
  Spacing is at intervals of 
 \begin_inset Formula $1\times10^{n}\ s$
 \end_inset
@@ -5074,31 +4544,11 @@ Worldline intersections with target plane of simultaneity
 \end_layout
 
 \begin_layout Standard
-Intersections between 
-\change_deleted 1 1312296893
-the 
-\change_unchanged
-each particle's path and the target particle's plane of simultaneity are
- displayed by a selectable glowing clock pulse
-\change_inserted 1 1312299107
-.
- The clock pulse now accurately reflects the particle's age in the target's
- current frame
-\change_unchanged
-.
+Intersections between each particle's path and the target particle's plane
+ of simultaneity are displayed by a selectable glowing clock pulse.
+ These clock pulses now accurately reflect the particle's age in the target's
+ current frame.
  
-\change_deleted 1 1312299005
-(The pulse timing is just the that of the particle in the current simulation
- step though, see: 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "enu:Intersection-clock-pulses-bug"
-
-\end_inset
-
-)
-\change_unchanged
-
 \end_layout
 
 \begin_layout Subsubsection
@@ -5128,33 +4578,13 @@ Particle frame axes coordinate grid
 \begin_layout Standard
 The coordinate grid for the target particle and the origin can be activated
  by toggles under the main panel.
- Units are displayed in light-seconds 
-\change_deleted 1 1280526911
--
-\change_inserted 1 1280526912
-(
-\change_unchanged
-
+ Units are displayed in light-seconds (
 \begin_inset Formula $ls$
 \end_inset
 
-
-\change_inserted 1 1280526915
-)
-\change_unchanged
-.
+).
  The coordinate grid spacing scales up relative to the distance from the
- 
-\change_deleted 1 1280527121
-k
-\change_inserted 1 1280527126
-c
-\change_unchanged
-amera
-\change_inserted 1 1280528702
-, keeping the displayed gridlines at a useful density on-screen
-\change_unchanged
-.
+ camera, keeping the displayed gridlines at a useful density on-screen.
 \end_layout
 
 \begin_layout Subsection
@@ -5167,28 +4597,14 @@ Pause
 
 \begin_layout Standard
 Stops the simulation for user inspection.
- When stopped, 
-\change_deleted 1 1280528376
-the
-\change_inserted 1 1280528376
-this
-\change_unchanged
- control changes to 
-\change_inserted 1 1280529486
-
+ When stopped, this control changes to 
 \begin_inset Quotes eld
 \end_inset
 
-
-\change_unchanged
 Play.
-\change_inserted 1 1280529487
-
 \begin_inset Quotes erd
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -5197,11 +4613,8 @@ Restart
 \end_layout
 
 \begin_layout Standard
-Restarts the currently active scene, keeping the 
-\change_deleted 1 1280528432
-the 
-\change_unchanged
-currently set control preferences.
+Restarts the currently active scene, keeping the currently set control preferenc
+es.
 \end_layout
 
 \begin_layout Subsubsection
@@ -5247,23 +4660,8 @@ When active, the simulation timestep is multiplied by the time dilation
 \end_layout
 
 \begin_layout Standard
-This restricts user's control of boosts 
-\change_inserted 1 1280528768
-of 
-\change_unchanged
-the target particle's velocity (
-\change_inserted 1 1280528800
-as applied 
-\change_unchanged
-via the 
-\change_inserted 1 1280528804
-W, A, S, D 
-\change_unchanged
-keys
-\change_deleted 1 1280528793
- W, A, S, and D
-\change_unchanged
-) to the x-direction.
+This restricts user's control of boosts of the target particle's velocity
+ (as applied via the W, A, S, D keys) to the x-direction.
 \end_layout
 
 \begin_layout Subsubsection
@@ -5298,8 +4696,6 @@ Show Particle Clock Ticks
 
 \begin_layout Standard
 Shows or hides all particle's clock tick history.
-\change_inserted 1 1281952511
-
 \end_layout
 
 \begin_layout Section
@@ -5334,11 +4730,7 @@ Libraries: VTextRenderer, ControlP5, Apache Math Commons
 \begin_layout Standard
 Processing has a great user community, forums, and reference docs.
  I've used two user-created libraries in particular - V*'s (Victor Martin's)
- VTextRenderer
-\change_inserted 1 1278984869
- 
-\change_unchanged
-
+ VTextRenderer 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "V*"
@@ -5346,11 +4738,7 @@ key "V*"
 \end_inset
 
 , for OpenGL text labels, one thing lacking in Processing; and Andreas Schlegel'
-s ControlP5 gui library
-\change_inserted 1 1278984866
- 
-\change_unchanged
-
+s ControlP5 gui library 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Schlegel"
@@ -5362,16 +4750,12 @@ key "Schlegel"
 
 \begin_layout Subsection
 Known Bugs
-\change_inserted 1 1280527476
-
 \begin_inset CommandInset label
 LatexCommand label
 name "sub:Known-Bugs"
 
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -5381,18 +4765,14 @@ These graphical details could be confusing:
 
 \begin_layout Enumerate
 
-\change_inserted 1 1312298716
-
 \series bold
 Update (2011.04.25): Clock pulses at worldline intersections of the both the
  world and target frame are now accurate.
  Fixed in commit 6cdd02a; refined in b8b8ed3 and 9098a46.
 
 \series default
- Previously: 
-\change_unchanged
-Intersection clock pulses match the timing of the head particles in the
- world frame.
+ Previously: Intersection clock pulses match the timing of the head particles
+ in the world frame.
  The timing is physically correct for the heads, but fixing the timing for
  the intersections needs an additional calculation.
  (Ie, just the elapsed propertime before the head catches up to the intersection
@@ -5405,19 +4785,13 @@ name "enu:Intersection-clock-pulses-bug"
 \end_inset
 
 
-\change_inserted 1 1312298684
-
 \end_layout
 
 \begin_layout Section*
-
-\change_inserted 1 1280706611
 Works Cited
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1280706627
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintCited"
@@ -5430,14 +4804,10 @@ options "plainnat"
 \end_layout
 
 \begin_layout Section*
-
-\change_inserted 1 1280706679
 Additional Sources
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1280706692
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 btprint "btPrintNotCited"
@@ -5450,25 +4820,6 @@ options "plainnat"
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1281952595
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-\change_inserted 1 1281952595
-
-
-\backslash
-end{multicols}
-\end_layout
-
-\end_inset
-
-
-\change_deleted 1 1281952447
-
 \begin_inset ERT
 status open
 
@@ -5481,8 +4832,6 @@ end{multicols}
 
 \end_inset
 
-
-\change_unchanged
 
 \end_layout
 
@@ -5500,11 +4849,7 @@ Axes
 \end_layout
 
 \begin_layout Standard
-Stores axes settings and draws axis basis, grid,
-\change_inserted 1 1282317494
- and
-\change_unchanged
- labels.
+Stores axes settings and draws axis basis, grid, and labels.
  
 \end_layout
 
@@ -5542,22 +4887,14 @@ Info
 
 \begin_layout Standard
 Draws gui panels and console layer.
-\change_inserted 1 1303841989
-
 \end_layout
 
 \begin_layout Subsection
-
-\change_inserted 1 1303841991
 Input
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1303841991
 Handles the user's mouse & keyboard input by dispatching to program actions.
-\change_unchanged
-
 \end_layout
 
 \begin_layout Subsection
@@ -5565,8 +4902,6 @@ Kamera
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1282352048
 \begin_inset Quotes eld
 \end_inset
 
@@ -5574,21 +4909,7 @@ Kamera
 \begin_inset Quotes erd
 \end_inset
 
- is an 
-\change_deleted 1 1282316433
-I
-\change_inserted 1 1282316434
-i
-\change_unchanged
-nterface to 
-\change_deleted 1 1282316442
-position 
-\change_unchanged
-Processing's 
-\change_inserted 1 1282316513
-built-in 
-\change_unchanged
-camera.
+ is an interface to Processing's built-in camera.
  Allows the user to smoothly control the camera's position (in spherical
  coordinates) relative to a tracked target.
  Mouse movement adjusts the azimuth and inclination angles; scrolling adjusts
@@ -5636,19 +4957,13 @@ Scene
 
 \begin_layout Standard
 Models the main scenes, which can be composites of other scenes.
-\change_inserted 1 1303841974
-
 \end_layout
 
 \begin_layout Subsection
-
-\change_inserted 1 1303841977
 Tests
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted 1 1303841977
 A light testing framework and a few essential tests (checking basic relativistic
  calculations and transforms).
 \end_layout
@@ -5667,11 +4982,7 @@ VTextRenderer
 \end_layout
 
 \begin_layout Standard
-Written by
-\change_inserted 1 1280872669
- V* (Victor Martin)
-\change_unchanged
- 
+Written by V* (Victor Martin) 
 \begin_inset CommandInset citation
 LatexCommand cite
 key "V*"
@@ -5696,18 +5007,10 @@ Worldlines
 
 \begin_layout Standard
 Main program.
-\change_inserted 1 1281952465
-
 \end_layout
 
 \begin_layout Section
 Program Source Code
-\change_inserted 1 1281952457
-
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Standard

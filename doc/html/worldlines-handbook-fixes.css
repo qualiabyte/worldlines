@@ -1,10 +1,20 @@
 /* Fixes and styles for Lyx's exported XHTML */
 
 /* Give images a consistent height (also aligns captions) */
-img {
+div.standard > img,
+div.plain_layout > img
+{
     height: 325px !important;
     width: auto !important;
 }
+
+/* Uncomment if the height-fix above interferes with MathJax */
+/*
+.MathJax img {
+    height: auto !important;
+    width: auto !important;
+}
+*/
 
 body {
     margin: 10px;

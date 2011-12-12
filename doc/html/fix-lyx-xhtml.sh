@@ -9,6 +9,8 @@ CSS_INCLUDE="
 
 <link rel='stylesheet' href='${CSSFILE}' type='text/css' />
 
+<script type='text/javascript' src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
 <!-- End Fixes-->
 "
 
